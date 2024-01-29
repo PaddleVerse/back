@@ -14,7 +14,7 @@ import { FortyTwoStrategy } from './strategys/42.strategy';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     UserModule, 
-    JwtModule.register({ secret: process.env.SECRET, signOptions: { expiresIn: '60s' }})
+    JwtModule.register({ secret: process.env.SECRET, signOptions: { expiresIn: '1w' }})
   ],
   providers: [LocalStrategy, AuthService, JwtStrategy, GoogleStrategy, FortyTwoStrategy],
   controllers: [AuthController],
