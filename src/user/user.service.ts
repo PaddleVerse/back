@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService 
@@ -39,7 +40,7 @@ export class UserService
     async findOrCreateGoogleUser(profile: any) {
         const { id, displayName, emails } = profile;
         const photo = await profile.photos[0].value;
-        console.log(profile);
+        // console.log(profile);
         // console.log(profile.photos[0].value);
 
         let user = await this.prisma.user.findUnique({
@@ -59,29 +60,40 @@ export class UserService
             },
           });
         }
-        console.log(photo);
-        console.log(user);
+        // console.log(photo);
+        // console.log(user);
         return user;
       }
 
       async findOrCreateFortyTwoUser(profile: any) {
         // console.log(profile);
-        // console.log(profile._json.image);
-        const { id, username } = profile;
+        // console.log(profile._json.first_name);
+        let { id, username } = profile;
+        const name = profile._json.first_name + ' ' + profile._json.last_name;
         const pic = profile._json.image.link;
         let user = await this.prisma.user.findUnique({
           where: {
             fortytwoId: id,
           },
         });
-    
+        let check = await this.prisma.user.findUnique({
+          where: {
+            username: username,
+          },
+        });
+        if (check) {
+          username = username + id;
+        }
         if (!user) {
+          const random = Math.floor(Math.random() * 1000000);
+          const res = random.toString();
+          const pw = await bcrypt.hash(res, 10);
           user = await this.prisma.user.create({
             data: {
               fortytwoId: id,
-              name: username,
+              name: name,
               username: username,
-              password: '',
+              password: pw,
               picture: pic
             },
           });
