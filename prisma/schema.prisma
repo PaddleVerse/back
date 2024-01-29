@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id        Int      @id @default(autoincrement())
+  googleId  String?  @unique
+  fortytwoId  Int?  @unique
+  username     String   @unique
+  name      String?
+  password  String
+  picture   String? @default("https://i.ibb.co/FsdsTYc/s-Instagram-photo-Soulless-Manga-Jujutsu-Kaisen-Artist-syrnrr-CLa5z-N2l-D1-L-JPG.jpg")
+  banner_picture String? 
+  status    String? @default("offline") // online, offline, away
+  level     Int?     @default(0)
+  createdAt DateTime @default(now())
+  achievements achievement[]
+  friends friend[]
+  messages message[]
+  channel_participants channel_participant[]
+}
+
+model friend{
+  id        Int      @id @default(autoincrement())
+  user_id    Int?     @default(0)
+  friendId  Int?     @default(0)
+  user    user?     @relation(fields: [user_id], references: [id])
+  status    String?
+  createdAt DateTime @default(now())
+}
+
+model achievement {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  description String?
+  picture   String?
+  createdAt DateTime @default(now())
+  user_id    Int?     @default(0)
+  user    user?     @relation(fields: [user_id], references: [id])
+}
+
+model game_history {
+  id        Int      @id @default(autoincrement())
+  user_a_id    Int?     @default(0)
+  user_b_id    Int?     @default(0)
+  user_a_score    Int?     @default(0)
+  user_b_score    Int?     @default(0)
+  start_time    DateTime?
+  end_time    DateTime?
+}
+
+model channle{
+  id       Int      @id @default(autoincrement())
+  name     String?
+  createdAt DateTime @default(now())
+  messages message[]
+  participants channel_participant[]
+}
+
+model message{
+  id        Int      @id @default(autoincrement())
+  user_id    Int?     @default(0)
+  channel_id    Int?     @default(0)
+  conversation_id    Int?     @default(0)
+  content    String?
+  content_type    String?
+  createdAt DateTime @default(now())
+  conv   conversation?     @relation(fields: [conversation_id], references: [id])
+  user    user?     @relation(fields: [user_id], references: [id])
+  channel    channle?     @relation(fields: [channel_id], references: [id])
+}
+
+model channel_participant{
+  id        Int      @id @default(autoincrement())
+  user_id    Int?     @default(0)
+  channel_id    Int?     @default(0)
+  joinedAt DateTime @default(now())
+  user    user?     @relation(fields: [user_id], references: [id])
+  channel    channle?     @relation(fields: [channel_id], references: [id])
+}
+
+model conversation {
+  id        Int      @id @default(autoincrement())
+  user_a_id    Int?     @default(0)
+  user_b_id    Int?     @default(0)
+  createdAt DateTime @default(now())
+  messages message[]
+}
