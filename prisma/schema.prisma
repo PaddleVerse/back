@@ -23,18 +23,28 @@ model user {
   level     Int?     @default(0)
   createdAt DateTime @default(now())
   achievements achievement[]
-  friends friend[]
+
+  friends1 Friendship[] @relation("User1")
+  friends2 Friendship[] @relation("User2")
   messages message[]
   channel_participants channel_participant[]
 }
 
-model friend{
+model Friendship {
   id        Int      @id @default(autoincrement())
-  user_id    Int?     @default(0)
-  friendId  Int?     @default(0)
-  user    user?     @relation(fields: [user_id], references: [id])
-  status    String?
+  user1     user     @relation("User1", fields: [user1Id], references: [id])
+  user1Id   Int
+  user2     user     @relation("User2", fields: [user2Id], references: [id])
+  user2Id   Int
+  status    FriendshipStatus
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 model achievement {
