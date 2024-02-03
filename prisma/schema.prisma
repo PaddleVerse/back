@@ -22,23 +22,19 @@ model user {
   status    String? @default("offline") // online, offline, away
   level     Int?     @default(0)
   createdAt DateTime @default(now())
-  achievements achievement[]
 
-  friends1 Friendship[] @relation("User1")
-  friends2 Friendship[] @relation("User2")
-  messages message[]
+  friends Friendship[]
+  achievements achievement[]
   channel_participants channel_participant[]
 }
 
 model Friendship {
   id        Int      @id @default(autoincrement())
-  user1     user     @relation("User1", fields: [user1Id], references: [id])
-  user1Id   Int
-  user2     user     @relation("User2", fields: [user2Id], references: [id])
-  user2Id   Int
+  user_id    Int?     @default(0)
+  friendId  Int?     @default(0)
   status    FriendshipStatus
+  user    user?     @relation(fields: [user_id], references: [id])
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 enum FriendshipStatus {
@@ -77,14 +73,12 @@ model channle{
 
 model message{
   id        Int      @id @default(autoincrement())
-  user_id    Int?     @default(0)
   channel_id    Int?     @default(0)
   conversation_id    Int?     @default(0)
   content    String?
   content_type    String?
   createdAt DateTime @default(now())
   conv   conversation?     @relation(fields: [conversation_id], references: [id])
-  user    user?     @relation(fields: [user_id], references: [id])
   channel    channle?     @relation(fields: [channel_id], references: [id])
 }
 
