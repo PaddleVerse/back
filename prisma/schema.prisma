@@ -5,9 +5,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// prisma/schema.prisma
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model user {
@@ -63,7 +70,7 @@ model game_history {
   end_time    DateTime?
 }
 
-model channle{
+model channel{
   id       Int      @id @default(autoincrement())
   name     String?
   createdAt DateTime @default(now())
@@ -79,7 +86,7 @@ model message{
   content_type    String?
   createdAt DateTime @default(now())
   conv   conversation?     @relation(fields: [conversation_id], references: [id])
-  channel    channle?     @relation(fields: [channel_id], references: [id])
+  channel    channel?     @relation(fields: [channel_id], references: [id])
 }
 
 model channel_participant{
@@ -88,7 +95,7 @@ model channel_participant{
   channel_id    Int?     @default(0)
   joinedAt DateTime @default(now())
   user    user?     @relation(fields: [user_id], references: [id])
-  channel    channle?     @relation(fields: [channel_id], references: [id])
+  channel    channel?     @relation(fields: [channel_id], references: [id])
 }
 
 model conversation {
