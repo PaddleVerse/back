@@ -28,7 +28,7 @@ export class ChatGateway {
     console.log("here");
 
     /*
-     * this here is how the server able to send
+     * this here is how the server able to send, there are methods that chain together  to send to a specific user/channel
      *
      * this.server.emit("creation", [
      *   { message: "about to create the room" },
