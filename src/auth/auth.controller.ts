@@ -1,10 +1,12 @@
-import { Controller,Post, UseGuards, Request, Body, Get, Res, HttpStatus } from '@nestjs/common';
+import { Controller,Post, UseGuards, Request, Body, Get, Res, HttpStatus, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Response } from 'express';
 import { LocalGuard } from './guards/local.guard';
 import { GoogleGuard } from './guards/google.guard';
 import { FortyTwoGuard } from './guards/42.guard';
+import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
+
 
 
 @Controller('auth')
@@ -24,7 +26,7 @@ export class AuthController
   }
 
   @Post('signup')
-  async signup(@Body() body: { username: string,name: string , password: string })
+  async signup(@Body() body: CreateUserDto)
   {
     const { username, name, password } = body;
     await this.authService.signup(username, name, password);
@@ -75,6 +77,7 @@ export class AuthController
   async fortyTwoLoginCallback(@Request() req, @Res({ passthrough: true }) res: Response) {
 
     const user: any = await this.authService.login(req.user);
+    // res.cookie('access_token', user.access_token, { httpOnly: true, secure: true, sameSite: 'strict' });
 
     res.cookie('access_token', user.access_token, {
       maxAge: 2592000000,
@@ -83,5 +86,22 @@ export class AuthController
     });
     res.redirect('http://localhost:3000/Dashboard');
     res.status(HttpStatus.OK);
+  }
+
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@Req() req, @Res({ passthrough: true }) res: Response) {
+    // Add the access token to the blacklist (optional step)
+    // You might use a database or an in-memory store for the blacklist
+    // Example: blacklistService.addToBlacklist(req.user.access_token);
+    // Clear the access token on the client side by removing the cookie
+    
+    // res.clearCookie('access_token');
+
+    // Optionally, handle revocation of refresh tokens (if used)
+    // Example: refreshTokenService.revokeRefreshToken(req.user.refresh_token);
+
+    return { message: 'Logout successful' };
   }
 }
