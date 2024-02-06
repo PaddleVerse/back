@@ -11,12 +11,30 @@ export class UserService
         this.prisma = new PrismaClient();
     }
 
-    async getUsers() 
+    // async getUsers() 
+    // {
+    //     const users = await this.prisma.user.findMany();
+    //     return users;
+    // }
+    async getUsers()
     {
-        const users = await this.prisma.user.findMany();
+        const users = await this.prisma.user.findMany({
+            select: {
+                id: true,
+                username: true,
+                name: true,
+                picture: true,
+                banner_picture: true,
+                status: true,
+                level: true,
+                createdAt: true,
+                friends: true,
+                achievements: true,
+                channel_participants: true,
+            }
+        });
         return users;
     }
-
     async getUserById(id: number)
     {
         const user = await this.prisma.user.findUnique({

@@ -6,13 +6,17 @@ import { LocalGuard } from './guards/local.guard';
 import { GoogleGuard } from './guards/google.guard';
 import { FortyTwoGuard } from './guards/42.guard';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
+import { BlacklistService } from './blacklist.service';
 
 
 
 @Controller('auth')
 export class AuthController 
 {
-  constructor(private authService: AuthService) {}
+  constructor (
+      private authService: AuthService,
+      private readonly blacklistService :BlacklistService
+      ) {}
 
   @UseGuards(LocalGuard)
   @Post('login')
@@ -91,17 +95,9 @@ export class AuthController
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Req() req, @Res({ passthrough: true }) res: Response) {
-    // Add the access token to the blacklist (optional step)
-    // You might use a database or an in-memory store for the blacklist
-    // Example: blacklistService.addToBlacklist(req.user.access_token);
-    // Clear the access token on the client side by removing the cookie
-    
-    // res.clearCookie('access_token');
-
-    // Optionally, handle revocation of refresh tokens (if used)
-    // Example: refreshTokenService.revokeRefreshToken(req.user.refresh_token);
-
+  async logout(@Req() req) {
+    const accessToken = req.headers.authorization.split(' ')[1]; // Extracting token from Authorization header
+    this.blacklistService.addToBlacklist(accessToken);
     return { message: 'Logout successful' };
   }
 }
