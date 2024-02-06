@@ -7,10 +7,11 @@ import { UserController } from './user/user.controller';
 import { UserModule } from './user/user.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { ChatModule } from './chat/chat.module';
+import { ChatService } from './chat/chat.service';
 
 @Module({
   imports: [AuthModule, UserModule, ChatModule],
   controllers: [AppController],
-  providers: [AppService, ChatGateway],
+  providers: [AppService, ChatGateway, ChatService],
 })
 export class AppModule {}

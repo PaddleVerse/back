@@ -93,6 +93,7 @@ model channel_participant{
   id        Int      @id @default(autoincrement())
   user_id    Int?     @default(0)
   channel_id    Int?     @default(0)
+  role String? @default("MEMBER")
   joinedAt DateTime @default(now())
   user    user?     @relation(fields: [user_id], references: [id])
   channel    channel?     @relation(fields: [channel_id], references: [id])
