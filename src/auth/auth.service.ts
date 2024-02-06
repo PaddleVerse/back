@@ -1,4 +1,4 @@
-import { Injectable,UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable,UnauthorizedException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -12,10 +12,10 @@ export class AuthService
         this.prisma = new PrismaClient();
     }
 
-    async signup(username: string, name: string, password: string) 
+    async signup(username: string, name: string, password: string)
     {
         if (!username || !password || !name) {
-            throw new UnauthorizedException('Missing credentials');
+            throw new ConflictException('Missing credentials');
         }
         const user = await this.prisma.user.findUnique({
             where: {
@@ -23,7 +23,7 @@ export class AuthService
             }
         });
         if (user) {
-            throw new UnauthorizedException('Username already taken');
+            throw new ConflictException('Username already taken');
         }
         const newUser = await this.prisma.user.create({
             data: {
@@ -32,11 +32,11 @@ export class AuthService
                 password: await this.hashPassword(password)
             }
         });
-
+        
         return newUser;
     }
     
-    async validatePassword(plainPassword: string,hashedPassword: string): Promise<boolean> 
+    async validatePassword(plainPassword: string, hashedPassword: string): Promise<boolean> 
     {
       return bcrypt.compare(plainPassword, hashedPassword);
     }
@@ -52,6 +52,5 @@ export class AuthService
             access_token: await this.jwtService.signAsync(payload),
         };
     }
-
 };
 
