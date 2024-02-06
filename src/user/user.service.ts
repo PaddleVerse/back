@@ -11,12 +11,30 @@ export class UserService
         this.prisma = new PrismaClient();
     }
 
-    async getUsers() 
+    // async getUsers() 
+    // {
+    //     const users = await this.prisma.user.findMany();
+    //     return users;
+    // }
+    async getUsers()
     {
-        const users = await this.prisma.user.findMany();
+        const users = await this.prisma.user.findMany({
+            select: {
+                id: true,
+                username: true,
+                name: true,
+                picture: true,
+                banner_picture: true,
+                status: true,
+                level: true,
+                createdAt: true,
+                friends: true,
+                achievements: true,
+                channel_participants: true,
+            }
+        });
         return users;
     }
-
     async getUserById(id: number)
     {
         const user = await this.prisma.user.findUnique({
@@ -40,34 +58,40 @@ export class UserService
     async findOrCreateGoogleUser(profile: any) {
         const { id, displayName, emails } = profile;
         const photo = await profile.photos[0].value;
-        // console.log(profile);
-        // console.log(profile.photos[0].value);
 
         let user = await this.prisma.user.findUnique({
           where: {
             googleId: id,
           },
         });
+
+        let check = await this.prisma.user.findUnique({
+          where: {
+            username: emails[0]?.value,
+          },
+        });
+        if (check) {
+          emails[0].value = emails[0].value + id;
+        }
     
         if (!user) {
+          const random = Math.floor(Math.random() * 1000000);
+          const res = random.toString();
+          const pw = await bcrypt.hash(res, 10);
           user = await this.prisma.user.create({
             data: {
               googleId: id,
               name: displayName,
               username: emails[0]?.value || id,
-              password: '',
+              password: pw,
               picture: photo
             },
           });
         }
-        // console.log(photo);
-        // console.log(user);
         return user;
       }
 
       async findOrCreateFortyTwoUser(profile: any) {
-        // console.log(profile);
-        // console.log(profile._json.first_name);
         let { id, username } = profile;
         const name = profile._json.first_name + ' ' + profile._json.last_name;
         const pic = profile._json.image.link;

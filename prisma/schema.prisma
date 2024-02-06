@@ -25,7 +25,7 @@ model user {
   name      String?
   password  String
   picture   String? @default("https://i.ibb.co/FsdsTYc/s-Instagram-photo-Soulless-Manga-Jujutsu-Kaisen-Artist-syrnrr-CLa5z-N2l-D1-L-JPG.jpg")
-  banner_picture String? 
+  banner_picture String? @default("https://i.ibb.co/9sV2NJD/samurai-jacket-3840x2160-13683.png")
   status    String? @default("offline") // online, offline, away
   level     Int?     @default(0)
   createdAt DateTime @default(now())
