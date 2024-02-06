@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ChatService } from "./chat.service";
 import { Prisma, channel } from "@prisma/client";
+import { DuplicateError } from "./utils/Errors";
 
 @Controller("chat")
 export class ChatController {
@@ -18,18 +19,25 @@ export class ChatController {
 
   @Get("channels/:id")
   async getChannel(@Param("id") id: string) {
-	  return await this.chatService.getChatRooms(id);
+    return await this.chatService.getChatRooms(id);
   }
 
   @Get("DirectMessages/:id")
   async getDirectMessage(@Param("id") id: string) {
-	  return "here in get direct messages by id/name";
+    return "here in get direct messages by id/name";
   }
 
-  @Post("Channels")
-  async createChannel(@Body() channelData: Prisma.channelCreateInput): Promise<channel> {
-    const channel = await this.chatService.createGroupChat(channelData);
-    return channel;
+  @Post("Channels") // this still needs some error management from the front end in case sql injection etc
+    
+  async createChannel(
+    @Body() channelData: Prisma.channelCreateInput
+  ): Promise<channel> {
+    const channel = await this.chatService.getChatRooms(channelData.name);
+    if (channel) {
+      // the case where the channel already exists
+      throw new DuplicateError(channelData.name);
+    }
+    return await this.chatService.createGroupChat(channelData);
   }
   @Post("DirectMessages")
   async createDirectMessage() {
