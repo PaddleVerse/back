@@ -5,13 +5,26 @@ import { DuplicateError } from "./utils/Errors";
 
 @Controller("chat")
 export class ChatController {
+  /**
+   *
+   * @param chatService
+   * @description this constructor will init all the dependencies that we need to use in the chatController
+   */
   constructor(private readonly chatService: ChatService) {}
 
+  /**
+   *
+   * @returns all the channels in case no parameter was passed in the url
+   */
   @Get("channels") // in here i should add a query that indicates that we are searching by name or something
   async getAllChannels() {
     return await this.chatService.getChatRooms(null);
   }
 
+  /**
+   *
+   * @returns all the direct messages in the the data base that the user is participating in
+   */
   @Get("DirectMessages") // here i should add a query to indicate that the user can use filters or something like that
   async getAllDirectMessage() {
     return "got all direct messages";
@@ -26,6 +39,7 @@ export class ChatController {
   async getDirectMessage(@Param("id") id: string) {
     return "here in get direct messages by id/name";
   }
+
   /*
    * descripion:
    * this function will create a channel if it doesn't already exist
@@ -33,8 +47,8 @@ export class ChatController {
    */
   @Post("Channels/") // this still needs some error management from the front end in case sql injection etc. it needs to add the logic for the init state where there will be only one user which is the creator of the channel
   async createChannel(
-    @Body('channelData') channelData: Prisma.channelCreateInput,
-    @Body('userInfo') user: user
+    @Body("channelData") channelData: Prisma.channelCreateInput,
+    @Body("userInfo") user: user
   ): Promise<channel> {
     const channel = await this.chatService.getChatRooms(channelData.name);
     if (channel) {
@@ -43,7 +57,17 @@ export class ChatController {
     }
     // i should create the channel participantes list and the message so i can add them later on when trying to create the channel
     const createdChannel = await this.chatService.createGroupChat(channelData);
-    // createdChannel
+
+    // const participant = {
+    //   id: participantId,
+    //   user_id: user.id,
+    //   channel_id: createdChannel.id,
+    //   role: "participant",
+    //   joinedAt: new Date(),
+    // };
+    // createdChannel.participants.push({
+    //   id :  
+    // });
     return createdChannel;
   }
   @Post("DirectMessages")
