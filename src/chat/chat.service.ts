@@ -7,6 +7,7 @@ import {
   user,
   message,
 } from "@prisma/client";
+import { error } from "console";
 
 /**
  * in the chat service we will implement the logic of the entire chat application
@@ -21,10 +22,6 @@ export class ChatService {
   constructor() {
     this.prisma = new PrismaClient();
   }
-
-
-  
-
   // // this function will create a chat room for groups that will later be either updated or deleted
   // /**
   //  *
@@ -138,4 +135,21 @@ export class ChatService {
   //   const participant = await this.prisma.channel_participant.create({});
   //   return;
   // }
+
+  /**
+   *
+   * @param channel
+   * @returns the newly created object of the channel
+   */
+  async createChannel(channel: Prisma.channelCreateInput) {
+    const ch = await this.prisma.channel.create({ data: channel });
+    if (!ch) {
+      throw new Error("an error in channel creation occured");
+    }
+    return ch;
+  }
+
+  async getChannel(name: string) {
+    return await this.prisma.channel.findFirst({ where: { name: name } });
+  }
 }
