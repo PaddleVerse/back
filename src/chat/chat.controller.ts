@@ -29,6 +29,7 @@ export class ChatController {
   /*
    * descripion:
    * this function will create a channel if it doesn't already exist
+   * in here i will create the participante field and also the messages field, but i will have to create end points for those as well
    */
   @Post("Channels/") // this still needs some error management from the front end in case sql injection etc. it needs to add the logic for the init state where there will be only one user which is the creator of the channel
   async createChannel(
@@ -36,13 +37,14 @@ export class ChatController {
     @Body('userInfo') user: user
   ): Promise<channel> {
     const channel = await this.chatService.getChatRooms(channelData.name);
-    console.log(user.id);
-    // console.log(user.id);
     if (channel) {
       // the case where the channel already exists
       throw new DuplicateError(channelData.name);
     }
-    return await this.chatService.createGroupChat(channelData);
+    // i should create the channel participantes list and the message so i can add them later on when trying to create the channel
+    const createdChannel = await this.chatService.createGroupChat(channelData);
+    // createdChannel
+    return createdChannel;
   }
   @Post("DirectMessages")
   async createDirectMessage() {

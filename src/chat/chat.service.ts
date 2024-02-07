@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaClient, Prisma, channel } from "@prisma/client";
+import { PrismaClient, Prisma, channel, channel_participant } from "@prisma/client";
 
 @Injectable()
 export class ChatService {
@@ -27,6 +27,13 @@ export class ChatService {
     });
   }
 
+  async createChannelParticipants(userId: number, channelId: number): Promise<channel_participant | null> {
+    const participants = this.prisma.channel_participant.create({
+      data: {
+      
+    }})
+    return 
+  }
   // in this function we will create the one to one conversation, the logic is still a bit vague but it is getting there
   async createDmRoom(/* the arguments in here will be what ever it is required by the database */) {}
 
