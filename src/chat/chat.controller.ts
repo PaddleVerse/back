@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ChatService } from "./chat.service";
-import { Prisma, channel } from "@prisma/client";
+import { Prisma, channel, user } from "@prisma/client";
 import { DuplicateError } from "./utils/Errors";
 
 @Controller("chat")
@@ -26,12 +26,18 @@ export class ChatController {
   async getDirectMessage(@Param("id") id: string) {
     return "here in get direct messages by id/name";
   }
-
-  @Post("Channels") // this still needs some error management from the front end in case sql injection etc. it needs to add the logic for the init state where there will be only one user which is the creator of the channel
+  /*
+   * descripion:
+   * this function will create a channel if it doesn't already exist
+   */
+  @Post("Channels/") // this still needs some error management from the front end in case sql injection etc. it needs to add the logic for the init state where there will be only one user which is the creator of the channel
   async createChannel(
-    @Body() channelData: Prisma.channelCreateInput
+    @Body('channelData') channelData: Prisma.channelCreateInput,
+    @Body('userInfo') user: user
   ): Promise<channel> {
     const channel = await this.chatService.getChatRooms(channelData.name);
+    console.log(user.id);
+    // console.log(user.id);
     if (channel) {
       // the case where the channel already exists
       throw new DuplicateError(channelData.name);
