@@ -27,7 +27,7 @@ export class ChatController {
     return "here in get direct messages by id/name";
   }
 
-  @Post("Channels") // this still needs some error management from the front end in case sql injection etc
+  @Post("Channels") // this still needs some error management from the front end in case sql injection etc. it needs to add the logic for the init state where there will be only one user which is the creator of the channel
   async createChannel(
     @Body() channelData: Prisma.channelCreateInput
   ): Promise<channel> {
