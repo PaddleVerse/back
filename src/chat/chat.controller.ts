@@ -28,7 +28,6 @@ export class ChatController {
   }
 
   @Post("Channels") // this still needs some error management from the front end in case sql injection etc
-    
   async createChannel(
     @Body() channelData: Prisma.channelCreateInput
   ): Promise<channel> {
