@@ -35,6 +35,72 @@ export class UserService
         });
         return users;
     }
+
+    async getTopThreeUsers()
+    {
+        const users = await this.prisma.user.findMany({
+            select: {
+                id: true,
+                username: true,
+                name: true,
+                picture: true,
+                banner_picture: true,
+                status: true,
+                level: true,
+                createdAt: true,
+                friends: true,
+                achievements: true,
+                channel_participants: true,
+            },
+            orderBy: {
+                level: 'desc'
+            },
+            take: 3
+        });
+        return users;
+    }
+
+    async getTopUsers()
+    {
+        const users = await this.prisma.user.findMany({
+            select: {
+                id: true,
+                username: true,
+                name: true,
+                picture: true,
+                banner_picture: true,
+                status: true,
+                level: true,
+                createdAt: true,
+                friends: true,
+                achievements: true,
+                channel_participants: true,
+            },
+            orderBy: {
+                level: 'desc'
+            },
+            take: 10
+        });
+        return users;
+    }
+
+    async getNeighbours(id: any)
+    {
+      const users = await this.getUsers();
+      for (let i = 0; i < users.length; i++) {
+      {
+        // check if the user in a range of each 10 users by level
+          if (users[i].id == id) {
+            if (i < 10) {
+              return users.slice(0, 10);
+            } else {
+              return users.slice(i - 10, i + 10);
+            }
+          }
+        }
+      }
+    }
+
     async getUserById(id: number)
     {
         const user = await this.prisma.user.findUnique({
