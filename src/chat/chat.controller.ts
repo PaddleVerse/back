@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post } from "@nestjs/common";
 import { ChatService } from "./chat.service";
 import { Prisma, channel, user } from "@prisma/client";
 import { DuplicateError } from "./utils/Errors";
+import { UserService } from "src/user/user.service";
 
 @Controller("chat")
 export class ChatController {
@@ -10,7 +11,7 @@ export class ChatController {
    * @param chatService
    * @description this constructor will init all the dependencies that we need to use in the chatController
    */
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly chatService: ChatService, private readonly userService: UserService) {}
 
   // /**
   //  *
@@ -80,6 +81,8 @@ export class ChatController {
     @Body("channel") channel: Prisma.channelCreateInput,
     @Body("user") user: user
   ) {
+    const u = await this.userService.getUserById(user.id);
+    if (!u) throw new HttpException("there is no user with that id", HttpStatus.BAD_REQUEST);
     const c = await this.chatService.getChannel(channel.name);
     if (c) throw new DuplicateError(channel.name);
     const ch = await this.chatService.createChannel(channel);
@@ -98,7 +101,6 @@ export class ChatController {
    */
   @Get('channels')
   async getChannels() {
-    console.log("here at get all channels");
     const channels = await this.chatService.getChannels();
     return channels;
   }
