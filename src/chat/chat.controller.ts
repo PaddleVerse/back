@@ -46,7 +46,7 @@ export class ChatController {
     if (c) throw new DuplicateError(channel.name);
     const ch = await this.chatService.createChannel(channel);
     const participant = await this.chatService.createParticipant({
-      user: { connect: { id: user.id } },
+      user: { connect: { id: user.id } }, // connect the fields that has a relation through a unique attribute (id)
       channel: { connect: { id: ch.id } }, // Fix: Connect the channel using its unique identifier
       role: "ADMIN",
     });
@@ -54,8 +54,13 @@ export class ChatController {
     return ch;
   }
 
+
   @Patch("channels/:id")
-  async updateChannel() {
+  async updateChannel(@Param("id") id: number, @Body("channelUpdates") updates: Prisma.channelUpdateInput) {
+    // handle if the update is a new message
+    // handle if the update is a new participant
+    // handle if the update is a some channel attribution like the modes or something like that
+    // const channel = this.chatService.updateChannel();
   }
 
   /**
