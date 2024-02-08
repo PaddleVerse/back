@@ -22,119 +22,6 @@ export class ChatService {
   constructor() {
     this.prisma = new PrismaClient();
   }
-  // // this function will create a chat room for groups that will later be either updated or deleted
-  // /**
-  //  *
-  //  * @param channel
-  //  * @returns an newly created channel instance that is to be added to the database
-  //  */
-  // async createGroupChat(
-  //   channel: Prisma.channelCreateInput
-  // ): Promise<Prisma.channelGetPayload<{
-  //   include: { participants: true; messages: true };
-  // }> | null> {
-  //   const msg: message = await this.prisma.message.create({ data: {} });
-  //   const participant: channel_participant =
-  //     await this.prisma.channel_participant.create({});
-  //   const chatRoom = await this.prisma.channel.create({
-  //     data: {
-  //       ...channel,
-  //       participants: { create: participant },
-  //       messages: { create: msg },
-  //     },
-  //     include: {
-  //       participants: true,
-  //       messages: true,
-  //     },
-  //   });
-  //   return chatRoom;
-  // }
-
-  // /**
-  //  *
-  //  * @param channelName
-  //  * @returns an array of all the channels in the database or some channels with a specific name
-  //  */
-  // async getChatRooms(
-  //   channelName: string | null
-  // ): Promise<
-  //   Prisma.channelGetPayload<{
-  //     include: { participants: true; messages: true };
-  //   }>[]
-  // > {
-  //   if (!channelName) {
-  //     return await this.prisma.channel.findMany({
-  //       include: {
-  //         participants: true,
-  //         messages: true,
-  //       },
-  //     });
-  //   }
-  //   return await this.prisma.channel.findMany({
-  //     where: { name: channelName },
-  //     include: {
-  //       participants: true,
-  //       messages: true,
-  //     },
-  //   });
-  // }
-
-  // /**
-  //  *
-  //  * @param channelName
-  //  * @returns the first occurance of the channel that matches the filter
-  //  */
-  // async getChatRoom(channelName: string): Promise<channel | null> {
-  //   const channel = this.prisma.channel.findFirst({
-  //     where: { name: channelName },
-  //   });
-  //   return channel;
-  // }
-
-  // /**
-  //  *
-  //  * @param userId
-  //  * @param channelId
-  //  * @returns an new created object to the
-  //  */
-  // async createChannelParticipants(
-  //   userId: number,
-  //   channelId: number
-  // ): Promise<channel_participant | null> {
-  //   const participants = this.prisma.channel_participant.create({
-  //     data: { channel_id: channelId, user_id: userId },
-  //   });
-  //   return;
-  // }
-
-  // /**
-  //  *
-  //  * @param user/channel participant
-  //  * @param channelId
-  //  * @returns promise with the new updated channel praticipants list and their roles if needed
-  //  */
-  // async updateChannelParticipants(
-  //   user: channel_participant,
-  //   channelId: number
-  // ): Promise<channel_participant | null> {
-  //   const updateChannelParticipants = this.prisma.channel_participant.update({
-  //     where: { id: channelId },
-  //     data: { ...user },
-  //   });
-  //   return updateChannelParticipants;
-  // }
-
-  // async createNewParticipant(
-  //   userId: number,
-  //   channelId: number,
-  //   role: string,
-  //   channel: Prisma.channelGetPayload<{
-  //     include: { participants: true; messages: true };
-  //   }>
-  // ) {
-  //   const participant = await this.prisma.channel_participant.create({});
-  //   return;
-  // }
 
   /**
    *
@@ -153,14 +40,38 @@ export class ChatService {
     return ch;
   }
 
-  async getChannel(name: string) {
+  /**
+   * 
+   * @param name the name of the channel
+   * @returns the channel with the name, as it is a unique field in the channel
+   */
+  async getChannelByName(name: string) {
     return await this.prisma.channel.findUnique({ where: { name: name } });
   }
 
+  /**
+   * 
+   * @param id the id of the channel
+   * @returns the channel that matches the filter (id)
+   */
+  async getChannelById(id: number) {
+    return await this.prisma.channel.findUnique({ where: { id: id } });
+  }
+
+  /**
+   * 
+   * @returns a promise with all the channels in the db
+   */
   async getChannels(): Promise<channel[]> {
     return await this.prisma.channel.findMany();
   }
 
+
+  /**
+   * 
+   * @param dat the input needed to creare the new participant
+   * @returns a new participant to the channel
+   */
   async createParticipant(dat: Prisma.channel_participantCreateInput) {
     const participant = await this.prisma.channel_participant.create({
       data: dat,
