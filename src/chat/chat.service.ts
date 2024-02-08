@@ -142,7 +142,11 @@ export class ChatService {
    * @returns the newly created object of the channel
    */
   async createChannel(channel: Prisma.channelCreateInput) {
-    const ch = await this.prisma.channel.create({ data: channel });
+    // in here i should a package that is going to generate a channel name in case the channel name was not provided
+    const ch = await this.prisma.channel.create({
+      data: channel,
+      include: { participants: true, messages: true },
+    });
     if (!ch) {
       throw new Error("an error in channel creation occured");
     }
@@ -150,6 +154,17 @@ export class ChatService {
   }
 
   async getChannel(name: string) {
-    return await this.prisma.channel.findFirst({ where: { name: name } });
+    return await this.prisma.channel.findUnique({ where: { name: name } });
+  }
+
+  async getChannels(): Promise<channel[]> {
+    return await this.prisma.channel.findMany();
+  }
+
+  async createParticipant(dat: Prisma.channel_participantCreateInput) {
+    const participant = await this.prisma.channel_participant.create({
+      data: dat,
+    });
+    return participant;
   }
 }

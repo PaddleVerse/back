@@ -80,17 +80,35 @@ export class ChatController {
     @Body("channel") channel: Prisma.channelCreateInput,
     @Body("user") user: user
   ) {
-    const c = this.chatService.getChannel(channel.name);
-    const ch = this.chatService.createChannel(channel);
-    return;
+    const c = await this.chatService.getChannel(channel.name);
+    if (c) throw new DuplicateError(channel.name);
+    const ch = await this.chatService.createChannel(channel);
+    const participant = await this.chatService.createParticipant({
+      user: {connect: {id: user.id}},
+      channel: {connect: { id: ch.id }}, // Fix: Connect the channel using its unique identifier
+      role: "ADMIN"
+    });
+    ch.participants.push(participant);
+    return ch;
+  }
+
+  /**
+   * 
+   * @returns all the channels in the database
+   */
+  @Get('channels')
+  async getChannels() {
+    console.log("here at get all channels");
+    const channels = await this.chatService.getChannels();
+    return channels;
   }
 }
+
 
 // type ChatRoom = channel & {
 //   participants: channel_participant[];
 //   messages: message[];
 // };
-
 
 // type ChatRoom = Prisma.channelGetPayload<{
 //   include: { participants: true; messages: true };
