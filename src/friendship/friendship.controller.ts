@@ -11,26 +11,32 @@ export class FriendshipController
     {
         return this.friendshipService.getFriends(id);
     }
+    
+    @Get('/status/:userId/:friendId')
+    getFriendshipStatus(@Param('userId') userId: number, @Param('friendId') friendId: number)
+    {
+        return this.friendshipService.getFriendshipStatus(userId, friendId);
+    }
 
-    @Get(':userId/:friendId')
+    @Get('add/:userId/:friendId')
     addFriend(@Param('userId') userId: number, @Param('friendId') friendId: number)
     {
         return this.friendshipService.addFriend(userId, friendId);
     }
 
-    @Get(':userId/:friendId/accept')
+    @Get('accept/:userId/:friendId')
     acceptFriend(@Param('userId') userId: number, @Param('friendId') friendId: number)
     {
         return this.friendshipService.acceptFriend(userId, friendId);
     }
 
-    @Get(':userId/:friendId/reject')
+    @Get('reject/:userId/:friendId')
     rejectFriend(@Param('userId') userId: number, @Param('friendId') friendId: number)
     {
         return this.friendshipService.rejectFriend(userId, friendId);
     }
 
-    @Get(':userId/:friendId/remove')
+    @Get('remove/:userId/:friendId')
     removeFriend(@Param('userId') userId: number, @Param('friendId') friendId: number)
     {
         return this.friendshipService.removeFriend(userId, friendId);

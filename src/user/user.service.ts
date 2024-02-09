@@ -38,6 +38,36 @@ export class UserService
       }
     }
 
+    async getUser(id: number)
+    {
+      try
+      {
+        const user = await this.prisma.user.findUnique({
+          select: {
+            id: true,
+                username: true,
+                name: true,
+                picture: true,
+                banner_picture: true,
+                status: true,
+                level: true,
+                createdAt: true,
+                friends: true,
+                achievements: true,
+                channel_participants: true,
+          },
+            where: {
+                id
+            }
+        });
+        return user;
+      }
+      catch (error)
+      {
+        return error;
+      }
+    }
+
     async getTopThreeUsers()
     {
       try
@@ -269,4 +299,5 @@ export class UserService
           return error;
         }
       }
+      
 }

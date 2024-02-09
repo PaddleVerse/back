@@ -105,4 +105,21 @@ export class FriendshipService
         }
     }
 
+    async getFriendshipStatus(user_id: number, friendId: number)
+    {
+        try
+        {
+            const friendship = await this.prisma.friendship.findFirst({
+                where: {
+                    user_id,
+                    friendId
+                }
+            });
+            return friendship.status;
+        }
+        catch (error)
+        {
+            return error;
+        }
+    }
 }

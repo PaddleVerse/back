@@ -12,6 +12,12 @@ export class UserController
         return this.userService.getUsers();
     }
 
+    @Get(':id')
+    getUser(@Param('id') id: any)
+    {
+        return this.userService.getUser(+id);
+    }
+
     @Get('range/:id')
     getTopUsers(@Param('id') id: any)
     {
