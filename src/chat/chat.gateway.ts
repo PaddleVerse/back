@@ -1,4 +1,4 @@
-import { Body } from "@nestjs/common";
+import { Body, HttpException, HttpStatus } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -6,9 +6,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
-import { Prisma, user } from "@prisma/client";
+import { Appearance, Prisma, user } from "@prisma/client";
 import { Socket, Server } from "socket.io";
 import { ChatService } from "./chat.service";
+import { UserService } from "src/user/user.service";
 
 // this type is here only for testing the end points
 type message = {
@@ -18,7 +19,10 @@ type message = {
 
 @WebSocketGateway()
 export class ChatGateway {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly userService: UserService
+  ) {}
   @WebSocketServer()
   server: Server;
   @SubscribeMessage("message")
@@ -53,15 +57,43 @@ export class ChatGateway {
     console.log(
       `the channel name is ${channel} and the creator is ${client.name}`
     );
-    // const 
+    // const
     // const room = this.chatService.createDmRoom();
     return true;
   }
 
-  @SubscribeMessage('join-channel')
-  async joinChannel(@Body('channel-info') channelInfo: any, @Body('user-info') user: user, @ConnectedSocket() socket: Socket) {
-    // check if the channel exists or not, if not throw an http error
+  @SubscribeMessage("join-channel")
+  async joinChannel(
+    @Body("channel-info") channelInfo: any,
+    @Body("user-info") user: user,
+    @ConnectedSocket() socket: Socket
+  ) {
     // check if the user exists in the channel exists or not
-    
+    {
+      const u = await this.userService.getUserById(user.id);
+      if (!u)
+        throw new HttpException(
+          `the user with the id ${user.id} doesn't exist`,
+          HttpStatus.BAD_REQUEST
+        );
+    }
+    // check if the channel exists or not, if not throw an http error
+    {
+      const channel = await this.chatService.getChannelByName(channelInfo.name);
+      if (!channel)
+        throw new HttpException(
+          `the channel with the name ${channel.name} doesn't exist`,
+          HttpStatus.BAD_REQUEST
+        );
+      // check the mode of the channel if it is locked with key or not
+      if (channel.state === Appearance.protected) {
+        if (channel.key !== channelInfo.key)
+          throw new HttpException(
+            `wrong key for the channel ${channel.name}`,
+            HttpStatus.BAD_REQUEST
+          );
+      }
+    }
+    // the channel can have three states, private (hidden from the groupds interface), protected (not hidden but has a password), or public check those and check if the user has all the things needed to join
   }
 }

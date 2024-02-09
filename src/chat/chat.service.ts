@@ -32,7 +32,7 @@ export class ChatService {
     // in here i should a package that is going to generate a channel name in case the channel name was not provided
     const ch = await this.prisma.channel.create({
       data: channel,
-      include: { participants: true, messages: true },
+      include: { participants: true, messages: true},
     });
     if (!ch) {
       throw new Error("an error in channel creation occured");

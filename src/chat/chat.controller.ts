@@ -38,10 +38,12 @@ export class ChatController {
    */
   @Post("channels")
   async createChannel(
-    @Body("channel") channel: Prisma.channelCreateInput,
+    @Body("channel")
+    channel: Prisma.channelCreateInput,
     @Body("user") user: user,
-    @ConnectedSocket() socket:  Socket
+    @ConnectedSocket() socket: Socket
   ) {
+    // need to add the case when the channel is going to be private/public/protected
     const u = await this.userService.getUserById(user.id);
     if (!u)
       throw new HttpException(
@@ -62,27 +64,27 @@ export class ChatController {
   }
 
   /**
-   * 
+   *
    * @param id  the id of the targeted channel
    * @param updates the object that is used to update the channel with
    * @description this function is used to update the info of the channel such as privacy etc
    */
-//   @Patch("channels/:id")
-//   async updateChannel(@Param("id") id: number, @Body("channelUpdates") updates: Prisma.channelUpdateInput) {
-//     if (updates)
-//       console.log();
-//     // handle if the update is a some channel attribution like the modes or something like that
-//   }
+  //   @Patch("channels/:id")
+  //   async updateChannel(@Param("id") id: number, @Body("channelUpdates") updates: Prisma.channelUpdateInput) {
+  //     if (updates)
+  //       console.log();
+  //     // handle if the update is a some channel attribution like the modes or something like that
+  //   }
 
-//   /**
-//    *
-//    * @returns all the channels in the database
-//    */
-//   @Get("channels")
-//   async getChannels() {
-//     const channels = await this.chatService.getChannels();
-//     return channels;
-//   }
+  //   /**
+  //    *
+  //    * @returns all the channels in the database
+  //    */
+  //   @Get("channels")
+  //   async getChannels() {
+  //     const channels = await this.chatService.getChannels();
+  //     return channels;
+  //   }
 }
 
 // type ChatRoom = channel & {

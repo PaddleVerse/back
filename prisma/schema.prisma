@@ -17,6 +17,12 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Appearance {
+  protected
+  private
+  public
+}
+
 model user {
   id        Int      @id @default(autoincrement())
   googleId  String?  @unique
@@ -71,10 +77,12 @@ model game_history {
 }
 
 model channel{
-  id       Int      @id @default(autoincrement())
-  name     String? @unique
-  createdAt DateTime @default(now())
-  messages message[]
+  id           Int      @id @default(autoincrement())
+  key          String?
+  state        Appearance? @default(public)
+  name         String? @unique
+  createdAt    DateTime @default(now())
+  messages     message[]
   participants channel_participant[]
 }
 
