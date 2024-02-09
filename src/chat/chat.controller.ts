@@ -12,6 +12,10 @@ import { ChatService } from "./chat.service";
 import { Prisma, channel, user } from "@prisma/client";
 import { DuplicateError } from "./utils/Errors";
 import { UserService } from "src/user/user.service";
+import { EventEmitter } from "stream";
+import { ChatGateway } from "./chat.gateway";
+import { ConnectedSocket } from "@nestjs/websockets";
+import { Socket } from "socket.io";
 
 @Controller("chat")
 export class ChatController {
@@ -22,7 +26,8 @@ export class ChatController {
    */
   constructor(
     private readonly chatService: ChatService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly chatGateWay: ChatGateway
   ) {}
 
   /**
@@ -34,7 +39,8 @@ export class ChatController {
   @Post("channels")
   async createChannel(
     @Body("channel") channel: Prisma.channelCreateInput,
-    @Body("user") user: user
+    @Body("user") user: user,
+    @ConnectedSocket() socket:  Socket
   ) {
     const u = await this.userService.getUserById(user.id);
     if (!u)
@@ -50,28 +56,33 @@ export class ChatController {
       channel: { connect: { id: ch.id } }, // Fix: Connect the channel using its unique identifier
       role: "ADMIN",
     });
+    // this.chatGateWay.server.to(socket.id).emit('channel-created', {},"you have created a channel");
     ch.participants.push(participant);
     return ch;
   }
 
-
-  @Patch("channels/:id")
-  async updateChannel(@Param("id") id: number, @Body("channelUpdates") updates: Prisma.channelUpdateInput) {
-    // handle if the update is a new message
-    // handle if the update is a new participant
-    // handle if the update is a some channel attribution like the modes or something like that
-    // const channel = this.chatService.updateChannel();
-  }
-
   /**
-   *
-   * @returns all the channels in the database
+   * 
+   * @param id  the id of the targeted channel
+   * @param updates the object that is used to update the channel with
+   * @description this function is used to update the info of the channel such as privacy etc
    */
-  @Get("channels")
-  async getChannels() {
-    const channels = await this.chatService.getChannels();
-    return channels;
-  }
+//   @Patch("channels/:id")
+//   async updateChannel(@Param("id") id: number, @Body("channelUpdates") updates: Prisma.channelUpdateInput) {
+//     if (updates)
+//       console.log();
+//     // handle if the update is a some channel attribution like the modes or something like that
+//   }
+
+//   /**
+//    *
+//    * @returns all the channels in the database
+//    */
+//   @Get("channels")
+//   async getChannels() {
+//     const channels = await this.chatService.getChannels();
+//     return channels;
+//   }
 }
 
 // type ChatRoom = channel & {

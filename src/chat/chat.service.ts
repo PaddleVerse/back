@@ -28,7 +28,7 @@ export class ChatService {
    * @param channel
    * @returns the newly created object of the channel
    */
-  async createChannel(channel: Prisma.channelCreateInput) {
+  async createChannel(channel: Prisma.channelCreateInput) { // it still needs the logic that is going to use the key and take into account th
     // in here i should a package that is going to generate a channel name in case the channel name was not provided
     const ch = await this.prisma.channel.create({
       data: channel,

@@ -57,4 +57,11 @@ export class ChatGateway {
     // const room = this.chatService.createDmRoom();
     return true;
   }
+
+  @SubscribeMessage('join-channel')
+  async joinChannel(@Body('channel-info') channelInfo: any, @Body('user-info') user: user, @ConnectedSocket() socket: Socket) {
+    // check if the channel exists or not, if not throw an http error
+    // check if the user exists in the channel exists or not
+    
+  }
 }
