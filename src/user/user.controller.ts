@@ -18,16 +18,16 @@ export class UserController
         return this.userService.getUser(+id);
     }
 
-    @Get('range/:id')
-    getTopUsers(@Param('id') id: any)
-    {
-        return this.userService.getNeighbours(+id);
-    }
-
     @Get('top')
     getTopThreeUsers()
     {
         return this.userService.getTopThreeUsers();
+    }
+    
+    @Get('range/:id')
+    getTopUsers(@Param('id') id: any)
+    {
+        return this.userService.getNeighbours(+id);
     }
 
     @Put(':id')
