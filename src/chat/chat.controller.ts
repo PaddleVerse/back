@@ -27,7 +27,6 @@ export class ChatController {
   constructor(
     private readonly chatService: ChatService,
     private readonly userService: UserService,
-    private readonly chatGateWay: ChatGateway
   ) {}
 
   /**
@@ -44,6 +43,7 @@ export class ChatController {
     @ConnectedSocket() socket: Socket
   ) {
     // need to add the case when the channel is going to be private/public/protected
+    // add error management
     const u = await this.userService.getUserById(user.id);
     if (!u)
       throw new HttpException(
@@ -58,7 +58,6 @@ export class ChatController {
       channel: { connect: { id: ch.id } }, // Fix: Connect the channel using its unique identifier
       role: "ADMIN",
     });
-    // this.chatGateWay.server.to(socket.id).emit('channel-created', {},"you have created a channel");
     ch.participants.push(participant);
     return ch;
   }
@@ -74,16 +73,6 @@ export class ChatController {
   //     if (updates)
   //       console.log();
   //     // handle if the update is a some channel attribution like the modes or something like that
-  //   }
-
-  //   /**
-  //    *
-  //    * @returns all the channels in the database
-  //    */
-  //   @Get("channels")
-  //   async getChannels() {
-  //     const channels = await this.chatService.getChannels();
-  //     return channels;
   //   }
 }
 
