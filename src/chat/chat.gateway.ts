@@ -11,7 +11,6 @@ import { Socket, Server } from "socket.io";
 import { ChatService } from "./chat.service";
 import { UserService } from "src/user/user.service";
 
-
 @WebSocketGateway({ namespace: "channel-convo" })
 export class ChatGateway {
   constructor(
@@ -20,6 +19,13 @@ export class ChatGateway {
   ) {}
   @WebSocketServer()
   server: Server;
+  connectedClients: Map<number, string>;
+
+  @SubscribeMessage('new-socket-connection')
+  handleConnection(@ConnectedSocket() socket: Socket, @Body('user-info') user: user) {
+    this.connectedClients[user.id] = socket.id;
+    console.log(this.connectedClients.size);
+  }
 
   @SubscribeMessage("join-channel")
   async joinChannel(
@@ -54,7 +60,7 @@ export class ChatGateway {
         channel.id
       );
       if (Participant) throw new Error("user is already on that channel");
-      // in case the user doesnt exist in the channel you create a new 
+      // in case the user doesnt exist in the channel you create a new
       const newChannel = this.chatService.createParticipant({
         user: { connect: { id: u.id } },
         channel: { connect: { id: channel.id } },
