@@ -11,17 +11,17 @@ export class UserController
     {
         return this.userService.getUsers();
     }
+    
+    @Get('top')
+    getTopThreeUsers()
+    {
+        return this.userService.getTopThreeUsers();
+    }
 
     @Get(':id')
     getUser(@Param('id') id: any)
     {
         return this.userService.getUser(+id);
-    }
-
-    @Get('top')
-    getTopThreeUsers()
-    {
-        return this.userService.getTopThreeUsers();
     }
     
     @Get('range/:id')
