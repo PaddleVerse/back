@@ -9,7 +9,7 @@ import {
   Post,
 } from "@nestjs/common";
 import { ChatService } from "./chat.service";
-import { Prisma, channel, user } from "@prisma/client";
+import { Prisma, Role, channel, user } from "@prisma/client";
 import { DuplicateError } from "./utils/Errors";
 import { UserService } from "src/user/user.service";
 import { EventEmitter } from "stream";
@@ -56,7 +56,7 @@ export class ChatController {
     const participant = await this.chatService.createParticipant({
       user: { connect: { id: user.id } }, // connect the fields that has a relation through a unique attribute (id)
       channel: { connect: { id: ch.id } }, // Fix: Connect the channel using its unique identifier
-      role: "ADMIN",
+      role: Role.ADMIN,
     });
     ch.participants.push(participant);
     return ch;
