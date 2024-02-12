@@ -105,4 +105,11 @@ export class ChatService {
     });
     return participant;
   }
+
+  async deleteParticipant(id: number) {
+    const participant = await this.prisma.channel_participant.delete({
+      where: { id: id },
+    });
+    return participant;
+  }
 }

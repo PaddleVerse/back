@@ -139,6 +139,7 @@ export class ChatGateway {
           console.log("the user is admin and can kick anyone");
         else throw new Error("cannot kick a mod or a channel admin");
       }
+      return await this.chatService.deleteParticipant(targetParticipant.id);
     } catch (error: any) {
       this.server.to(socket.id).emit("arg-error", { error: error.toString() });
     }
