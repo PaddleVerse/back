@@ -153,6 +153,12 @@ export class ChatGateway {
     return "reached end of structure";
   }
 
+  /**
+   * 
+   * @param socket 
+   * @param target 
+   * @description this function will ban a user from a channel
+   */
   @SubscribeMessage("ban-from-channel")
   async banFromChannel(
     @ConnectedSocket() socket: Socket,
@@ -208,6 +214,12 @@ export class ChatGateway {
     return "reached end of structure";
   }
 
+  /**
+   * 
+   * @param socket 
+   * @param target 
+   * @description this function will handle the task of muting and unmuting channel participants, the logic varies with different roles
+   */
   @SubscribeMessage("mute-unmute")
   async mute_UnmuteParticipant(
     @ConnectedSocket() socket: Socket,
