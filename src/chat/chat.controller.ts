@@ -14,7 +14,7 @@ import { DuplicateError } from "./utils/Errors";
 import { UserService } from "src/user/user.service";
 import { EventEmitter } from "stream";
 import { ChatGateway } from "./chat.gateway";
-import { ConnectedSocket } from "@nestjs/websockets";
+import { ConnectedSocket, WebSocketGateway } from "@nestjs/websockets";
 import { Socket } from "socket.io";
 
 @Controller("chat")
@@ -43,12 +43,11 @@ export class ChatController {
     @ConnectedSocket() socket: Socket
   ) {
     // need to add the case when the channel is going to be private/public/protected
-    // add error management
+    // add error management by adding try catch blocks
     const u = await this.userService.getUserById(user.id);
     if (!u)
-      throw new HttpException(
+      throw new Error(
         "there is no user with that id",
-        HttpStatus.BAD_REQUEST
       );
     const c = await this.chatService.getChannelByName(channel.name);
     if (c) throw new DuplicateError(channel.name);

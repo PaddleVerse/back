@@ -10,6 +10,7 @@ import { Appearance, Prisma, Role, user } from "@prisma/client";
 import { Socket, Server } from "socket.io";
 import { ChatService } from "./chat.service";
 import { UserService } from "src/user/user.service";
+import { subscribe } from "diagnostics_channel";
 
 @WebSocketGateway({ namespace: "channel-convo" })
 export class ChatGateway {
@@ -99,6 +100,13 @@ export class ChatGateway {
     // the channel can have three states, private (hidden from the groupds interface), protected (not hidden but has a password), or public check those and check if the user has all the things needed to join
   }
 
+  /**
+   *
+   * @param socket
+   * @param target
+   * @returns the object of the kicked participant
+   * @description this function will kick a user from the channel in real time
+   */
   @SubscribeMessage("kick-from-channel")
   async kickFromChannel(
     @ConnectedSocket() socket: Socket,
@@ -135,14 +143,118 @@ export class ChatGateway {
       if (Number(socket.handshake.query.userId) === target.id)
         throw new Error("cannot kick self");
       if (targetParticipant.role !== Role.MEMBER) {
-        if (executorParticipant.role === Role.ADMIN)
-          console.log("the user is admin and can kick anyone");
-        else throw new Error("cannot kick a mod or a channel admin");
+        if (executorParticipant.role !== Role.ADMIN)
+          throw new Error("cannot kick a mod or a channel admin");
       }
       return await this.chatService.deleteParticipant(targetParticipant.id);
     } catch (error: any) {
       this.server.to(socket.id).emit("arg-error", { error: error.toString() });
     }
     return "reached end of structure";
+  }
+
+  @SubscribeMessage("ban-from-channel")
+  async banFromChannel(
+    @ConnectedSocket() socket: Socket,
+    @Body("ban-target") target: target
+  ) {
+    // check if both users (the executor and the target) are part of the channel and if they are both are mods/admins
+    try {
+      // check if the channel exists or not
+      const channel = await this.chatService.getChannelById(target.channelId);
+      // checking if the channel exists or not
+      if (!channel)
+        throw new Error(
+          `the channel with the id ${target.channelId} doesnt exist`
+        );
+      const executorParticipant = await this.chatService.filterParticipantByIds(
+        +socket.handshake.query.userId,
+        channel.id
+      );
+      // checking if the user exists and if he is anything else but a member
+      if (!executorParticipant || executorParticipant.role === Role.MEMBER)
+        throw new Error(
+          `the user with the id ${socket.handshake.query.userId} doesnt have privilege over the channel`
+        );
+      const targetParticipant = await this.chatService.filterParticipantByIds(
+        target.id,
+        target.channelId
+      );
+      // checking if the participant is a member or not
+      if (!targetParticipant)
+        throw new Error(
+          `the user with the id ${target.id} doesnt exist in the channel`
+        );
+      // ch
+      if (Number(socket.handshake.query.userId) === target.id)
+        throw new Error("cannot ban self");
+      if (targetParticipant.role !== Role.MEMBER) {
+        if (executorParticipant.role !== Role.ADMIN)
+          throw new Error("cannot ban a mod or a channel admin");
+      }
+      const bannedUser = await this.chatService.deleteParticipant(
+        targetParticipant.id
+      );
+      const banned = await this.chatService.createBannedParticipant({
+        user: { connect: { id: target.id } },
+        channel: { connect: { id: target.channelId } },
+      });
+
+      // here i should emit back to the user that banned the notification that he banned a user, and one that tells the user that has been banned a notification
+      return banned;
+    } catch (error: any) {
+      this.server.to(socket.id).emit("arg-error", { error: error.toString() });
+    }
+    return "reached end of structure";
+  }
+
+  @SubscribeMessage("mute-unmute")
+  async mute_UnmuteParticipant(
+    @ConnectedSocket() socket: Socket,
+    @Body("mute/unmute-target") target: target
+  ) {
+    try {
+      // check if the channel exists or not
+      const channel = await this.chatService.getChannelById(target.channelId);
+      // checking if the channel exists or not
+      if (!channel)
+        throw new Error(
+          `the channel with the id ${target.channelId} doesnt exist`
+        );
+      const executorParticipant = await this.chatService.filterParticipantByIds(
+        +socket.handshake.query.userId,
+        channel.id
+      );
+      // checking if the user exists and if he is anything else but a member
+      if (!executorParticipant || executorParticipant.role === Role.MEMBER)
+        throw new Error(
+          `the user with the id ${socket.handshake.query.userId} doesnt have privilege over the channel`
+        );
+      const targetParticipant = await this.chatService.filterParticipantByIds(
+        target.id,
+        target.channelId
+      );
+      // checking if the participant is a member or not
+      if (!targetParticipant)
+        throw new Error(
+          `the user with the id ${target.id} doesnt exist in the channel`
+        );
+      // ch
+      if (Number(socket.handshake.query.userId) === target.id)
+        throw new Error("cannot mute self");
+      if (targetParticipant.role !== Role.MEMBER) {
+        if (executorParticipant.role !== Role.ADMIN)
+          throw new Error("cannot mute//unmute a mod or a channel admin");
+      } else {
+        throw new Error("you do not have the privilege to mute/unmute users");
+      }
+      if (target.muteUnmute && !targetParticipant.mute)
+        targetParticipant.mute = true;
+      else if (!target.muteUnmute && targetParticipant.mute)
+        targetParticipant.mute = false;
+      //emit to the executor that the change is done, and to the target that he has been muted
+    } catch (error) {
+      this.server.to(socket.id).emit("arg-error", { error: error.toString() });
+    }
   }
 }

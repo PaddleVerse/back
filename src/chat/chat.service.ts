@@ -33,7 +33,7 @@ export class ChatService {
     // in here i should a package that is going to generate a channel name in case the channel name was not provided
     const ch = await this.prisma.channel.create({
       data: channel,
-      include: { participants: true, messages: true },
+      include: { participants: true, messages: true, ban: true },
     });
     if (!ch) {
       throw new Error("an error in channel creation occured");
@@ -92,6 +92,11 @@ export class ChatService {
     return participant;
   }
 
+  /**
+   *
+   * @param id
+   * @returns the user with the same user id, might actually not use it
+   */
   async filterParticipantbyuserId(id: number) {
     const participant = await this.prisma.channel_participant.findMany({
       where: { user_id: id },
@@ -99,6 +104,11 @@ export class ChatService {
     return participant;
   }
 
+  /**
+   *
+   * @param id
+   * @returns the channel with the same channel id
+   */
   async filterParticipantbychannelId(id: number) {
     const participant = await this.prisma.channel_participant.findMany({
       where: { channel_id: id },
@@ -106,10 +116,20 @@ export class ChatService {
     return participant;
   }
 
+  /**
+   *
+   * @param id
+   * @returns removes the participant from the channel as a participant
+   */
   async deleteParticipant(id: number) {
     const participant = await this.prisma.channel_participant.delete({
       where: { id: id },
     });
     return participant;
+  }
+
+  async createBannedParticipant(data: Prisma.ban_listCreateInput) {
+    const user = await this.prisma.ban_list.create({ data: data });
+    return user;
   }
 }

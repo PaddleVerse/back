@@ -1,4 +1,5 @@
 type target = {
 	id: number,
-	channelId: number
+	channelId: number,
+	muteUnmute: boolean
 };
