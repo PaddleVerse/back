@@ -10,6 +10,19 @@ export class FriendshipService
         this.prisma = new PrismaClient();
     }
 
+    async getFriendships()
+    {
+        try
+        {
+            const friendships = await this.prisma.friendship.findMany();
+            return friendships;
+        }
+        catch (error)
+        {
+            return error;
+        }
+    }
+
     async getFriends(userId: number)
     {
         try
@@ -88,16 +101,17 @@ export class FriendshipService
         }
     }
 
-    async removeFriend(user_id: number, friendId: number)
+    async removeFriend(userId: number, friend_id: number)
     {
         try
         {
             await this.prisma.friendship.deleteMany({
                 where: {
-                    user_id,
-                    friendId
+                    user_id: +userId,
+                    friendId: +friend_id
                 }
             });
+            return `Friendship between ${userId} and ${friend_id} removed`;
         }
         catch (error)
         {
@@ -105,14 +119,14 @@ export class FriendshipService
         }
     }
 
-    async getFriendshipStatus(user_id: number, friendId: number)
+    async getFriendshipStatus(userId: number, friend_id: number)
     {
         try
         {
             const friendship = await this.prisma.friendship.findFirst({
                 where: {
-                    user_id,
-                    friendId
+                    user_id: +userId,
+                    friendId: +friend_id
                 }
             });
             return friendship.status;
