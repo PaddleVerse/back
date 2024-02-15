@@ -2,12 +2,11 @@ import { Injectable } from "@nestjs/common";
 import {
   PrismaClient,
   Prisma,
-  channel,
   channel_participant,
   user,
+  channel,
   message,
 } from "@prisma/client";
-import { error } from "console";
 
 /**
  * in the chat service we will implement the logic of the entire chat application
@@ -131,5 +130,13 @@ export class ChatService {
   async createBannedParticipant(data: Prisma.ban_listCreateInput) {
     const user = await this.prisma.ban_list.create({ data: data });
     return user;
+  }
+
+  async updateChannel(id: number, data: Prisma.channelUpdateInput) {
+    const channel = await this.prisma.channel.update({
+      data: data,
+      where: {id: id}
+    });
+    return channel;
   }
 }

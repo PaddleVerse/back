@@ -12,8 +12,6 @@ import { ChatService } from "./chat.service";
 import { Prisma, Role, channel, user } from "@prisma/client";
 import { DuplicateError } from "./utils/Errors";
 import { UserService } from "src/user/user.service";
-import { EventEmitter } from "stream";
-import { ChatGateway } from "./chat.gateway";
 import { ConnectedSocket, WebSocketGateway } from "@nestjs/websockets";
 import { Socket } from "socket.io";
 

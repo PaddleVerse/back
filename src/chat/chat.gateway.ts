@@ -154,9 +154,9 @@ export class ChatGateway {
   }
 
   /**
-   * 
-   * @param socket 
-   * @param target 
+   *
+   * @param socket
+   * @param target
    * @description this function will ban a user from a channel
    */
   @SubscribeMessage("ban-from-channel")
@@ -215,9 +215,9 @@ export class ChatGateway {
   }
 
   /**
-   * 
-   * @param socket 
-   * @param target 
+   *
+   * @param socket
+   * @param target
    * @description this function will handle the task of muting and unmuting channel participants, the logic varies with different roles
    */
   @SubscribeMessage("mute-unmute")
@@ -267,6 +267,68 @@ export class ChatGateway {
       //emit to the executor that the change is done, and to the target that he has been muted
     } catch (error) {
       this.server.to(socket.id).emit("arg-error", { error: error.toString() });
+    }
+  }
+
+  /**
+   * 
+   * @param socket 
+   * @param updates 
+   * @description it handles the changes that happen to the channel in real time
+   * it still needs work and definiletly testing
+   */
+  @SubscribeMessage("channel-update")
+  async updateChannelInfo(
+    @ConnectedSocket() socket: Socket,
+    @Body("channel-updates") updates: channelUpdates
+  ) {
+    try {
+      // check if the user exists in the database and if the user is not a member
+      const user = await this.chatService.filterParticipantByIds(
+        +socket.handshake.query.userId,
+        updates.channelId
+      );
+      if (!user || user.role === Role.MEMBER)
+        throw new Error(
+          `you do not have the privilige to make changes in the channel`
+        );
+      // check if the channel exists or not
+      const channel = await this.chatService.getChannelByName(
+        updates.channelName
+      );
+      if (!channel) throw new Error("channel doesn't exist");
+
+      if (
+        channel.state === Appearance.private ||
+        channel.state === Appearance.public
+      )
+        return;
+      if (channel.state === Appearance.protected && !updates.key)
+        throw new Error("need parameter as channel key");
+      let state: Appearance = channel.state;
+      if (updates.visibility === "private") state = Appearance.private;
+      else if (updates.visibility === "public") state = Appearance.public;
+      else if (updates.visibility === "protected") state = Appearance.protected;
+      const ch = await this.chatService.updateChannel(channel.id, {
+        key: (state !== Appearance.protected) ? updates.key: null ,
+        state: state,
+        name: (updates.channelName) ? updates.channelName : null,
+      });
+      if (!ch)
+        throw new Error("update was not applied");
+      // emit to the server that the change is successfull
+    } catch (error) {
+      this.server.to(socket.id).emit("arg-error", { error: error.toString() });
+    }
+  }
+
+  @SubscribeMessage("new-message-group")
+  async newMessage_Group(@ConnectedSocket() socket: Socket, @Body('message') message: string) {
+    try {
+
+    }
+    catch (error) {
+      this.server.to(socket.id).emit("error-send", {error: error.toString()});
     }
   }
 }
