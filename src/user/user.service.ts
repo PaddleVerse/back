@@ -34,7 +34,7 @@ export class UserService
       }
       catch (error)
       {
-        return error;
+        return null;
       }
     }
 
@@ -64,7 +64,7 @@ export class UserService
       }
       catch (error)
       {
-        return error;
+        return null;
       }
     }
 
@@ -95,7 +95,7 @@ export class UserService
       }
       catch (error)
       {
-        return error;
+        return null;
       }
     }
 
@@ -126,7 +126,7 @@ export class UserService
       }
       catch (error)
       {
-        return error;
+        return null;
       }
     }
 
@@ -144,7 +144,7 @@ export class UserService
       }
       catch (error)
       {
-        return error;
+        return null;
       }
     }
 
@@ -161,7 +161,7 @@ export class UserService
       }
       catch (error)
       {
-        return error;
+        return null;
       }
     }
 
@@ -178,7 +178,7 @@ export class UserService
         }
         catch (error)
         {
-          return error;
+          return null;
         }
     }
 
@@ -221,7 +221,7 @@ export class UserService
         }
         catch (error)
         {
-          return error;
+          return null;
         }
       }
 
@@ -263,7 +263,7 @@ export class UserService
         }
         catch (error)
         {
-          return error;
+          return null;
         }
       }
 
@@ -280,7 +280,7 @@ export class UserService
         }
         catch (error)
         {
-          return error;
+          return null;
         }
       }
 
@@ -296,7 +296,7 @@ export class UserService
         }
         catch (error)
         {
-          return error;
+          return null;
         }
       }
       

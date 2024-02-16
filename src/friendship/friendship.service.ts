@@ -59,18 +59,18 @@ export class FriendshipService
         }
     }
 
-    async acceptFriend(user_id: number, friendId: number) 
+    async acceptFriend(userId: number, friend_id: number) 
     {
         try
         {
             await this.prisma.friendship.updateMany({
                 where: {
-                    user_id,
-                    friendId,
-                    status: FriendshipStatus.PENDING // Ensure friendship is pending
+                    user_id : userId,
+                    friendId : friend_id,
+                    status: FriendshipStatus.PENDING
                 },
                 data: {
-                  status: FriendshipStatus.ACCEPTED // Update status to ACCEPTED
+                  status: FriendshipStatus.ACCEPTED
                 },
               });
         }
@@ -111,7 +111,6 @@ export class FriendshipService
                     friendId: +friend_id
                 }
             });
-            return `Friendship between ${userId} and ${friend_id} removed`;
         }
         catch (error)
         {

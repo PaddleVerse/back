@@ -38,52 +38,104 @@ export class UserGateway {
   }
   
   @SubscribeMessage('friendRequest')
-  handleFriendRequest(client: any, payload: any): string
+  async handleFriendRequest(client: any, payload: any): Promise<string>
   {
-    console.log(payload);
-    const id: any = this.getSocketId(payload?.reciverId);
-    if (id === null)
+    try
     {
-      this.server.to(client.id).emit('friendRequest', { ok : 0});
-      return "User not found."
+      const id: any = await this.getSocketId(payload?.reciverId);
+      await this.friendshipService.addFriend(payload?.senderId, payload?.reciverId);
+      if (id === null)
+      {
+        this.server.to(client.id).emit('friendRequest', { ok : 0});
+        return "User not found."
+      }
+
+      this.server.to(id).emit('friendRequest', payload);
+      client.emit('friendRequest', payload);
+      return 'Friend request received!';
     }
-    console.log(`Sending friend request to user ${payload?.reciverId} with socket ID ${id}.`);
-    this.server.to(id).emit('friendRequest', payload);
-    this.friendshipService.addFriend(payload?.senderId, payload?.reciverId);
-    return 'Friend request received!';
+    catch (error) { return 'Failed to receive friend request.'; }
   }
 
   @SubscribeMessage('acceptFriendRequest')
-  handleAcceptFriendRequest(client: any, payload: any): string
-  {
-    return 'Friend request accepted!';
+  async handleAcceptFriendRequest(client: any, payload: any): Promise<string> {
+    try
+    {
+      await this.friendshipService.acceptFriend(payload?.senderId, payload?.reciverId);
+  
+      const id: any = this.getSocketId(payload?.senderId);
+      if (id === null)
+      {
+        this.server.to(client.id).emit('acceptFriendRequest', { ok : 0 });
+        return "User not found.";
+      }
+      this.server.to(id).emit('acceptFriendRequest', payload);
+      client.emit('acceptFriendRequest', payload);
+      
+      return 'Friend request accepted!';
+    }
+    catch (error) { return 'Failed to accept friend request.'; }
   }
+  
 
   @SubscribeMessage('rejectFriendRequest')
-  handleRejectFriendRequest(client: any, payload: any): string
+  async handleRejectFriendRequest(client: any, payload: any): Promise<string>
   {
+    try
+    {
+      const id: any = await this.getSocketId(payload?.senderId);
+      await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
+      if (id === null)
+      {
+        this.server.to(client.id).emit('rejectFriendRequest', { ok : 0 });
+        return "User not found.";
+      }
+      this.server.to(id).emit('rejectFriendRequest', payload);
+      client.emit('rejectFriendRequest', payload);
+    }
+    catch (error) { return 'Failed to reject friend request.'; }
     return 'Friend request rejected!';
   }
 
   @SubscribeMessage('removeFriend')
-  handleRemoveFriend(client: any, payload: any): string
+  async handleRemoveFriend(client: any, payload: any): Promise<string>
   {
-    return 'Friend removed!';
+    try
+    {
+      const id: any = await this.getSocketId(payload?.senderId);
+      await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
+      if (id === null)
+      {
+        this.server.to(client.id).emit('removeFriend', { ok : 0});
+        return "User not found."
+      }
+      this.server.to(id).emit('removeFriend', payload);
+      client.emit('removeFriend', payload);
+      return 'Friend removed!';
+    }
+    catch (error) { return 'Failed to removed friend.'; }
   }
 
   @SubscribeMessage('cancelFriendRequest')
-  handleCancelFriendRequest(client: any, payload: any): string
+  async handleCancelFriendRequest(client: any, payload: any): Promise<string>
   {
-    this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
-    const id: any = this.getSocketId(payload?.reciverId);
-    console.log(id + "  " + client.id);
-    (id && this.server.to(id).emit('friendRequest', { ok : 1}))
-    client.emit('friendRequest', { ok : 1});
-    return 'Friend request canceled!';
+    try
+    {
+      await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
+      const id: any = await this.getSocketId(payload?.reciverId);
+
+      
+      this.server.to(id).emit('cancelFriendRequest', payload);
+      client.emit('cancelFriendRequest', payload);
+
+      return 'Friend request canceled!';
+    }
+    catch (error) { return 'Failed to cancele friend.'; }
   }
 
   
-  getSocketId(userId: number): string {
+  getSocketId(userId: number): string
+  {
     return (this.clients[userId] === undefined ? null : this.clients[userId].socketId);
   }
   
