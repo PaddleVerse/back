@@ -10,8 +10,7 @@ import { Appearance, Prisma, Role, user } from "@prisma/client";
 import { Socket, Server } from "socket.io";
 import { ChatService } from "./chat.service";
 import { UserService } from "src/user/user.service";
-import { channel, subscribe } from "diagnostics_channel";
-import { error } from "console";
+import { first } from "rxjs";
 
 @WebSocketGateway({ namespace: "channel-convo" })
 export class ChatGateway {
@@ -19,11 +18,11 @@ export class ChatGateway {
     private readonly chatService: ChatService,
     private readonly userService: UserService
   ) {
-    // this.connectedClients = new Map<number, string>();
+    this.connectedClients = new Map<number, Socket>();
   }
   @WebSocketServer()
   server: Server;
-  // connectedClients: Map<number, string>;
+  connectedClients: Map<number, Socket>;
 
   /**
    *
@@ -38,6 +37,15 @@ export class ChatGateway {
       );
       if (!user)
         throw new Error('there is no such user')
+      this.connectedClients.set(Number(socket.handshake.query.userId), socket);
+      if (Math.random() % 2 === 0) {
+        console.log("in first");
+        socket.join("first");
+      }
+      else {
+        console.log("in second");
+        socket.join("second");
+      }
     } catch (error: any) {
       socket.emit("connection-error", { error: error.toString() });
     }
@@ -53,18 +61,12 @@ export class ChatGateway {
   @SubscribeMessage("join-channel")
   async joinChannel(
     @Body("channel-info") channelInfo: any,
-    @Body("user-info") user: user, // this one can be fixed by using query containing user id
     @ConnectedSocket() socket: Socket
   ) {
-    // if (!channelInfo || !user) {
-    //   this.server
-    //     .to(socket.id)
-    //     .emit("arg-error", { error: "wrong arg, try again" });
-    // }
     try {
       // check if the user exists or not
-      const u = await this.userService.getUserById(user.id);
-      if (!u) throw new Error(`the user with the id ${user.id} doesn't exist`);
+      const u = await this.userService.getUserById(+socket.handshake.query.userId);
+      if (!u) throw new Error(`the user with the id ${socket.handshake.query.userId} doesn't exist`);
       // check if the channel exists or not, if not throw an http error
       const channel = await this.chatService.getChannelByName(channelInfo.name);
       if (!channel)
@@ -308,6 +310,7 @@ export class ChatGateway {
   @SubscribeMessage("new-message-group")
   async newMessage_Group(@ConnectedSocket() socket: Socket, @Body('message') message: string, @Body("channel") channelName: string) {
     try {
+      console.log(message, channelName);
       this.server.to(channelName).emit('new-message', message);
     }
     catch (error) {

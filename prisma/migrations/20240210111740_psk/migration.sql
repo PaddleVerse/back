@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "FriendshipStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
+
 -- CreateTable
 CREATE TABLE "user" (
     "id" SERIAL NOT NULL,
@@ -7,7 +10,7 @@ CREATE TABLE "user" (
     "name" TEXT,
     "password" TEXT NOT NULL,
     "picture" TEXT DEFAULT 'https://i.ibb.co/FsdsTYc/s-Instagram-photo-Soulless-Manga-Jujutsu-Kaisen-Artist-syrnrr-CLa5z-N2l-D1-L-JPG.jpg',
-    "banner_picture" TEXT,
+    "banner_picture" TEXT DEFAULT 'https://i.postimg.cc/85Y2rRB7/jezael-melgoza-lay-Mb-SJ3-YOE-unsplash.jpg',
     "status" TEXT DEFAULT 'offline',
     "level" INTEGER DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -16,14 +19,14 @@ CREATE TABLE "user" (
 );
 
 -- CreateTable
-CREATE TABLE "friend" (
+CREATE TABLE "Friendship" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER DEFAULT 0,
     "friendId" INTEGER DEFAULT 0,
-    "status" TEXT,
+    "status" "FriendshipStatus" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "friend_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Friendship_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -63,7 +66,6 @@ CREATE TABLE "channle" (
 -- CreateTable
 CREATE TABLE "message" (
     "id" SERIAL NOT NULL,
-    "user_id" INTEGER DEFAULT 0,
     "channel_id" INTEGER DEFAULT 0,
     "conversation_id" INTEGER DEFAULT 0,
     "content" TEXT,
@@ -103,16 +105,13 @@ CREATE UNIQUE INDEX "user_fortytwoId_key" ON "user"("fortytwoId");
 CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
 
 -- AddForeignKey
-ALTER TABLE "friend" ADD CONSTRAINT "friend_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Friendship" ADD CONSTRAINT "Friendship_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "achievement" ADD CONSTRAINT "achievement_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "message" ADD CONSTRAINT "message_conversation_id_fkey" FOREIGN KEY ("conversation_id") REFERENCES "conversation"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "message" ADD CONSTRAINT "message_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "message" ADD CONSTRAINT "message_channel_id_fkey" FOREIGN KEY ("channel_id") REFERENCES "channle"("id") ON DELETE SET NULL ON UPDATE CASCADE;
