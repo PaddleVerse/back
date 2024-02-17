@@ -55,7 +55,10 @@ export class ChatService {
    * @returns the channel that matches the filter (id)
    */
   async getChannelById(id: number) {
-    return await this.prisma.channel.findUnique({ where: { id: id } });
+    const channel = await this.prisma.channel.findUnique({ where: { id: id } });
+    if (!channel)
+      throw new Error(`the channel you are looking for doesn't exist`);
+    return channel;
   }
 
   /**
@@ -100,6 +103,7 @@ export class ChatService {
     const participant = await this.prisma.channel_participant.findMany({
       where: { user_id: id },
     });
+    if (!participant) throw new Error(`the user is not in any channel yet`);
     return participant;
   }
 
@@ -112,6 +116,7 @@ export class ChatService {
     const participant = await this.prisma.channel_participant.findMany({
       where: { channel_id: id },
     });
+    if (!participant) throw new Error(`the user is not in any channel yet`);
     return participant;
   }
 
@@ -135,7 +140,7 @@ export class ChatService {
   async updateChannel(id: number, data: Prisma.channelUpdateInput) {
     const channel = await this.prisma.channel.update({
       data: data,
-      where: {id: id}
+      where: { id: id },
     });
     return channel;
   }

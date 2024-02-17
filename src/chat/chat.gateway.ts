@@ -10,7 +10,8 @@ import { Appearance, Prisma, Role, user } from "@prisma/client";
 import { Socket, Server } from "socket.io";
 import { ChatService } from "./chat.service";
 import { UserService } from "src/user/user.service";
-import { subscribe } from "diagnostics_channel";
+import { channel, subscribe } from "diagnostics_channel";
+import { error } from "console";
 
 @WebSocketGateway({ namespace: "channel-convo" })
 export class ChatGateway {
@@ -18,11 +19,11 @@ export class ChatGateway {
     private readonly chatService: ChatService,
     private readonly userService: UserService
   ) {
-    this.connectedClients = new Map<number, string>();
+    // this.connectedClients = new Map<number, string>();
   }
   @WebSocketServer()
   server: Server;
-  connectedClients: Map<number, string>;
+  // connectedClients: Map<number, string>;
 
   /**
    *
@@ -35,11 +36,8 @@ export class ChatGateway {
       const user = await this.userService.getUserById(
         Number(socket.handshake.query.userId)
       );
-      try {
-        this.connectedClients.set(user.id, socket.id);
-      } catch (error) {
-        throw new Error(`error connecting socket to unregistered user`);
-      }
+      if (!user)
+        throw new Error('there is no such user')
     } catch (error: any) {
       socket.emit("connection-error", { error: error.toString() });
     }
@@ -58,12 +56,11 @@ export class ChatGateway {
     @Body("user-info") user: user, // this one can be fixed by using query containing user id
     @ConnectedSocket() socket: Socket
   ) {
-    if (!channelInfo || !user) {
-      this.server
-        .to(socket.id)
-        .emit("arg-error", { error: "wrong arg, try again" });
-    }
-    console.log(user, channelInfo);
+    // if (!channelInfo || !user) {
+    //   this.server
+    //     .to(socket.id)
+    //     .emit("arg-error", { error: "wrong arg, try again" });
+    // }
     try {
       // check if the user exists or not
       const u = await this.userService.getUserById(user.id);
@@ -86,10 +83,11 @@ export class ChatGateway {
       );
       if (Participant) throw new Error("user is already on that channel");
       // in case the user doesnt exist in the channel you create a new
-      const newChannel = this.chatService.createParticipant({
+      const newChannel = await this.chatService.createParticipant({
         user: { connect: { id: u.id } },
         channel: { connect: { id: channel.id } },
       });
+      socket.join(channel.name);
       this.server
         .to(socket.id)
         .emit("join-success", { success: "the checks are succesfull" });
@@ -116,37 +114,27 @@ export class ChatGateway {
     try {
       // check if the channel exists or not
       const channel = await this.chatService.getChannelById(target.channelId);
-      // checking if the channel exists or not
-      if (!channel)
-        throw new Error(
-          `the channel with the id ${target.channelId} doesnt exist`
-        );
+      //check if the executor is in the channel or not
       const executorParticipant = await this.chatService.filterParticipantByIds(
         +socket.handshake.query.userId,
         channel.id
       );
-      // checking if the user exists and if he is anything else but a member
-      if (!executorParticipant || executorParticipant.role === Role.MEMBER)
+      if (executorParticipant.role === Role.MEMBER)
         throw new Error(
-          `the user with the id ${socket.handshake.query.userId} doesnt have privilege over the channel`
+          `the user doesnt have privilege over the channel`
         );
       const targetParticipant = await this.chatService.filterParticipantByIds(
         target.id,
         target.channelId
       );
-      // checking if the participant is a member or not
-      if (!targetParticipant)
-        throw new Error(
-          `the user with the id ${target.id} doesnt exist in the channel`
-        );
-      // ch
       if (Number(socket.handshake.query.userId) === target.id)
         throw new Error("cannot kick self");
       if (targetParticipant.role !== Role.MEMBER) {
         if (executorParticipant.role !== Role.ADMIN)
           throw new Error("cannot kick a mod or a channel admin");
       }
-      return await this.chatService.deleteParticipant(targetParticipant.id);
+      await this.chatService.deleteParticipant(targetParticipant.id);
+      // emit the event that the user is kicked from the channel
     } catch (error: any) {
       this.server.to(socket.id).emit("arg-error", { error: error.toString() });
     }
@@ -169,10 +157,6 @@ export class ChatGateway {
       // check if the channel exists or not
       const channel = await this.chatService.getChannelById(target.channelId);
       // checking if the channel exists or not
-      if (!channel)
-        throw new Error(
-          `the channel with the id ${target.channelId} doesnt exist`
-        );
       const executorParticipant = await this.chatService.filterParticipantByIds(
         +socket.handshake.query.userId,
         channel.id
@@ -207,7 +191,6 @@ export class ChatGateway {
       });
 
       // here i should emit back to the user that banned the notification that he banned a user, and one that tells the user that has been banned a notification
-      return banned;
     } catch (error: any) {
       this.server.to(socket.id).emit("arg-error", { error: error.toString() });
     }
@@ -323,9 +306,9 @@ export class ChatGateway {
   }
 
   @SubscribeMessage("new-message-group")
-  async newMessage_Group(@ConnectedSocket() socket: Socket, @Body('message') message: string) {
+  async newMessage_Group(@ConnectedSocket() socket: Socket, @Body('message') message: string, @Body("channel") channelName: string) {
     try {
-
+      this.server.to(channelName).emit('new-message', message);
     }
     catch (error) {
       this.server.to(socket.id).emit("error-send", {error: error.toString()});
