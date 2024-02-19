@@ -2,10 +2,8 @@ import { Body } from '@nestjs/common';
 import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { FriendshipService } from 'src/friendship/friendship.service';
+import { UserService } from './user.service';
 
-interface ClientData {
-  [userId: number]: { socketId: string;};
-}
 
 @WebSocketGateway({
   cors:{
@@ -13,26 +11,26 @@ interface ClientData {
   }
 })
 export class UserGateway {
-  private clients: ClientData = {};
-  constructor(private readonly friendshipService : FriendshipService) {}
+  constructor(private readonly friendshipService : FriendshipService,
+              private readonly userService: UserService) {}
 
   @WebSocketServer() server: Server;
 
   handleConnection(client: any)
   {
     const userId = client.handshake.query?.userId;
-    this.clients[userId] = { socketId : client.id };
+    this.userService.clients[userId] = { socketId : client.id };
     console.log(`User ${userId} connected with socket ID ${client.id}`);
   }
 
   handleDisconnect(client: any)
   {
-    for (const key in this.clients)
+    for (const key in this.userService.clients)
     {
-      if (this.clients[key].socketId === client.id)
+      if (this.userService.clients[key].socketId === client.id)
       {
         console.log(`Client with id ${key} disconnected.`);
-        delete this.clients[key];
+        delete this.userService.clients[key];
       }
     }
   }
@@ -102,7 +100,7 @@ export class UserGateway {
   {
     try
     {
-      const id: any = await this.getSocketId(payload?.senderId);
+      const id: any = await this.getSocketId((payload?.is ? payload?.reciverId : payload?.senderId));
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
       if (id === null)
       {
@@ -123,6 +121,27 @@ export class UserGateway {
     {
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
       const id: any = await this.getSocketId(payload?.reciverId);
+      if (id === null)
+      {
+        this.server.to(client.id).emit('removeFriend', { ok : 0});
+        return "User not found."
+      }
+      
+      this.server.to(id).emit('cancelFriendRequest', payload);
+      client.emit('cancelFriendRequest', payload);
+
+      return 'Friend request canceled!';
+    }
+    catch (error) { return 'Failed to cancele friend.'; }
+  }
+
+  @SubscribeMessage('blockFriend')
+  async handleBlockFriendRequest(client: any, payload: any): Promise<string>
+  {
+    try
+    {
+      await this.friendshipService.blockFriend(payload?.senderId, payload?.reciverId);
+      const id: any = await this.getSocketId(payload?.reciverId);
 
       
       this.server.to(id).emit('cancelFriendRequest', payload);
@@ -133,10 +152,28 @@ export class UserGateway {
     catch (error) { return 'Failed to cancele friend.'; }
   }
 
+  @SubscribeMessage('unblockFriend')
+  async handleUnblockFriendRequest(client: any, payload: any): Promise<string>
+  {
+    try
+    {
+      const id: any = await this.getSocketId(payload?.reciverId);
+      await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
+      if (id === null)
+      {
+        this.server.to(client.id).emit('removeFriend', { ok : 0});
+        return "User not found."
+      }
+      this.server.to(id).emit('removeFriend', payload);
+      client.emit('removeFriend', payload);
+      return 'Friend removed!';
+    }
+    catch (error) { return 'Failed to cancele friend.'; }
+  }
   
   getSocketId(userId: number): string
   {
-    return (this.clients[userId] === undefined ? null : this.clients[userId].socketId);
+    return (this.userService.clients[userId] === undefined ? null : this.userService.clients[userId].socketId);
   }
   
 }

@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
+interface ClientData {
+  [userId: number]: { socketId: string;};
+}
+
 @Injectable()
 export class UserService 
 {
-    private readonly prisma : PrismaClient;
+  private readonly prisma : PrismaClient;
+  public clients: ClientData = {};
     constructor () 
     {
         this.prisma = new PrismaClient();

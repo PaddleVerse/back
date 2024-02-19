@@ -36,12 +36,6 @@ export class FriendshipController
         return this.friendshipService.acceptFriend(userId, friendId);
     }
 
-    @Get('reject/:userId/:friendId')
-    rejectFriend(@Param('userId') userId: number, @Param('friendId') friendId: number)
-    {
-        return this.friendshipService.rejectFriend(userId, friendId);
-    }
-
     @Delete('remove/:userId/:friendId')
     async removeFriend(@Param('userId') userId: number, @Param('friendId') friendId: number)
     {
