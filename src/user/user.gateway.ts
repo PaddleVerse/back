@@ -44,12 +44,12 @@ export class UserGateway {
       await this.friendshipService.addFriend(payload?.senderId, payload?.reciverId);
       if (id === null)
       {
-        this.server.to(client.id).emit('friendRequest', { ok : 0});
+        this.server.to(client.id).emit('refresh', { ok : 0});
         return "User not found."
       }
 
-      this.server.to(id).emit('friendRequest', payload);
-      client.emit('friendRequest', payload);
+      this.server.to(id).emit('refresh', payload);
+      client.emit('refresh', payload);
       return 'Friend request received!';
     }
     catch (error) { return 'Failed to receive friend request.'; }
@@ -64,11 +64,11 @@ export class UserGateway {
       const id: any = this.getSocketId(payload?.senderId);
       if (id === null)
       {
-        this.server.to(client.id).emit('acceptFriendRequest', { ok : 0 });
+        this.server.to(client.id).emit('refresh', { ok : 0 });
         return "User not found.";
       }
-      this.server.to(id).emit('acceptFriendRequest', payload);
-      client.emit('acceptFriendRequest', payload);
+      this.server.to(id).emit('refresh', payload);
+      client.emit('refresh', payload);
       
       return 'Friend request accepted!';
     }
@@ -85,11 +85,11 @@ export class UserGateway {
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
       if (id === null)
       {
-        this.server.to(client.id).emit('rejectFriendRequest', { ok : 0 });
+        this.server.to(client.id).emit('refresh', { ok : 0 });
         return "User not found.";
       }
-      this.server.to(id).emit('rejectFriendRequest', payload);
-      client.emit('rejectFriendRequest', payload);
+      this.server.to(id).emit('refresh', payload);
+      client.emit('refresh', payload);
     }
     catch (error) { return 'Failed to reject friend request.'; }
     return 'Friend request rejected!';
@@ -104,11 +104,11 @@ export class UserGateway {
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
       if (id === null)
       {
-        this.server.to(client.id).emit('removeFriend', { ok : 0});
+        this.server.to(client.id).emit('refresh', { ok : 0});
         return "User not found."
       }
-      this.server.to(id).emit('removeFriend', payload);
-      client.emit('removeFriend', payload);
+      this.server.to(id).emit('refresh', payload);
+      client.emit('refresh', payload);
       return 'Friend removed!';
     }
     catch (error) { return 'Failed to removed friend.'; }
@@ -123,12 +123,12 @@ export class UserGateway {
       const id: any = await this.getSocketId(payload?.reciverId);
       if (id === null)
       {
-        this.server.to(client.id).emit('removeFriend', { ok : 0});
+        this.server.to(client.id).emit('refresh', { ok : 0});
         return "User not found."
       }
       
-      this.server.to(id).emit('cancelFriendRequest', payload);
-      client.emit('cancelFriendRequest', payload);
+      this.server.to(id).emit('refresh', payload);
+      client.emit('refresh', payload);
 
       return 'Friend request canceled!';
     }
@@ -142,10 +142,14 @@ export class UserGateway {
     {
       await this.friendshipService.blockFriend(payload?.senderId, payload?.reciverId);
       const id: any = await this.getSocketId(payload?.reciverId);
-
+      if (id === null)
+      {
+        this.server.to(client.id).emit('refresh', { ok : 0});
+        return "User not found."
+      }
       
-      this.server.to(id).emit('cancelFriendRequest', payload);
-      client.emit('cancelFriendRequest', payload);
+      this.server.to(id).emit('refresh', payload);
+      client.emit('refresh', payload);
 
       return 'Friend request canceled!';
     }
@@ -161,11 +165,11 @@ export class UserGateway {
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
       if (id === null)
       {
-        this.server.to(client.id).emit('removeFriend', { ok : 0});
+        this.server.to(client.id).emit('refresh', { ok : 0});
         return "User not found."
       }
-      this.server.to(id).emit('removeFriend', payload);
-      client.emit('removeFriend', payload);
+      this.server.to(id).emit('refresh', payload);
+      client.emit('refresh', payload);
       return 'Friend removed!';
     }
     catch (error) { return 'Failed to cancele friend.'; }
