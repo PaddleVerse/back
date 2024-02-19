@@ -3,7 +3,7 @@ import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer } 
 import { Socket, Server } from 'socket.io';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { UserService } from './user.service';
-
+import { Status } from '@prisma/client';
 
 @WebSocketGateway({
   cors:{
@@ -16,21 +16,27 @@ export class UserGateway {
 
   @WebSocketServer() server: Server;
 
-  handleConnection(client: any)
+  async handleConnection(client: any)
   {
-    const userId = client.handshake.query?.userId;
+    const userId = await client.handshake.query?.userId;
     this.userService.clients[userId] = { socketId : client.id };
+    const user = await this.userService.getUserById(+userId);
+    (user) && await this.userService.updateUser(user.id, { status : Status.ONLINE });
+    this.server.emit('ok', { ok : 1 });
     console.log(`User ${userId} connected with socket ID ${client.id}`);
   }
 
-  handleDisconnect(client: any)
+  async handleDisconnect(client: any)
   {
     for (const key in this.userService.clients)
     {
       if (this.userService.clients[key].socketId === client.id)
       {
         console.log(`Client with id ${key} disconnected.`);
-        delete this.userService.clients[key];
+        const user = await this.userService.getUserById(+key);
+        (user) && await this.userService.updateUser(user.id, { status : Status.OFFLINE });
+        await delete this.userService.clients[key];
+        this.server.emit('ok', { ok : 1 });
       }
     }
   }

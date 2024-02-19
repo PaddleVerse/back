@@ -19,9 +19,11 @@ model user {
   password  String
   picture   String? @default("https://i.ibb.co/FsdsTYc/s-Instagram-photo-Soulless-Manga-Jujutsu-Kaisen-Artist-syrnrr-CLa5z-N2l-D1-L-JPG.jpg")
   banner_picture String? @default("https://i.postimg.cc/85Y2rRB7/jezael-melgoza-lay-Mb-SJ3-YOE-unsplash.jpg")
-  status    String? @default("offline") // online, offline, away
+  status    Status  @default(OFFLINE)
   level     Int?     @default(0)
   createdAt DateTime @default(now())
+  twoFa    Boolean? @default(false)
+  twoFaSecret String?
 
   friends Friendship[]
   achievements achievement[]
@@ -35,6 +37,12 @@ model Friendship {
   status    FriendshipStatus
   user    user?     @relation(fields: [user_id], references: [id])
   createdAt DateTime @default(now())
+}
+
+enum Status {
+  ONLINE
+  OFFLINE
+  ON_GAME
 }
 
 enum FriendshipStatus {

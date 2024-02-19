@@ -2,12 +2,14 @@ import { ConflictException, ForbiddenException, Injectable,UnauthorizedException
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { UserService } from 'src/user/user.service';
+import { TwoFactorService } from './two-factor.service';
 
 @Injectable()
 export class AuthService 
 {
     private readonly prisma : PrismaClient;
-    constructor (private jwtService: JwtService ) 
+    constructor (private jwtService: JwtService, private userService: UserService, private twoFactorService: TwoFactorService) 
     {
         this.prisma = new PrismaClient();
     }
@@ -52,5 +54,21 @@ export class AuthService
             access_token: await this.jwtService.signAsync(payload),
         };
     }
+
+    async enable2FA(userId: number): Promise<void> {
+        const user = await this.userService.getUser(userId);
+
+        if (!user) throw new UnauthorizedException('User not found');
+
+        const { secret, otpauthUrl } = await this.twoFactorService.generateSecret();
+
+        await this.userService.updateUser(userId, { twoFactorSecret: secret });
+
+        // Generate QR code for user to scan
+        const qrCode = await this.twoFactorService.generateQrCode(otpauthUrl);
+
+        // Send QR code to user (e.g., email, notification)
+        // ...
+      }
 };
 
