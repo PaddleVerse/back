@@ -80,20 +80,16 @@ export class FriendshipService
         }
     }
 
-    async rejectFriend(user_id: number, friendId: number)
+    async removeFriend(userId: number, friend_id: number)
     {
         try
         {
-            await this.prisma.friendship.updateMany({
+            await this.prisma.friendship.deleteMany({
                 where: {
-                    user_id,
-                    friendId,
-                    status: FriendshipStatus.PENDING // Ensure friendship is pending
-                },
-                data: {
-                  status: FriendshipStatus.REJECTED // Update status to REJECTED
-                },
-              });
+                    user_id: userId,
+                    friendId: friend_id
+                }
+            });
         }
         catch (error)
         {
@@ -101,16 +97,35 @@ export class FriendshipService
         }
     }
 
-    async removeFriend(userId: number, friend_id: number)
+    async blockFriend(userId: number, friend_id: number)
     {
         try
         {
             await this.prisma.friendship.deleteMany({
                 where: {
-                    user_id: +userId,
-                    friendId: +friend_id
+                    user_id: friend_id,
+                    friendId: userId
                 }
             });
+            const user = await this.prisma.friendship.updateMany({
+                where: {
+                    user_id: userId,
+                    friendId: friend_id,
+                },
+                data: {
+                  status: FriendshipStatus.BLOCKED
+                },
+              });
+            if (user.count === 0)
+            {
+                await this.prisma.friendship.create({
+                    data: {
+                        user_id: userId,
+                        friendId: friend_id,
+                        status: FriendshipStatus.BLOCKED
+                    }
+                });
+            }
         }
         catch (error)
         {

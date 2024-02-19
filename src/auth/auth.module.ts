@@ -9,6 +9,8 @@ import { JwtStrategy } from './strategys/jwt.strategy';
 import { GoogleStrategy } from './strategys/google.strategy';
 import { FortyTwoStrategy } from './strategys/42.strategy';
 import { BlacklistService } from './blacklist.service';
+import { TwoFactorService } from './two-factor.service';
+
 
 
 @Module({
@@ -17,7 +19,7 @@ import { BlacklistService } from './blacklist.service';
     UserModule, 
     JwtModule.register({ secret: process.env.SECRET, signOptions: { expiresIn: '1w' }})
   ],
-  providers: [LocalStrategy, AuthService, JwtStrategy, GoogleStrategy, FortyTwoStrategy, BlacklistService],
+  providers: [LocalStrategy, AuthService, JwtStrategy, GoogleStrategy, FortyTwoStrategy, BlacklistService, TwoFactorService],
   controllers: [AuthController],
 })
 export class AuthModule {}
