@@ -15,7 +15,7 @@ export class FriendshipController
     @Get(':id')
     getFriends(@Param('id') id: number)
     {
-        return this.friendshipService.getFriends(id);
+        return this.friendshipService.getFriends(+id);
     }
     
     @Get('/status/:userId/:friendId')
