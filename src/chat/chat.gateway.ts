@@ -12,7 +12,10 @@ import { ChatService } from "./chat.service";
 import { UserService } from "src/user/user.service";
 import { first } from "rxjs";
 
-@WebSocketGateway({ namespace: "channel-convo" })
+@WebSocketGateway({
+  namespace: "channel-convo",
+  cors: true
+})
 export class ChatGateway {
   constructor(
     private readonly chatService: ChatService,
