@@ -29,6 +29,24 @@ export class AuthController
     return user;
   }
 
+  @Post('2fa')
+  // @UseGuards(JwtAuthGuard)
+  async enable2FA(@Body('userId') userId: number){
+
+    const res = await this.authService.enable2FA(userId);
+
+    return res;
+  }
+
+  @Post('v2fa')
+  // @UseGuards(JwtAuthGuard)
+  async V2FA(@Body('token') token: string){
+
+    const res = await this.authService.V2FA(2, token);
+
+    return res;
+  }
+
   @Post('signup')
   async signup(@Body() body: CreateUserDto)
   {

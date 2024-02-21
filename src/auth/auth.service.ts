@@ -55,20 +55,30 @@ export class AuthService
         };
     }
 
-    async enable2FA(userId: number): Promise<void> {
+    async enable2FA(userId: number): Promise<any>
+    {
         const user = await this.userService.getUser(userId);
 
         if (!user) throw new UnauthorizedException('User not found');
 
-        const { secret, otpauthUrl } = await this.twoFactorService.generateSecret();
+        const url = await this.twoFactorService.generateSecret();
 
-        await this.userService.updateUser(userId, { twoFactorSecret: secret });
+        await this.userService.updateUser(userId, { twoFaSecret: url.secret });
 
-        // Generate QR code for user to scan
-        const qrCode = await this.twoFactorService.generateQrCode(otpauthUrl);
+        const qrCode = await this.twoFactorService.generateQRCode(url.url);
 
-        // Send QR code to user (e.g., email, notification)
-        // ...
-      }
+        return { Qr: qrCode };
+    }
+
+    async V2FA(userId: number, token: string): Promise<any>
+    {
+        const user = await this.userService.getUser(userId);
+
+        if (!user) throw new UnauthorizedException('User not found');
+
+        const res = await this.twoFactorService.verifyToken(user.twoFaSecret, token);
+
+        return {ok: res};
+    }
 };
 

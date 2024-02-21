@@ -57,6 +57,8 @@ export class UserService
                 status: true,
                 level: true,
                 createdAt: true,
+                twoFaSecret: true,
+                twoFa: true,
                 friends: true,
                 achievements: true,
                 channel_participants: true,
