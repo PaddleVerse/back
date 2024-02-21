@@ -1,5 +1,8 @@
 -- CreateEnum
-CREATE TYPE "FriendshipStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
+CREATE TYPE "Status" AS ENUM ('ONLINE', 'OFFLINE', 'ON_GAME');
+
+-- CreateEnum
+CREATE TYPE "FriendshipStatus" AS ENUM ('PENDING', 'ACCEPTED', 'BLOCKED');
 
 -- CreateTable
 CREATE TABLE "user" (
@@ -11,9 +14,11 @@ CREATE TABLE "user" (
     "password" TEXT NOT NULL,
     "picture" TEXT DEFAULT 'https://i.ibb.co/FsdsTYc/s-Instagram-photo-Soulless-Manga-Jujutsu-Kaisen-Artist-syrnrr-CLa5z-N2l-D1-L-JPG.jpg',
     "banner_picture" TEXT DEFAULT 'https://i.postimg.cc/85Y2rRB7/jezael-melgoza-lay-Mb-SJ3-YOE-unsplash.jpg',
-    "status" TEXT DEFAULT 'offline',
+    "status" "Status" NOT NULL DEFAULT 'OFFLINE',
     "level" INTEGER DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "twoFa" BOOLEAN DEFAULT false,
+    "twoFaSecret" TEXT,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
