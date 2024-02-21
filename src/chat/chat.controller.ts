@@ -9,11 +9,22 @@ import {
   Post,
 } from "@nestjs/common";
 import { ChatService } from "./chat.service";
-import { Prisma, Role, channel, user } from "@prisma/client";
+import {
+  Prisma,
+  Role,
+  channel,
+  channel_participant,
+  message,
+  user,
+} from "@prisma/client";
 import { DuplicateError } from "./utils/Errors";
 import { UserService } from "src/user/user.service";
 import { ConnectedSocket, WebSocketGateway } from "@nestjs/websockets";
 import { Socket } from "socket.io";
+import { get } from "http";
+import { FriendshipService } from "src/friendship/friendship.service";
+import { threadId } from "worker_threads";
+import { send } from "process";
 
 @Controller("chat")
 export class ChatController {
@@ -25,6 +36,7 @@ export class ChatController {
   constructor(
     private readonly chatService: ChatService,
     private readonly userService: UserService,
+    private readonly friendShipService: FriendshipService
   ) {}
 
   /**
@@ -33,44 +45,60 @@ export class ChatController {
    * @param user
    * @returns a newly created channel with the user that created it as the admin
    */
-  @Post("channels")
+  @Post("channel")
   async createChannel(
     @Body("channel")
     channel: Prisma.channelCreateInput,
     @Body("user") user: user,
     @ConnectedSocket() socket: Socket
   ) {
-    // need to add the case when the channel is going to be private/public/protected
-    // add error management by adding try catch blocks
-    const u = await this.userService.getUserById(user.id);
-    if (!u)
-      throw new Error(
-        "there is no user with that id",
-      );
-    const c = await this.chatService.getChannelByName(channel.name);
-    if (c) throw new DuplicateError(channel.name);
-    const ch = await this.chatService.createChannel(channel);
-    const participant = await this.chatService.createParticipant({
-      user: { connect: { id: user.id } }, // connect the fields that has a relation through a unique attribute (id)
-      channel: { connect: { id: ch.id } }, // Fix: Connect the channel using its unique identifier
-      role: Role.ADMIN,
-    });
-    ch.participants.push(participant);
-    return ch;
+    try {
+      const u = await this.userService.getUserById(user.id);
+
+      if (!u)
+        throw new HttpException(
+          "there is no user with that id",
+          HttpStatus.BAD_REQUEST
+        );
+      const c = await this.chatService.getChannelByName(channel.name);
+      if (c) throw new DuplicateError(channel.name);
+      const ch = await this.chatService.createChannel(channel);
+      const participant = await this.chatService.createParticipant({
+        user: { connect: { id: user.id } }, // connect the fields that has a relation through a unique attribute (id)
+        channel: { connect: { id: ch.id } }, // Fix: Connect the channel using its unique identifier
+        role: Role.ADMIN,
+      });
+      ch.participants.push(participant);
+      return ch;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
 
-  /**
-   *
-   * @param id  the id of the targeted channel
-   * @param updates the object that is used to update the channel with
-   * @description this function is used to update the info of the channel such as privacy etc
-   */
-  //   @Patch("channels/:id")
-  //   async updateChannel(@Param("id") id: number, @Body("channelUpdates") updates: Prisma.channelUpdateInput) {
-  //     if (updates)
-  //       console.log();
-  //     // handle if the update is a some channel attribution like the modes or something like that
-  //   }
+  @Get("chatlist/:id")
+  async getChatList(@Param("id") id: string) {
+    try {
+      const channelList = await this.chatService.filterParticipantbyuserId(+id);
+      const friendsList = await this.friendShipService.getFriends(+id);
+      let channels = [];
+      let friends = [];
+      console.log("the id is ", id);
+      for (const value of channelList) {
+        const ch = await this.chatService.getChannelById(value.channel_id);
+        channels.push(ch);
+      }
+      for (const fr of friendsList) {
+        const user = await this.userService.getUserById(fr.id);
+        console.log(user.id);
+        friends.push(user);
+      }
+      const list = channels.concat(friends);
+      console.log(list);
+      return list;
+    } catch (error) {
+      throw new HttpException("no records found", HttpStatus.BAD_REQUEST);
+    }
+  }
 }
 
 // type ChatRoom = channel & {

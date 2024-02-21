@@ -63,7 +63,7 @@ export class ChatGateway {
    */
   @SubscribeMessage("join-channel")
   async joinChannel(
-    @Body("channel-info") channelInfo: any,
+    @Body("channel-info") channelInfo: any, // this one needs fix for later use, by using channel_info type
     @ConnectedSocket() socket: Socket
   ) {
     try {

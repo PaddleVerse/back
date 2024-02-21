@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import {
   PrismaClient,
   Prisma,
@@ -6,6 +6,7 @@ import {
   user,
   channel,
   message,
+  Role,
 } from "@prisma/client";
 
 /**
@@ -14,9 +15,6 @@ import {
  */
 @Injectable()
 export class ChatService {
-  /**
-   * new instance of the prisma client
-   */
   prisma: PrismaClient;
   constructor() {
     this.prisma = new PrismaClient();
@@ -28,15 +26,11 @@ export class ChatService {
    * @returns the newly created object of the channel
    */
   async createChannel(channel: Prisma.channelCreateInput) {
-    // it still needs the logic that is going to use the key and take into account th
     // in here i should a package that is going to generate a channel name in case the channel name was not provided
     const ch = await this.prisma.channel.create({
       data: channel,
       include: { participants: true, messages: true, ban: true },
     });
-    if (!ch) {
-      throw new Error("an error in channel creation occured");
-    }
     return ch;
   }
 
@@ -143,5 +137,37 @@ export class ChatService {
       where: { id: id },
     });
     return channel;
+  }
+
+  /**
+   *
+   * @param user
+   * @param httpOrSocket
+   * @description this function is used to check if the user is found i the data base or not, if not it checks the httporsocket and throws an error
+   */
+  validateUser(user: any | null, httpOrSocket: boolean) {
+    if (httpOrSocket) {
+      if (!user) {
+        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      }
+    } else {
+      if (!user) {
+        throw new Error("no such user");
+      }
+    }
+  }
+
+  /**
+   *
+   * @param user
+   * @param httpOrSocket
+   * @returns a bool expression whether the user is privileged or not, true mean yes false means no
+   */
+  validateUserPrivilege(
+    user: channel_participant,
+    httpOrSocket: boolean
+  ): boolean {
+    if (user.role === Role.MEMBER) return false;
+    return true;
   }
 }
