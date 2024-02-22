@@ -11,10 +11,13 @@ import { ChannelsController } from './channels/channels.controller';
 import { BanModule } from './ban/ban.module';
 import { ChannelsService } from './channels/channels.service';
 import { ChannelsModule } from './channels/channels.module';
+import { ConversationsService } from './conversations/conversations.service';
+import { ConversationsController } from './conversations/conversations.controller';
+import { ConversationsModule } from './conversations/conversations.module';
 
 @Module({
-  providers: [ChatService, UserService, FriendshipService, ChannelsService],
-  controllers: [ChatController, ChannelsController],
-  imports: [UserModule, FriendshipModule, ParticipantsModule, MessageModule, BanModule, ChannelsModule],
+  providers: [ChatService, UserService, FriendshipService, ChannelsService, ConversationsService],
+  controllers: [ChatController, ChannelsController, ConversationsController],
+  imports: [UserModule, FriendshipModule, ParticipantsModule, MessageModule, BanModule, ChannelsModule, ConversationsModule],
 })
 export class ChatModule {}
