@@ -82,20 +82,17 @@ export class ChatController {
       const friendsList = await this.friendShipService.getFriends(+id);
       let channels = [];
       let friends = [];
-      console.log("the id is ", id);
       for (const value of channelList) {
         const ch = await this.chatService.getChannelById(value.channel_id);
         channels.push(ch);
       }
-      for (const fr of friendsList) {
-        const user = await this.userService.getUserById(fr.id);
-        console.log(user.id);
+      for (const friend of friendsList) {
+        const user = await this.userService.getUserById(friend.friendId);
         friends.push(user);
       }
-      const list = channels.concat(friends);
-      console.log(list);
-      return list;
+      return channels.concat(friends);
     } catch (error) {
+      console.log(error.toString());
       throw new HttpException("no records found", HttpStatus.BAD_REQUEST);
     }
   }

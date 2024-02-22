@@ -36,7 +36,7 @@ export class FriendshipService
         }
         catch (error)
         {
-            return error;
+            throw error;
         }
     }
 
