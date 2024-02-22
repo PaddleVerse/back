@@ -34,15 +34,36 @@ export class ChannelsService {
     return channel;
   }
 
-  async updateChannel(data: Prisma.channelUpdateInput) {
-    return;
+  async updateChannel(channelid: number, data: Prisma.channelUpdateInput) {
+    const channel = await this.prisma.channel.update({
+      data: data,
+      where: { id: channelid },
+    });
+    return channel;
   }
 
   async getChannelById(id: number) {
-    return;
+    const channel = await this.prisma.channel.findUnique({ where: { id: id } });
+
+    return channel;
   }
 
   async getChannelByName(name: string) {
-    return;
+    const channel = await this.prisma.channel.findUnique({
+      where: { name: name },
+    });
+    return channel;
+  }
+
+  async getChannels() {
+    const channels = await this.prisma.channel.findMany();
+    return channels;
+  }
+
+  async filterChannelsByName(name: string) {
+    const channels = await this.prisma.channel.findMany({
+      where: { name: name },
+    });
+    return channels;
   }
 }

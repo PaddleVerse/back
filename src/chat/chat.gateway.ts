@@ -10,7 +10,7 @@ import { Appearance, Prisma, Role, user } from "@prisma/client";
 import { Socket, Server } from "socket.io";
 import { ChatService } from "./chat.service";
 import { UserService } from "src/user/user.service";
-import { first } from "rxjs";
+import { ChannelsService } from "./channels/channels.service";
 
 @WebSocketGateway({
   namespace: "channel-convo",
@@ -19,7 +19,8 @@ import { first } from "rxjs";
 export class ChatGateway {
   constructor(
     private readonly chatService: ChatService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly channelService: ChannelsService
   ) {
     this.connectedClients = new Map<number, Socket>();
   }
@@ -71,7 +72,7 @@ export class ChatGateway {
       const u = await this.userService.getUserById(+socket.handshake.query.userId);
       if (!u) throw new Error(`the user with the id ${socket.handshake.query.userId} doesn't exist`);
       // check if the channel exists or not, if not throw an http error
-      const channel = await this.chatService.getChannelByName(channelInfo.name);
+      const channel = await this.channelService.getChannelByName(channelInfo.name);
       if (!channel)
         throw new Error(
           `the channel with the name ${channelInfo.name} doesn't exist`
@@ -118,7 +119,7 @@ export class ChatGateway {
     // check if both users (the executor and the target) are part of the channel and if they are both are mods/admins
     try {
       // check if the channel exists or not
-      const channel = await this.chatService.getChannelById(target.channelId);
+      const channel = await this.channelService.getChannelById(target.channelId);
       //check if the executor is in the channel or not
       const executorParticipant = await this.chatService.filterParticipantByIds(
         +socket.handshake.query.userId,
@@ -160,7 +161,7 @@ export class ChatGateway {
     // check if both users (the executor and the target) are part of the channel and if they are both are mods/admins
     try {
       // check if the channel exists or not
-      const channel = await this.chatService.getChannelById(target.channelId);
+      const channel = await this.channelService.getChannelById(target.channelId);
       // checking if the channel exists or not
       const executorParticipant = await this.chatService.filterParticipantByIds(
         +socket.handshake.query.userId,
@@ -215,7 +216,7 @@ export class ChatGateway {
   ) {
     try {
       // check if the channel exists or not
-      const channel = await this.chatService.getChannelById(target.channelId);
+      const channel = await this.channelService.getChannelById(target.channelId);
       // checking if the channel exists or not
       if (!channel)
         throw new Error(
@@ -281,7 +282,7 @@ export class ChatGateway {
           `you do not have the privilige to make changes in the channel`
         );
       // check if the channel exists or not
-      const channel = await this.chatService.getChannelByName(
+      const channel = await this.channelService.getChannelByName(
         updates.channelName
       );
       if (!channel) throw new Error("channel doesn't exist");

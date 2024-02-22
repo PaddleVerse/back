@@ -11,10 +11,12 @@ import { FriendshipModule } from './friendship/friendship.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { ChatModule } from './chat/chat.module';
 import { ChatService } from './chat/chat.service';
+import { ChannelsService } from './chat/channels/channels.service';
+import { ChannelsModule } from './chat/channels/channels.module';
 
 @Module({
-  imports: [AuthModule, UserModule, FriendshipModule, ChatModule],
+  imports: [AuthModule, UserModule, FriendshipModule, ChatModule, ChannelsModule],
   controllers: [AppController, FriendshipController],
-  providers: [AppService, FriendshipService, ChatGateway, ChatService],
+  providers: [AppService, FriendshipService, ChatGateway, ChatService, ChannelsService],
 })
 export class AppModule {}

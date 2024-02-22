@@ -7,12 +7,14 @@ import { FriendshipService } from 'src/friendship/friendship.service';
 import { FriendshipModule } from 'src/friendship/friendship.module';
 import { ParticipantsModule } from './participants/participants.module';
 import { MessageModule } from './message/message.module';
-import { ChannelController } from './channel/channel.controller';
+import { ChannelsController } from './channels/channels.controller';
 import { BanModule } from './ban/ban.module';
+import { ChannelsService } from './channels/channels.service';
+import { ChannelsModule } from './channels/channels.module';
 
 @Module({
-  providers: [ChatService, UserService, FriendshipService],
-  controllers: [ChatController, ChannelController],
-  imports: [UserModule, FriendshipModule, ParticipantsModule, MessageModule, BanModule],
+  providers: [ChatService, UserService, FriendshipService, ChannelsService],
+  controllers: [ChatController, ChannelsController],
+  imports: [UserModule, FriendshipModule, ParticipantsModule, MessageModule, BanModule, ChannelsModule],
 })
 export class ChatModule {}

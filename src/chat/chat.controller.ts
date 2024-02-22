@@ -25,6 +25,7 @@ import { get } from "http";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { threadId } from "worker_threads";
 import { send } from "process";
+import { ChannelsService } from "./channels/channels.service";
 
 @Controller("chat")
 export class ChatController {
@@ -36,7 +37,8 @@ export class ChatController {
   constructor(
     private readonly chatService: ChatService,
     private readonly userService: UserService,
-    private readonly friendShipService: FriendshipService
+    private readonly friendShipService: FriendshipService,
+    private readonly channelService: ChannelsService
   ) {}
 
   /**
@@ -60,9 +62,9 @@ export class ChatController {
           "there is no user with that id",
           HttpStatus.BAD_REQUEST
         );
-      const c = await this.chatService.getChannelByName(channel.name);
+      const c = await this.channelService.getChannelByName(channel.name);
       if (c) throw new DuplicateError(channel.name);
-      const ch = await this.chatService.createChannel(channel);
+      const ch = await this.channelService.createChannel(channel);
       const participant = await this.chatService.createParticipant({
         user: { connect: { id: user.id } }, // connect the fields that has a relation through a unique attribute (id)
         channel: { connect: { id: ch.id } }, // Fix: Connect the channel using its unique identifier
@@ -83,7 +85,7 @@ export class ChatController {
       let channels = [];
       let friends = [];
       for (const value of channelList) {
-        const ch = await this.chatService.getChannelById(value.channel_id);
+        const ch = await this.channelService.getChannelById(value.channel_id);
         channels.push(ch);
       }
       for (const friend of friendsList) {

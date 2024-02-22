@@ -20,40 +20,6 @@ export class ChatService {
     this.prisma = new PrismaClient();
   }
 
-  /**
-   *
-   * @param channel
-   * @returns the newly created object of the channel
-   */
-
-  /**
-   *
-   * @param name the name of the channel
-   * @returns the channel with the name, as it is a unique field in the channel
-   */
-  async getChannelByName(name: string) {
-    return await this.prisma.channel.findUnique({ where: { name: name } });
-  }
-
-  /**
-   *
-   * @param id the id of the channel
-   * @returns the channel that matches the filter (id)
-   */
-  async getChannelById(id: number) {
-    const channel = await this.prisma.channel.findUnique({ where: { id: id } });
-    if (!channel)
-      throw new Error(`the channel you are looking for doesn't exist`);
-    return channel;
-  }
-
-  /**
-   *
-   * @returns a promise with all the channels in the db
-   */
-  async getChannels(): Promise<channel[]> {
-    return await this.prisma.channel.findMany();
-  }
 
   /**
    *
@@ -129,37 +95,5 @@ export class ChatService {
       where: { id: id },
     });
     return channel;
-  }
-
-  /**
-   *
-   * @param user
-   * @param httpOrSocket
-   * @description this function is used to check if the user is found i the data base or not, if not it checks the httporsocket and throws an error
-   */
-  validateUser(user: any | null, httpOrSocket: boolean) {
-    if (httpOrSocket) {
-      if (!user) {
-        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
-      }
-    } else {
-      if (!user) {
-        throw new Error("no such user");
-      }
-    }
-  }
-
-  /**
-   *
-   * @param user
-   * @param httpOrSocket
-   * @returns a bool expression whether the user is privileged or not, true mean yes false means no
-   */
-  validateUserPrivilege(
-    user: channel_participant,
-    httpOrSocket: boolean
-  ): boolean {
-    if (user.role === Role.MEMBER) return false;
-    return true;
   }
 }
