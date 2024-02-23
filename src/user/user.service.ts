@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import { MulterFile } from 'multer';
+import { UpdateUserDto } from 'src/auth/dto/update-user.dto/update-user.dto';
 
 interface ClientData {
   [userId: number]: { socketId: string;};
@@ -306,5 +309,39 @@ export class UserService
           return null;
         }
       }
-      
+
+      async uploadImage(file: MulterFile): Promise<string>
+      {
+        try
+        {
+          const filename = `${Date.now()}-${file.originalname}`;
+          const filePath = `images/${filename}`;
+        
+          await fs.promises.writeFile(filePath, file.buffer);
+        
+          return `http://localhost:8080/${filename}`;
+        }
+        catch (error) { return null; }
+      }
+
+      async editUser(id: number, data: UpdateUserDto)
+      {
+        const { name , username } = data;
+        const user = await this.prisma.user.findUnique({
+            where: {
+                username: username
+            }
+        });
+        if (user) return null;
+        const updatedUser = await this.prisma.user.update({
+            where: {
+                id
+            },
+            data: {
+                name: name,
+                username: username
+            }
+        });
+        return updatedUser;
+      }
 }

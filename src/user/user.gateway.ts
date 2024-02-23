@@ -40,7 +40,7 @@ export class UserGateway {
       }
     }
   }
-  
+
   @SubscribeMessage('friendRequest')
   async handleFriendRequest(client: any, payload: any): Promise<string>
   {
