@@ -20,7 +20,7 @@ export class ChannelsService {
       const customConfig: Config = {
         dictionaries: [adjectives, colors],
         separator: "-",
-        length: 3,
+        length: 2,
       };
       const randomName: string = uniqueNamesGenerator({
         dictionaries: [adjectives, colors, animals],
@@ -43,7 +43,10 @@ export class ChannelsService {
   }
 
   async getChannelById(id: number) {
-    const channel = await this.prisma.channel.findUnique({ where: { id: id } });
+    const channel = await this.prisma.channel.findUnique({
+      where: { id: id },
+      include: { participants: true, ban: true, messages: true },
+    });
 
     return channel;
   }
@@ -51,6 +54,7 @@ export class ChannelsService {
   async getChannelByName(name: string) {
     const channel = await this.prisma.channel.findUnique({
       where: { name: name },
+      include: {participants: true, ban: true, messages: true}
     });
     return channel;
   }

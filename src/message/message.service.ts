@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, message } from "@prisma/client";
 
 @Injectable()
 export class MessageService {
@@ -20,5 +20,12 @@ export class MessageService {
       where: { conversation_id: convoId },
     });
     return messages;
+  }
+
+  async createMessage(message: Prisma.messageCreateInput) {
+    const m = await this.prisma.message.create({
+      data: message
+    })
+    return m;
   }
 }
