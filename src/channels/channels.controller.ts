@@ -95,13 +95,16 @@ export class ChannelsController {
           ? await this.channelService.getChannelById(Number(id))
           : await this.channelService.getChannelByName(id);
         const us = await this.userService.getUserById(Number(user.id));
+        if (!us) {
+          throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+        }
         if (!channels)
           throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
         const participant = await this.participantService.getParticipantByIds(
           channels.id,
           us.id
         );
-        if (participant.role !== Role.ADMIN) {
+        if (participant.role === Role.MEMBER) {
           throw new HttpException(
             "you are not an admin to this channel",
             HttpStatus.BAD_REQUEST

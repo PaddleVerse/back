@@ -13,11 +13,8 @@ export class ParticipantsService {
     this.prisma = new PrismaClient();
   }
 
-  /**
-   *
-   * @param dat the input needed to creare the new participant
-   * @returns a new participant to the channel
-   */
+
+  
   async createParticipant(dat: Prisma.channel_participantCreateInput) {
     const participant = await this.prisma.channel_participant.create({
       data: dat,

@@ -70,7 +70,6 @@ export class ParticipantsController {
     }
   }
 
-  //test end point
   @Put(":id")
   async updatePaticipant(
     @Param("id") id: string,
