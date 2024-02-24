@@ -23,6 +23,7 @@ export class MessageService {
   }
 
   async createMessage(message: Prisma.messageCreateInput) {
+    console.log(message);
     const m = await this.prisma.message.create({
       data: message
     })

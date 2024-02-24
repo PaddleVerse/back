@@ -103,8 +103,9 @@ model channel{
 
 model message{
   id        Int      @id @default(autoincrement())
-  channel_id    Int?     @default(0)
-  conversation_id    Int?     @default(0)
+  channel_id    Int?     
+  sender_id    Int?
+  conversation_id    Int?
   content    String?
   content_type    String?
   createdAt DateTime @default(now())
