@@ -40,6 +40,7 @@ export class FriendshipService
         }
     }
 
+
     async addFriend(userId: number, friendId: number) 
     {
         try

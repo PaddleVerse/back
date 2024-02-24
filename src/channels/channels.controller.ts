@@ -82,15 +82,15 @@ export class ChannelsController {
     }
   }
 
-  // test end point
   @Put(":id")
   async updateChannel(
     @Param("id") id: string,
-    @Param("user") user: user,
+    @Body("user") user: user,
     @Body("channel") updates: Prisma.channelUpdateInput
   ) {
     try {
       try {
+        console.log(user);
         const channels = !isNaN(Number(id))
           ? await this.channelService.getChannelById(Number(id))
           : await this.channelService.getChannelByName(id);
