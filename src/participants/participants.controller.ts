@@ -10,7 +10,7 @@ import {
   Query,
 } from "@nestjs/common";
 import { ParticipantsService } from "./participants.service";
-import { Prisma, channel, user } from "@prisma/client";
+import { Prisma, Role, channel, user } from "@prisma/client";
 import { ChannelsService } from "src/channels/channels.service";
 import { UserService } from "src/user/user.service";
 import { connect } from "http2";
@@ -74,7 +74,8 @@ export class ParticipantsController {
   @Put(":id")
   async updatePaticipant(
     @Param("id") id: string,
-    @Body("channel") channel: number,
+    @Body("channel") channelId: string,
+    @Body("executor") execId: string,
     @Body("participant") update: Prisma.channel_participantUpdateInput
   ) {
     try {
@@ -82,20 +83,37 @@ export class ParticipantsController {
         Number(id)
       );
       const ch = await this.participantsService.channelService.getChannelById(
-        Number(channel)
+        Number(channelId)
       );
       if (!u) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
       if (!ch)
         throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      const admin = await this.participantsService.getParticipantByIds(
+        ch.id,
+        Number(execId)
+      );
+      if (!admin || admin.role === Role.MEMBER) {
+        console.log(admin, execId);
+        throw new HttpException(
+          "you are not an admin to this channel",
+          HttpStatus.BAD_REQUEST
+        );
+      }
       const participant = await this.participantsService.getParticipantByIds(
         ch.id,
         u.id
       );
       if (!participant)
         throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
-      if (participant.role !== "ADMIN") {
+      if (participant.id === admin.id) {
         throw new HttpException(
-          "you are not an admin to this channel",
+          "can't modify self",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      if (participant.role === "ADMIN") {
+        throw new HttpException(
+          "you can't change on an admin",
           HttpStatus.BAD_REQUEST
         );
       }
