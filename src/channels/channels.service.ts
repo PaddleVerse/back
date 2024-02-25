@@ -67,6 +67,7 @@ export class ChannelsService {
   async filterChannelsByName(name: string) {
     const channels = await this.prisma.channel.findMany({
       where: { name: name },
+      include : {participants: true, ban: true, messages: true}
     });
     return channels;
   }

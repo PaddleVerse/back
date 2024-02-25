@@ -73,7 +73,6 @@ export class ConversationsController {
   @Get()
   async getConversation(@Query("uid1") id1: string, @Query("uid2") id2: string) {
     try {
-
       const conversation = await this.conversationsService.getConversation(
         Number(id1),
         Number(id2)

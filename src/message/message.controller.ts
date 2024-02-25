@@ -17,13 +17,6 @@ export class MessageController {
     private readonly participantsService: ParticipantsService
   ) {}
 
-  @Get()
-  async getChannelMessages(@Query("other") otherId: string) {
-    const message = [{ content: "hello user", createdAt: new Date() }];
-    console.log(message);
-    return message;
-  }
-
   @Post()
   async createMessage(
     @Body("message") m: Prisma.messageCreateInput,
@@ -33,8 +26,7 @@ export class MessageController {
   ) {
     try {
       if (channel) {
-        console.log("in channel");
-        const ch = channel.id
+        const ch = !isNaN(channel.id)
           ? await this.channelService.getChannelById(channel.id)
           : await this.channelService.getChannelByName(channel.name);
         if (!ch) {

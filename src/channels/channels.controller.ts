@@ -12,13 +12,15 @@ import { ChannelsService } from "./channels.service";
 import { Appearance, Prisma, Role, user } from "@prisma/client";
 import { UserService } from "src/user/user.service";
 import { ParticipantsService } from "src/participants/participants.service";
+import { BanService } from "src/ban/ban.service";
 
 @Controller("channels")
 export class ChannelsController {
   constructor(
     private readonly channelService: ChannelsService,
     private readonly userService: UserService,
-    private readonly participantService: ParticipantsService
+    private readonly participantService: ParticipantsService,
+    private readonly banService: BanService
   ) {}
 
   @Post()
