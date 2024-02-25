@@ -8,6 +8,7 @@ import { FriendshipModule } from "src/friendship/friendship.module";
 import { MessageModule } from "../message/message.module";
 import { ChannelsService } from "../channels/channels.service";
 import { MessageService } from "../message/message.service";
+import { ConversationsService } from "src/conversations/conversations.service";
 
 @Module({
   providers: [
@@ -15,7 +16,8 @@ import { MessageService } from "../message/message.service";
     UserService,
     FriendshipService,
     ChannelsService,
-    MessageService
+    MessageService,
+    ConversationsService
   ],
   controllers: [
     ChatController,
