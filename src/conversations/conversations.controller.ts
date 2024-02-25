@@ -1,9 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
+  Query,
 } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { ConversationsService } from "./conversations.service";
@@ -60,9 +63,30 @@ export class ConversationsController {
       const conversation = await this.conversationsService.createConversation(
         Number(user1),
         Number(user2)
-	  );
-		return conversation;
+      );
+      return conversation;
     } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get()
+  async getConversation(@Query("uid1") id1: string, @Query("uid2") id2: string) {
+    try {
+
+      const conversation = await this.conversationsService.getConversation(
+        Number(id1),
+        Number(id2)
+        );
+        if (!conversation) {
+          throw new HttpException(
+            "Conversation does not exist",
+            HttpStatus.NOT_FOUND
+            );
+          }
+          return conversation;
+    }
+    catch (error) {
       throw error;
     }
   }

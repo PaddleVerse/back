@@ -103,13 +103,13 @@ model channel{
 
 model message{
   id        Int      @id @default(autoincrement())
-  channel_id    Int?     
-  sender_id    Int?
+  channel_id    Int?
+  sender_id    Int? @default(0)
   conversation_id    Int?
   content    String?
   content_type    String?
   createdAt DateTime @default(now())
-  conv   conversation?     @relation(fields: [conversation_id], references: [id])
+  conv   conversation?    @relation(fields: [conversation_id], references: [id])
   channel    channel?     @relation(fields: [channel_id], references: [id])
 }
 

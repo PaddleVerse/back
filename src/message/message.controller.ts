@@ -51,7 +51,6 @@ export class MessageController {
         const message = await this.messageService.createMessage({
           ...m,
           channel: { connect: { id: ch.id } },
-          conv: { connect: { id: null } }
         });
         return message;
       } else {
@@ -68,8 +67,8 @@ export class MessageController {
         const message = await this.messageService.createMessage({
           ...m,
           conv: { connect: { id: co.id } },
-          channel: { connect: { id: null } }
         });
+        co.messages.push(message);
         return message;
       }
     } catch (error) {
