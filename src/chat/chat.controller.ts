@@ -1,12 +1,9 @@
 import {
-  Body,
   Controller,
   Get,
   HttpException,
   HttpStatus,
   Param,
-  Patch,
-  Post,
 } from "@nestjs/common";
 import { ChatService } from "./chat.service";
 import {
@@ -17,10 +14,7 @@ import {
   message,
   user,
 } from "@prisma/client";
-import { DuplicateError } from "./utils/Errors";
 import { UserService } from "src/user/user.service";
-import { ConnectedSocket, WebSocketGateway } from "@nestjs/websockets";
-import { Socket } from "socket.io";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { ChannelsService } from "../channels/channels.service";
 import { MessageService } from "src/message/message.service";
@@ -43,24 +37,33 @@ export class ChatController {
   ) {}
 
   @Get("chatlist/:id")
-  async getChatList(@Param("id") id: string) {
+  async getChatList(@Param("id") id: string, @Param("id") id2: string) {
     try {
       const channelList = await this.chatService.filterParticipantbyuserId(+id);
+      const user1 = await this.userService.getUserById(+id);
+      if (!user1) {
+        throw new HttpException("no records found", HttpStatus.BAD_REQUEST);
+      }
       const friendsList = await this.friendShipService.getFriends(+id);
       let channels = [];
       let friends = [];
       for (const value of channelList) {
         const ch = await this.channelService.getChannelById(value.channel_id);
         if (ch) {
-          const cha = { ...ch, user: false }
-          channels.push(cha);
+          if (ch.messages) {
+            const cha = { ...ch, user: false }
+            channels.push(cha);
+          }
         }
       }
       for (const friend of friendsList) {
         const user = await this.userService.getUserById(friend.friendId);
-        if (user) {
-          const u = {...user, user: true}
-          friends.push(u);
+        const conversations = await this.conversationService.getConversation(+id, user.id);
+        if (conversations) {
+          if (conversations.messages!) {
+            const u = {...user, user: true}
+            friends.push(u);
+          }
         }
       }
       console.log(channels);
