@@ -78,6 +78,8 @@ export class AuthService
 
         const res = await this.twoFactorService.verifyToken(user.twoFaSecret, token);
 
+        this.userService.updateUser(userId, { twoFa: res });
+
         return {ok: res};
     }
 };
