@@ -46,7 +46,6 @@ export class MessageController {
         });
         return message;
       } else {
-        console.log("in conversation");
         const u1 = await this.conversationService.userService.getUserById(Number(users1));
         const u2 = await this.conversationService.userService.getUserById(Number(users2));
         if (!u1 || !u2) {

@@ -7,12 +7,15 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from "@nestjs/common";
 import { ChannelsService } from "./channels.service";
 import { Appearance, Prisma, Role, user } from "@prisma/client";
 import { UserService } from "src/user/user.service";
 import { ParticipantsService } from "src/participants/participants.service";
 import { BanService } from "src/ban/ban.service";
+import { ConversationsService } from "src/conversations/conversations.service";
+import { MessageService } from "src/message/message.service";
 
 @Controller("channels")
 export class ChannelsController {
@@ -20,7 +23,8 @@ export class ChannelsController {
     private readonly channelService: ChannelsService,
     private readonly userService: UserService,
     private readonly participantService: ParticipantsService,
-    private readonly banService: BanService
+    private readonly banService: BanService,
+    private readonly messagesService: MessageService
   ) {}
 
   @Post()
@@ -77,7 +81,6 @@ export class ChannelsController {
       const channels = !isNaN(Number(id))
         ? await this.channelService.getChannelById(Number(id))
         : await this.channelService.getChannelByName(id);
-      console.log("here");
       return channels;
     } catch (error) {
       console.log(error);
@@ -92,7 +95,6 @@ export class ChannelsController {
   ) {
     try {
       try {
-        console.log(user);
         const channels = !isNaN(Number(id))
           ? await this.channelService.getChannelById(Number(id))
           : await this.channelService.getChannelByName(id);
@@ -106,7 +108,7 @@ export class ChannelsController {
           channels.id,
           us.id
         );
-        if (participant.role === Role.MEMBER) {
+        if (participant.role === Role.MEMBER || !participant) {
           throw new HttpException(
             "you are not an admin to this channel",
             HttpStatus.BAD_REQUEST
@@ -130,6 +132,32 @@ export class ChannelsController {
       } catch (error) {
         throw error;
       }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('/messages/:id')
+  async getMessages(@Param('id') id: string, @Query('uid') user: string) {
+    try {
+      const channels = !isNaN(Number(id))
+        ? await this.channelService.getChannelById(Number(id))
+        : await this.channelService.getChannelByName(id);
+      const us = await this.userService.getUserById(Number(user));
+      if (!us) {
+        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      }
+      if (!channels)
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      const participant = await this.participantService.getParticipantByIds(
+        channels.id,
+        us.id
+      );
+      if (!participant) {
+        throw new HttpException("you are not a participant", HttpStatus.BAD_REQUEST);
+      }
+      const messages = await this.messagesService.getChannelMessages(channels.id);
+      return messages;
     } catch (error) {
       throw error;
     }
