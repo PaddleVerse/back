@@ -58,9 +58,11 @@ export class ChatController {
       }
       for (const friend of friendsList) {
         const user = await this.userService.getUserById(friend.friendId);
-        const conversations = await this.conversationService.getConversation(+id, user.id);
+        console.log(id, user.id)
+        const conversations = await this.conversationService.getConversation(Number(id), user.id);
+        console.log("the conversation object",conversations);
         if (conversations) {
-          if (conversations.messages!) {
+          if (conversations.messages.length > 0) {
             const u = {...user, user: true}
             friends.push(u);
           }

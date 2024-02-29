@@ -21,6 +21,16 @@ export class ConversationsService {
       },
       include: { messages: true },
     });
+    if (!convo) {
+      const convo2 = await this.prisma.conversation.findFirst({
+        where: {
+          user_b_id: user,
+          user_a_id: friend,
+        },
+        include: { messages: true },
+      });
+      return convo2;
+    }
     return convo;
   }
 
