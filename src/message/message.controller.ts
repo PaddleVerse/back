@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, Post, Query } from "@nestjs/common";
+import { Body, ConsoleLogger, Controller, Get, HttpException, Post, Query } from "@nestjs/common";
 import { MessageService } from "./message.service";
 import { Prisma, channel, message, user } from "@prisma/client";
 import { privateDecrypt } from "crypto";
@@ -42,6 +42,7 @@ export class MessageController {
         }
         const message = await this.messageService.createMessage({
           ...m,
+          sender_picture: u.picture,
           channel: { connect: { id: ch.id } },
         });
         return message;
@@ -57,6 +58,7 @@ export class MessageController {
         }
         const message = await this.messageService.createMessage({
           ...m,
+          sender_picture: u1.picture,
           conv: { connect: { id: co.id } },
         });
         co.messages.push(message);

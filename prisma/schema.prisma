@@ -105,6 +105,7 @@ model message{
   id        Int      @id @default(autoincrement())
   channel_id    Int?
   sender_id    Int? @default(0)
+  sender_picture    String?
   conversation_id    Int?
   content    String?
   content_type    String?
