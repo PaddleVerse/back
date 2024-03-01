@@ -38,6 +38,15 @@ export class AuthController
     return res;
   }
 
+  @Post('disable2fa')
+  @UseGuards(JwtAuthGuard)
+  async disable2FA(@Body('userId') userId: number){
+
+    const res = await this.authService.disable2FA(userId);
+
+    return res;
+  }
+
   @Post('v2fa')
   @UseGuards(JwtAuthGuard)
   async V2FA(@Body('token') token: string, @Body('userId') userId: number){

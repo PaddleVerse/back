@@ -70,6 +70,17 @@ export class AuthService
         return { Qr: qrCode };
     }
 
+    async disable2FA(userId: number): Promise<any>
+    {
+        const user = await this.userService.getUser(userId);
+
+        if (!user) throw new UnauthorizedException('User not found');
+
+        await this.userService.updateUser(userId, { twoFaSecret: null , twoFa: false});
+
+        return { message: '2FA disabled' };
+    }
+
     async V2FA(userId: number, token: string): Promise<any>
     {
         const user = await this.userService.getUser(userId);
