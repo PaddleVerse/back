@@ -30,7 +30,7 @@ export class AuthController
   }
 
   @Post('2fa')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async enable2FA(@Body('userId') userId: number){
 
     const res = await this.authService.enable2FA(userId);
@@ -48,7 +48,7 @@ export class AuthController
   }
 
   @Post('v2fa')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async V2FA(@Body('token') token: string, @Body('userId') userId: number){
 
     const res = await this.authService.V2FA(userId, token);

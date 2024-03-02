@@ -6,7 +6,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto)
 {
     @IsString()
     @Length(3, undefined, { message: "Username must be at least 3 characters long" })
-    username: string;
+    nickname: string;
 
     @IsString()
     @Length(3, undefined, { message: "Name must be at least 3 characters long" })

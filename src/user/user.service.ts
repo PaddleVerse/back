@@ -28,6 +28,7 @@ export class UserService
                 id: true,
                 username: true,
                 name: true,
+                nickname: true,
                 picture: true,
                 banner_picture: true,
                 status: true,
@@ -57,6 +58,7 @@ export class UserService
             id: true,
                 username: true,
                 name: true,
+                nickname: true,
                 picture: true,
                 banner_picture: true,
                 status: true,
@@ -89,6 +91,7 @@ export class UserService
                 id: true,
                 username: true,
                 name: true,
+                nickname: true,
                 picture: true,
                 banner_picture: true,
                 status: true,
@@ -120,6 +123,7 @@ export class UserService
                 id: true,
                 username: true,
                 name: true,
+                nickname: true,
                 picture: true,
                 banner_picture: true,
                 status: true,
@@ -328,20 +332,14 @@ export class UserService
 
       async editUser(id: number, data: UpdateUserDto)
       {
-        const { name , username } = data;
-        const user = await this.prisma.user.findUnique({
-            where: {
-                username: username
-            }
-        });
-        if (user) return null;
+        const { name , nickname } = data;
         const updatedUser = await this.prisma.user.update({
             where: {
                 id
             },
             data: {
                 name: name,
-                username: username
+                nickname: nickname
             }
         });
         return updatedUser;
