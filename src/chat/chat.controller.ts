@@ -50,7 +50,7 @@ export class ChatController {
       for (const value of channelList) {
         const ch = await this.channelService.getChannelById(value.channel_id);
         if (ch) {
-          if (ch.messages) {
+          if (ch.messages.length > 0) {
             const cha = { ...ch, user: false }
             channels.push(cha);
           }
@@ -58,9 +58,7 @@ export class ChatController {
       }
       for (const friend of friendsList) {
         const user = await this.userService.getUserById(friend.friendId);
-        console.log(id, user.id)
         const conversations = await this.conversationService.getConversation(Number(id), user.id);
-        console.log("the conversation object",conversations);
         if (conversations) {
           if (conversations.messages.length > 0) {
             const u = {...user, user: true}
@@ -68,11 +66,8 @@ export class ChatController {
           }
         }
       }
-      console.log(channels);
-      console.log(friends);
       return channels.concat(friends);
     } catch (error) {
-      console.log(error.toString());
       throw new HttpException("no records found", HttpStatus.BAD_REQUEST);
     }
   }

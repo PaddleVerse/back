@@ -92,7 +92,6 @@ export class ParticipantsController {
         Number(execId)
       );
       if (!admin || admin.role === Role.MEMBER) {
-        console.log(admin, execId);
         throw new HttpException(
           "you are not an admin to this channel",
           HttpStatus.BAD_REQUEST

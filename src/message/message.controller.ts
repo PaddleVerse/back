@@ -25,6 +25,7 @@ export class MessageController {
     @Body("user2") users2: string
   ) {
     try {
+      console.log(m, channel, users1, users2);
       if (channel) {
         const ch = !isNaN(channel.id)
           ? await this.channelService.getChannelById(channel.id)
@@ -42,7 +43,6 @@ export class MessageController {
         }
         const message = await this.messageService.createMessage({
           ...m,
-          sender_picture: u.picture,
           channel: { connect: { id: ch.id } },
         });
         return message;
@@ -58,7 +58,6 @@ export class MessageController {
         }
         const message = await this.messageService.createMessage({
           ...m,
-          sender_picture: u1.picture,
           conv: { connect: { id: co.id } },
         });
         co.messages.push(message);

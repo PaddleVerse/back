@@ -24,6 +24,7 @@ import { ParticipantsService } from "./participants/participants.service";
 import { BanService } from "./ban/ban.service";
 import { ConversationsService } from "./conversations/conversations.service";
 import { ConversationsModule } from "./conversations/conversations.module";
+import { UserGateway } from "./user/user.gateway";
 
 @Module({
   imports: [
