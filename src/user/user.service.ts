@@ -32,6 +32,8 @@ export class UserService
                 banner_picture: true,
                 status: true,
                 level: true,
+                twoFa : true,
+                twoFaSecret: true,
                 createdAt: true,
                 friends: true,
                 achievements: true,
