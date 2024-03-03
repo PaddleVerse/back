@@ -14,9 +14,9 @@ export class AuthService
         this.prisma = new PrismaClient();
     }
 
-    async signup(username: string, name: string, password: string)
+    async signup(username: string, name: string, nickname: string, password: string)
     {
-        if (!username || !password || !name) {
+        if (!username || !password || !name || !nickname) {
             throw new ConflictException('Missing credentials');
         }
         const user = await this.prisma.user.findUnique({
@@ -31,6 +31,7 @@ export class AuthService
             data: {
                 username,
                 name,
+                nickname,
                 password: await this.hashPassword(password)
             }
         });

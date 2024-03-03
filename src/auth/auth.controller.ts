@@ -59,8 +59,8 @@ export class AuthController
   @Post('signup')
   async signup(@Body() body: CreateUserDto)
   {
-    const { username, name, password } = body;
-    await this.authService.signup(username, name, password);
+    const { username, name, nickname, password } = body;
+    await this.authService.signup(username, name, nickname, password);
     return { message: 'signup successful' };
   }
 
