@@ -44,4 +44,36 @@ export class ConversationsService {
     });
     return convo;
   }
+
+  async deleteConversation(user: number, friend: number) {
+    const convo = await this.prisma.conversation.findFirst({
+      where: {
+        user_a_id: user,
+        user_b_id: friend,
+      },
+    });
+    if (!convo) {
+      const convo2 = await this.prisma.conversation.findFirst({
+        where: {
+          user_b_id: user,
+          user_a_id: friend,
+        },
+      });
+      if (!convo2) {
+        return null;
+      }
+      await this.prisma.conversation.delete({
+        where: {
+          id: convo2.id,
+        },
+      });
+      return convo2;
+    }
+    await this.prisma.conversation.delete({
+      where: {
+        id: convo.id,
+      },
+    });
+    return convo;
+  }
 }

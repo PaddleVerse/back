@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -86,6 +87,29 @@ export class ConversationsController {
           return conversation;
     }
     catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete()
+  async deleteConversation(@Query("uid1") id1: string, @Query("uid2") id2: string) {
+    try {
+      const conversation = await this.conversationsService.getConversation(
+        Number(id1),
+        Number(id2)
+      );
+      if (!conversation) {
+        throw new HttpException(
+          "Conversation does not exist",
+          HttpStatus.NOT_FOUND
+        );
+      }
+      const deleted = await this.conversationsService.deleteConversation(
+        Number(id1),
+        Number(id2)
+      );
+      return deleted;
+    } catch (error) {
       throw error;
     }
   }
