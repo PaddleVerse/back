@@ -51,4 +51,10 @@ export class UserController
     {
         return this.userService.deleteUser(+id);
     }
+
+    @Get('linked/:userId/:friendId')
+    getLinkedUsers(@Param('userId') userid: any, @Param('friendId') friendId: any)
+    {
+        return this.userService.getLinkedFriends(+userid, +friendId);
+    }
 }

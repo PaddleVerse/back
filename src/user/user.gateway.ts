@@ -3,7 +3,7 @@ import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer } 
 import { Socket, Server } from 'socket.io';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { UserService } from './user.service';
-import { Status } from '@prisma/client';
+import { Req, Status } from '@prisma/client';
 
 @WebSocketGateway({
   cors:{
@@ -47,7 +47,8 @@ export class UserGateway {
     try
     {
       const id: any = await this.getSocketId(payload?.reciverId);
-      await this.friendshipService.addFriend(payload?.senderId, payload?.reciverId);
+      await this.friendshipService.addFriend(payload?.senderId, payload?.reciverId, Req.SEND);
+      await this.friendshipService.addFriend(payload?.reciverId, payload?.senderId, Req.RECIVED);
       if (id === null)
       {
         this.server.to(client.id).emit('refresh', { ok : 0});
@@ -66,7 +67,7 @@ export class UserGateway {
     try
     {
       await this.friendshipService.acceptFriend(payload?.senderId, payload?.reciverId);
-  
+      await this.friendshipService.acceptFriend(payload?.reciverId, payload?.senderId);
       const id: any = this.getSocketId(payload?.senderId);
       if (id === null)
       {
@@ -89,6 +90,8 @@ export class UserGateway {
     {
       const id: any = await this.getSocketId(payload?.senderId);
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
+      await this.friendshipService.removeFriend(payload?.reciverId, payload?.senderId);
+      
       if (id === null)
       {
         this.server.to(client.id).emit('refresh', { ok : 0 });
@@ -108,6 +111,8 @@ export class UserGateway {
     {
       const id: any = await this.getSocketId((payload?.is ? payload?.reciverId : payload?.senderId));
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
+      await this.friendshipService.removeFriend(payload?.reciverId, payload?.senderId);
+
       if (id === null)
       {
         this.server.to(client.id).emit('refresh', { ok : 0});
@@ -126,6 +131,7 @@ export class UserGateway {
     try
     {
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
+      await this.friendshipService.removeFriend(payload?.reciverId, payload?.senderId);
       const id: any = await this.getSocketId(payload?.reciverId);
       if (id === null)
       {
@@ -146,7 +152,8 @@ export class UserGateway {
   {
     try
     {
-      await this.friendshipService.blockFriend(payload?.senderId, payload?.reciverId);
+      await this.friendshipService.blockFriend(payload?.senderId, payload?.reciverId, Req.SEND);
+      await this.friendshipService.blockFriend(payload?.reciverId, payload?.senderId, Req.RECIVED);
       const id: any = await this.getSocketId(payload?.reciverId);
       if (id === null)
       {
@@ -169,6 +176,7 @@ export class UserGateway {
     {
       const id: any = await this.getSocketId(payload?.reciverId);
       await this.friendshipService.removeFriend(payload?.senderId, payload?.reciverId);
+      await this.friendshipService.removeFriend(payload?.reciverId, payload?.senderId);
       if (id === null)
       {
         this.server.to(client.id).emit('refresh', { ok : 0});

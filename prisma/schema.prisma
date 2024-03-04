@@ -36,6 +36,7 @@ model Friendship {
   user_id    Int?     @default(0)
   friendId  Int?     @default(0)
   status    FriendshipStatus
+  request  Req? @default(SEND)
   user    user?     @relation(fields: [user_id], references: [id])
   createdAt DateTime @default(now())
 }
@@ -44,6 +45,11 @@ enum Status {
   ONLINE
   OFFLINE
   ON_GAME
+}
+
+enum Req {
+  RECIVED
+  SEND
 }
 
 enum FriendshipStatus {
