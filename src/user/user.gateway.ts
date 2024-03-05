@@ -193,5 +193,12 @@ export class UserGateway {
   {
     return (this.userService.clients[userId] === undefined ? null : this.userService.clients[userId].socketId);
   }
+
+  @SubscribeMessage('dmmessage')
+  async handleMessage(@Body('sender') client: any, @Body('reciever') reciever: any) {
+    const id: any = this.getSocketId(reciever);
+    console.log(reciever, id);
+    this.server.to(id).emit('update', reciever);
+  }
   
 }
