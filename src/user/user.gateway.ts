@@ -198,7 +198,7 @@ export class UserGateway {
   async handleMessage(@Body('sender') client: any, @Body('reciever') reciever: any) {
     const id: any = this.getSocketId(reciever);
     console.log(reciever, id);
-    this.server.to(id).emit('update', reciever);
+    this.server.to(id).emit('update');
   }
   
 }
