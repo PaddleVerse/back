@@ -10,6 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model user {
   id        Int      @id @default(autoincrement())
   googleId  String?  @unique
@@ -29,6 +30,12 @@ model user {
   friends Friendship[]
   achievements achievement[]
   channel_participants channel_participant[]
+}
+
+model SearchHistory {
+  id        Int      @id @default(autoincrement())
+  userId     Int?
+  createdAt DateTime @default(now())
 }
 
 model Friendship {

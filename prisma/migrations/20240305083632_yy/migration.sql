@@ -2,6 +2,9 @@
 CREATE TYPE "Status" AS ENUM ('ONLINE', 'OFFLINE', 'ON_GAME');
 
 -- CreateEnum
+CREATE TYPE "Req" AS ENUM ('RECIVED', 'SEND');
+
+-- CreateEnum
 CREATE TYPE "FriendshipStatus" AS ENUM ('PENDING', 'ACCEPTED', 'BLOCKED');
 
 -- CreateTable
@@ -25,11 +28,21 @@ CREATE TABLE "user" (
 );
 
 -- CreateTable
+CREATE TABLE "SearchHistory" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "SearchHistory_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Friendship" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER DEFAULT 0,
     "friendId" INTEGER DEFAULT 0,
     "status" "FriendshipStatus" NOT NULL,
+    "request" "Req" DEFAULT 'SEND',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Friendship_pkey" PRIMARY KEY ("id")

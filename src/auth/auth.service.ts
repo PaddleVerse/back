@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
 import { TwoFactorService } from './two-factor.service';
+import { use } from 'passport';
 
 @Injectable()
 export class AuthService 
@@ -62,7 +63,7 @@ export class AuthService
 
         if (!user) throw new UnauthorizedException('User not found');
 
-        const url = await this.twoFactorService.generateSecret();
+        const url = await this.twoFactorService.generateSecret(user.username);
 
         await this.userService.updateUser(userId, { twoFaSecret: url.secret });
 

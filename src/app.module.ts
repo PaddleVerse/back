@@ -8,11 +8,15 @@ import { FriendshipController } from './friendship/friendship.controller';
 import { FriendshipModule } from './friendship/friendship.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { SearchService } from './search/search.service';
+import { SearchController } from './search/search.controller';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [AuthModule, UserModule, FriendshipModule,
-    ServeStaticModule.forRoot({ rootPath: join(__dirname, '..' ,'images'), })],
-  controllers: [AppController, FriendshipController],
-  providers: [AppService, FriendshipService],
+    ServeStaticModule.forRoot({ rootPath: join(__dirname, '..' ,'images'), }),
+    SearchModule],
+  controllers: [AppController, FriendshipController, SearchController],
+  providers: [AppService, FriendshipService, SearchService],
 })
 export class AppModule {}

@@ -56,19 +56,19 @@ export class UserService
         const user = await this.prisma.user.findUnique({
           select: {
             id: true,
-                username: true,
-                name: true,
-                nickname: true,
-                picture: true,
-                banner_picture: true,
-                status: true,
-                level: true,
-                createdAt: true,
-                twoFaSecret: true,
-                twoFa: true,
-                friends: true,
-                achievements: true,
-                channel_participants: true,
+            username: true,
+            name: true,
+            nickname: true,
+            picture: true,
+            banner_picture: true,
+            status: true,
+            level: true,
+            createdAt: true,
+            twoFaSecret: true,
+            twoFa: true,
+            friends: true,
+            achievements: true,
+            channel_participants: true,
           },
             where: {
                 id
@@ -371,7 +371,7 @@ export class UserService
           {
             for (let j = 0; j < friend.friends.length; j++)
             {
-              if (user.friends[i].friendId === friend.friends[j].friendId)
+              if (user.friends[i].friendId === friend.friends[j].friendId && friend.friends[i].status === 'ACCEPTED' && user.friends[j].status === 'ACCEPTED')
                 friends.push(await this.getUserById(+user.friends[i].friendId));
               if (friends.length === 7)
                 return friends;
