@@ -29,11 +29,38 @@ export class AuthController
     return user;
   }
 
+  @Post('2fa')
+  // @UseGuards(JwtAuthGuard)
+  async enable2FA(@Body('userId') userId: number){
+
+    const res = await this.authService.enable2FA(userId);
+
+    return res;
+  }
+
+  @Post('disable2fa')
+  @UseGuards(JwtAuthGuard)
+  async disable2FA(@Body('userId') userId: number){
+
+    const res = await this.authService.disable2FA(userId);
+
+    return res;
+  }
+
+  @Post('v2fa')
+  // @UseGuards(JwtAuthGuard)
+  async V2FA(@Body('token') token: string, @Body('userId') userId: number){
+
+    const res = await this.authService.V2FA(userId, token);
+
+    return res;
+  }
+
   @Post('signup')
   async signup(@Body() body: CreateUserDto)
   {
-    const { username, name, password } = body;
-    await this.authService.signup(username, name, password);
+    const { username, name, nickname, password } = body;
+    await this.authService.signup(username, name, nickname, password);
     return { message: 'signup successful' };
   }
 

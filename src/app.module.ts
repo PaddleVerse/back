@@ -25,12 +25,15 @@ import { BanService } from "./ban/ban.service";
 import { ConversationsService } from "./conversations/conversations.service";
 import { ConversationsModule } from "./conversations/conversations.module";
 import { UserGateway } from "./user/user.gateway";
+import { ServeStaticModule } from "@nestjs/serve-static";
+import { join } from "path";
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
     FriendshipModule,
+    ServeStaticModule.forRoot({ rootPath: join(__dirname, '..' ,'images'), }),
     ChatModule,
     ChannelsModule,
     MessageModule,

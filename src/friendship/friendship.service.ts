@@ -40,8 +40,7 @@ export class FriendshipService
         }
     }
 
-
-    async addFriend(userId: number, friendId: number) 
+    async addFriend(userId: number, friendId: number, req : any) 
     {
         try
         {
@@ -49,6 +48,7 @@ export class FriendshipService
                 data: {
                     user_id: userId,
                     friendId: friendId,
+                    request: req,
                     status: FriendshipStatus.PENDING
                 }
             });
@@ -87,8 +87,8 @@ export class FriendshipService
         {
             await this.prisma.friendship.deleteMany({
                 where: {
-                    user_id: userId,
-                    friendId: friend_id
+                    user_id: +userId,
+                    friendId: +friend_id
                 }
             });
         }
@@ -98,23 +98,24 @@ export class FriendshipService
         }
     }
 
-    async blockFriend(userId: number, friend_id: number)
+    async blockFriend(userId: number, friend_id: number, req : any)
     {
         try
         {
-            await this.prisma.friendship.deleteMany({
-                where: {
-                    user_id: friend_id,
-                    friendId: userId
-                }
-            });
+            // await this.prisma.friendship.deleteMany({
+            //     where: {
+            //         user_id: friend_id,
+            //         friendId: userId
+            //     }
+            // });
             const user = await this.prisma.friendship.updateMany({
                 where: {
                     user_id: userId,
                     friendId: friend_id,
                 },
                 data: {
-                  status: FriendshipStatus.BLOCKED
+                    request: req,
+                    status: FriendshipStatus.BLOCKED
                 },
               });
             if (user.count === 0)
@@ -123,6 +124,7 @@ export class FriendshipService
                     data: {
                         user_id: userId,
                         friendId: friend_id,
+                        request: req,
                         status: FriendshipStatus.BLOCKED
                     }
                 });
@@ -144,7 +146,7 @@ export class FriendshipService
                     friendId: +friend_id
                 }
             });
-            return friendship.status;
+            return {"status": friendship.status, "request": friendship.request};
         }
         catch (error)
         {

@@ -14,9 +14,9 @@ export class AuthService
         this.prisma = new PrismaClient();
     }
 
-    async signup(username: string, name: string, password: string)
+    async signup(username: string, name: string, nickname: string, password: string)
     {
-        if (!username || !password || !name) {
+        if (!username || !password || !name || !nickname) {
             throw new ConflictException('Missing credentials');
         }
         const user = await this.prisma.user.findUnique({
@@ -31,6 +31,7 @@ export class AuthService
             data: {
                 username,
                 name,
+                nickname,
                 password: await this.hashPassword(password)
             }
         });
@@ -55,20 +56,43 @@ export class AuthService
         };
     }
 
-    async enable2FA(userId: number): Promise<void> {
+    async enable2FA(userId: number): Promise<any>
+    {
         const user = await this.userService.getUser(userId);
 
         if (!user) throw new UnauthorizedException('User not found');
 
-        const { secret, otpauthUrl } = await this.twoFactorService.generateSecret();
+        const url = await this.twoFactorService.generateSecret();
 
-        await this.userService.updateUser(userId, { twoFactorSecret: secret });
+        await this.userService.updateUser(userId, { twoFaSecret: url.secret });
 
-        // Generate QR code for user to scan
-        const qrCode = await this.twoFactorService.generateQrCode(otpauthUrl);
+        const qrCode = await this.twoFactorService.generateQRCode(url.url);
 
-        // Send QR code to user (e.g., email, notification)
-        // ...
-      }
+        return { Qr: qrCode };
+    }
+
+    async disable2FA(userId: number): Promise<any>
+    {
+        const user = await this.userService.getUser(userId);
+
+        if (!user) throw new UnauthorizedException('User not found');
+
+        await this.userService.updateUser(userId, { twoFaSecret: null , twoFa: false});
+
+        return { message: '2FA disabled' };
+    }
+
+    async V2FA(userId: number, token: string): Promise<any>
+    {
+        const user = await this.userService.getUser(userId);
+
+        if (!user) throw new UnauthorizedException('User not found');
+
+        const res = await this.twoFactorService.verifyToken(user.twoFaSecret, token);
+
+        this.userService.updateUser(userId, { twoFa: res });
+
+        return {ok: res};
+    }
 };
 

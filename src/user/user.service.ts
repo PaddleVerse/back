@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import { MulterFile } from 'multer';
+import { UpdateUserDto } from 'src/auth/dto/update-user.dto/update-user.dto';
 
 interface ClientData {
   [userId: number]: { socketId: string;};
@@ -25,10 +28,13 @@ export class UserService
                 id: true,
                 username: true,
                 name: true,
+                nickname: true,
                 picture: true,
                 banner_picture: true,
                 status: true,
                 level: true,
+                twoFa : true,
+                twoFaSecret: true,
                 createdAt: true,
                 friends: true,
                 achievements: true,
@@ -52,11 +58,14 @@ export class UserService
             id: true,
                 username: true,
                 name: true,
+                nickname: true,
                 picture: true,
                 banner_picture: true,
                 status: true,
                 level: true,
                 createdAt: true,
+                twoFaSecret: true,
+                twoFa: true,
                 friends: true,
                 achievements: true,
                 channel_participants: true,
@@ -82,6 +91,7 @@ export class UserService
                 id: true,
                 username: true,
                 name: true,
+                nickname: true,
                 picture: true,
                 banner_picture: true,
                 status: true,
@@ -113,6 +123,7 @@ export class UserService
                 id: true,
                 username: true,
                 name: true,
+                nickname: true,
                 picture: true,
                 banner_picture: true,
                 status: true,
@@ -160,6 +171,20 @@ export class UserService
         const user = await this.prisma.user.findUnique({
             where: {
                 id
+            },
+            select: {
+              id: true,
+                username: true,
+                name: true,
+                nickname: true,
+                picture: true,
+                banner_picture: true,
+                status: true,
+                level: true,
+                createdAt: true,
+                friends: true,
+                achievements: true,
+                channel_participants: true,
             }
         });
         return user;
@@ -304,5 +329,59 @@ export class UserService
           return null;
         }
       }
-      
+
+      async uploadImage(file: MulterFile): Promise<string>
+      {
+        try
+        {
+          const filename = `${Date.now()}-${file.originalname}`;
+          const filePath = `images/${filename}`;
+        
+          await fs.promises.writeFile(filePath, file.buffer);
+        
+          return `http://localhost:8080/${filename}`;
+        }
+        catch (error) { return null; }
+      }
+
+      async editUser(id: number, data: UpdateUserDto)
+      {
+        const { name , nickname } = data;
+        const updatedUser = await this.prisma.user.update({
+            where: {
+                id
+            },
+            data: {
+                name: name,
+                nickname: nickname
+            }
+        });
+        return updatedUser;
+      }
+
+      async getLinkedFriends(userId: number , friendId: number)
+      {
+        try
+        {
+          const user : any= await this.getUserById(userId);
+          const friend : any= await this.getUserById(friendId);
+
+          let friends = [];
+          for (let i = 0; i < user.friends.length; i++)
+          {
+            for (let j = 0; j < friend.friends.length; j++)
+            {
+              if (user.friends[i].friendId === friend.friends[j].friendId)
+                friends.push(await this.getUserById(+user.friends[i].friendId));
+              if (friends.length === 7)
+                return friends;
+            }
+          }
+          return friends;
+        }
+        catch (error)
+        {
+          return null;
+        }
+      }
 }

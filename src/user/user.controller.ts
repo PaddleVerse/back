@@ -1,5 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MulterFile } from 'multer';
 
 @Controller('user')
 export class UserController 
@@ -30,15 +32,29 @@ export class UserController
         return this.userService.getNeighbours(+id);
     }
 
-    @Put(':id')
-    updateUser(@Param('id') id: any, @Body() updateUserDto: any)
+    @Put('img/:id')
+    @UseInterceptors(FileInterceptor('image'))
+    async updateUserPic(@Param('id') id: any, @UploadedFile() file: MulterFile)
     {
-        return this.userService.updateUser(+id, updateUserDto);
+        const url = await this.userService.uploadImage(file);
+        return this.userService.updateUser(+id, { picture: url });
+    }
+
+    @Put(':id')
+    async updateUser(@Param('id') id: any, @Body() data: any)
+    {
+        return this.userService.editUser(+id, data);
     }
 
     @Delete(':id')
     deleteUser(@Param('id') id: any)
     {
         return this.userService.deleteUser(+id);
+    }
+
+    @Get('linked/:userId/:friendId')
+    getLinkedUsers(@Param('userId') userid: any, @Param('friendId') friendId: any)
+    {
+        return this.userService.getLinkedFriends(+userid, +friendId);
     }
 }

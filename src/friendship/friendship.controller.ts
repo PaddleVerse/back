@@ -27,13 +27,13 @@ export class FriendshipController
     @Get('add/:userId/:friendId')
     addFriend(@Param('userId') userId: number, @Param('friendId') friendId: number)
     {
-        return this.friendshipService.addFriend(userId, friendId);
+        // return this.friendshipService.addFriend(userId, friendId);
     }
 
     @Get('accept/:userId/:friendId')
     acceptFriend(@Param('userId') userId: number, @Param('friendId') friendId: number)
     {
-        return this.friendshipService.acceptFriend(userId, friendId);
+        // return this.friendshipService.acceptFriend(userId, friendId);
     }
 
     @Delete('remove/:userId/:friendId')
