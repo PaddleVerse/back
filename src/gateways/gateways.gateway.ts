@@ -2,7 +2,7 @@ import { Body } from '@nestjs/common';
 import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { FriendshipService } from 'src/friendship/friendship.service';
-import { UserService } from './user.service';
+import { UserService } from '../user/user.service';
 import { Req, Status } from '@prisma/client';
 
 @WebSocketGateway({
@@ -10,7 +10,7 @@ import { Req, Status } from '@prisma/client';
     origin: '*',
   }
 })
-export class UserGateway {
+export class GatewaysGateway  {
   constructor(private readonly friendshipService : FriendshipService,
               private readonly userService: UserService) {}
 

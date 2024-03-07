@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class SearchService 
 {
     private readonly prisma : PrismaClient;
-    constructor()
+    constructor(private readonly userService : UserService)
     {
         this.prisma = new PrismaClient();
     }
@@ -15,6 +16,33 @@ export class SearchService
         return await this.prisma.searchHistory.findMany();
     }
 
+    async filterSearch(name : string, userId : number)
+    {
+        try {
+            const users : any = await this.userService.getUsers();
+            if (users.length === 0) return [];
+            const otherUsers = await users.filter((user : any) => user.id !== userId);
+            if (otherUsers.length === 0) return [];
+
+            const result = await otherUsers.filter((user : any) => user.name.toLowerCase().includes(name.toLowerCase()));
+            return result;
+        } catch (error) {
+            return error;
+        }
+    }
+
+    async getSearchedUsers()
+    {
+        try {
+            const srchs = await this.getAll();
+            const users = await this.userService.getUsers();
+            const usersID = srchs?.map((user : any) => user?.userId);
+            const res = usersID.map((id : any) => users.find((u : any) => (u?.id === id)));
+            return res;
+        } catch (error) {
+            return error;
+        }
+    }
     async addSearch(user_id : number)
     {
         try {

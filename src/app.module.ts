@@ -11,11 +11,13 @@ import { join } from 'path';
 import { SearchService } from './search/search.service';
 import { SearchController } from './search/search.controller';
 import { SearchModule } from './search/search.module';
+import { GatewaysModule } from './gateways/gateways.module';
 
 @Module({
   imports: [AuthModule, UserModule, FriendshipModule,
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..' ,'images'), }),
-    SearchModule],
+    SearchModule,
+    GatewaysModule],
   controllers: [AppController, FriendshipController, SearchController],
   providers: [AppService, FriendshipService, SearchService],
 })

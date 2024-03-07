@@ -12,6 +12,18 @@ export class SearchController
         return this.searchService.getAll();
     }
 
+    @Get('searchedUsers')
+    getSearchedUsers()
+    {
+        return this.searchService.getSearchedUsers();
+    }
+
+    @Get(':name/:userId')
+    filterSearch(@Param() body)
+    {
+        return this.searchService.filterSearch(body?.name, +body?.userId);
+    }
+
     @Post()
     addSearch(@Body() body)
     {
