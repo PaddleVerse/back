@@ -34,6 +34,15 @@ CREATE TABLE "user" (
 );
 
 -- CreateTable
+CREATE TABLE "SearchHistory" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "SearchHistory_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Friendship" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER DEFAULT 0,

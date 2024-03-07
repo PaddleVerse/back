@@ -1,23 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import * as speakeasy from 'speakeasy';
+import {authenticator} from 'otplib';
 import * as qrcode from 'qrcode';
 
 @Injectable()
 export class TwoFactorService {
 
-  async generateSecret() : Promise<any>
+  async generateSecret(username: string) : Promise<any>
   {
-    const secret = await speakeasy.generateSecret({
-      name: 'tchipa',
-      length: 64,
-      symbols: true,
-      qr_codes: true
-    });
+    const secret = authenticator.generateSecret(64);
+
+    const url = authenticator.keyuri(username, 'tchipa', secret);
 
     return {
-      secret: secret.base32,
-      url: secret.otpauth_url
-    }
+      secret: secret,
+      url: url,
+    };
   }
 
   async generateQRCode(url: string) : Promise<string>
@@ -27,6 +24,6 @@ export class TwoFactorService {
 
   async verifyToken(secret: string, token: string) : Promise<boolean>
   {
-    return speakeasy.totp.verify({ secret, encoding: 'base32', token });
+    return authenticator.verify({token, secret});
   }
 }

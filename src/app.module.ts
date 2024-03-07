@@ -24,9 +24,12 @@ import { ParticipantsService } from "./participants/participants.service";
 import { BanService } from "./ban/ban.service";
 import { ConversationsService } from "./conversations/conversations.service";
 import { ConversationsModule } from "./conversations/conversations.module";
-import { UserGateway } from "./user/user.gateway";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "path";
+import { SearchService } from './search/search.service';
+import { SearchController } from './search/search.controller';
+import { SearchModule } from './search/search.module';
+import { GatewaysModule } from './gateways/gateways.module';
 
 @Module({
   imports: [
@@ -34,6 +37,8 @@ import { join } from "path";
     UserModule,
     FriendshipModule,
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..' ,'images'), }),
+    SearchModule,
+    GatewaysModule,
     ChatModule,
     ChannelsModule,
     MessageModule,
@@ -42,7 +47,7 @@ import { join } from "path";
   ],
   controllers: [
     AppController,
-    FriendshipController,
+    FriendshipController, SearchController,
     MessageController,
     ConversationsController,
     ParticipantsController,
@@ -52,7 +57,7 @@ import { join } from "path";
   ],
   providers: [
     AppService,
-    FriendshipService,
+    FriendshipService, SearchService,
     ChatGateway,
     ChatService,
     ChannelsService,
