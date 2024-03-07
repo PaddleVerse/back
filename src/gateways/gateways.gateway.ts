@@ -8,13 +8,11 @@ import {
 import { Socket, Server } from "socket.io";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { UserService } from "../user/user.service";
-import { Req, Status } from "@prisma/client";
+import { Req, Status, user } from "@prisma/client";
+import { Payload } from "@prisma/client/runtime/library";
+import { GatewaysService } from "./gateways.service";
 
-type room = {
-  name: string;
-  host: Record<number, string>;
-  users: Map<number, string>;
-};
+
 
 @WebSocketGateway({
   cors: {
@@ -24,9 +22,9 @@ type room = {
 export class GatewaysGateway {
   constructor(
     private readonly friendshipService: FriendshipService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly gatewayService: GatewaysService
   ) {}
-  rooms: room[] = [];
   @WebSocketServer() server: Server;
 
   async handleConnection(client: any) {
@@ -36,6 +34,18 @@ export class GatewaysGateway {
     user &&
       (await this.userService.updateUser(user.id, { status: Status.ONLINE }));
     this.server.emit("ok", { ok: 1 });
+    // the chat part
+    // this.rooms.forEach((room) => {
+    //   if (room.host[userId]) {
+    //     console.log("host matched");
+    //   }
+    //   room.users.forEach((user, id) => {
+    //     if (id === userId) {
+    //       console.log("user matched");
+    //     }
+    //   })
+    // })
+    // end of chat part
     console.log(`User ${userId} connected with socket ID ${client.id}`);
   }
 
@@ -49,6 +59,7 @@ export class GatewaysGateway {
             status: Status.OFFLINE,
           }));
         await delete this.userService.clients[key];
+        // here the user should leave the room he is on
         this.server.emit("ok", { ok: 1 });
       }
     }
@@ -247,9 +258,42 @@ export class GatewaysGateway {
     @Body("sender") client: any,
     @Body("reciever") reciever: any
   ) {
-    const id: any = this.getSocketId(reciever);
-    this.server.to(id).emit("update");
+    try {
+      //some logic here to handle the message between the two users, mainly check the sockets and if they exist in the data base or not
+      const id: any = this.getSocketId(reciever);
+      this.server.to(id).emit("update"); // final result
+    } catch (error) {}
   }
 
-  
+  @SubscribeMessage("joinRoom")
+  async handleJoinRoom(
+    @ConnectedSocket() socket: Socket,
+    @Body("user") client: user,
+    @Body("roomName") roomName: string
+  ) {
+    try {
+      // console.log("join room", roomName, client.id, socket.id);
+      // const socketUser = await this.getSocketId(client.id);
+      // if (socketUser === null) {
+      //   throw new Error("User not found.");
+      // }
+      // const room = await this.gatewayService.rooms.find((room) => room.name === roomName);
+      // if (!room) {
+      //   throw new Error("Room not found.");
+      // }
+      // const part = room.users.get(client.id);
+      // if (part) {
+      //   return;
+      // }
+      // socket.join(roomName);
+    } catch (error) {
+      this.server.to(socket.id).emit("error", error.toString());
+    }
+  }
+
+  @SubscribeMessage("leaveRoom")
+  async handleLEaveRoom() {
+    try {
+    } catch (error) {}
+  }
 }

@@ -14,10 +14,14 @@ import { Prisma, Role, channel, user } from "@prisma/client";
 import { ChannelsService } from "src/channels/channels.service";
 import { UserService } from "src/user/user.service";
 import { connect } from "http2";
+import { BanService } from "src/ban/ban.service";
 
 @Controller("participants")
 export class ParticipantsController {
-  constructor(private readonly participantsService: ParticipantsService) {}
+  constructor(
+    private readonly participantsService: ParticipantsService,
+    private readonly banService: BanService
+  ) {}
 
   @Post()
   async createParticipants(
@@ -36,6 +40,15 @@ export class ParticipantsController {
         ch.id,
         us.id
       );
+      // added banned from channel
+      const banlist = await this.banService.getChannelBanList(ch.id);
+      const banned = banlist.find((b) => b.user_id === us.id);
+      if (banned) {
+        throw new HttpException(
+          "you are banned from this channel",
+          HttpStatus.FORBIDDEN
+        );
+      }
       if (!ch)
         throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
       if (!us) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
@@ -104,10 +117,7 @@ export class ParticipantsController {
       if (!participant)
         throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
       if (participant.id === admin.id) {
-        throw new HttpException(
-          "can't modify self",
-          HttpStatus.BAD_REQUEST
-        );
+        throw new HttpException("can't modify self", HttpStatus.BAD_REQUEST);
       }
       if (participant.role === "ADMIN") {
         throw new HttpException(

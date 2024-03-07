@@ -11,10 +11,13 @@ import {
 } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import { ConversationsService } from "./conversations.service";
+import { MessageService } from "src/message/message.service";
 
 @Controller("conversations")
 export class ConversationsController {
-  constructor(readonly conversationsService: ConversationsService) {}
+  constructor(readonly conversationsService: ConversationsService,
+    readonly messagesService: MessageService,
+  ) { }
 
   @Post()
   async createConversation(
@@ -104,6 +107,7 @@ export class ConversationsController {
           HttpStatus.NOT_FOUND
         );
       }
+      const message = await this.messagesService.getConversationMessages(conversation.id);
       const deleted = await this.conversationsService.deleteConversation(
         Number(id1),
         Number(id2)

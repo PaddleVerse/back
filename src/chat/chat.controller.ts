@@ -33,7 +33,7 @@ export class ChatController {
     private readonly userService: UserService,
     private readonly friendShipService: FriendshipService,
     private readonly channelService: ChannelsService,
-    private readonly messageService: MessageService,
+    // private readonly messageService: MessageService,
     private readonly conversationService: ConversationsService
   ) {}
 
@@ -51,20 +51,16 @@ export class ChatController {
       for (const value of channelList) {
         const ch = await this.channelService.getChannelById(value.channel_id);
         if (ch) {
-          if (ch.messages.length > 0) {
             const cha = { ...ch, user: false }
             channels.push(cha);
-          }
         }
       }
       for (const friend of friendsList) {
         const user = await this.userService.getUserById(friend.friendId);
         const conversations = await this.conversationService.getConversation(Number(id), user.id);
         if (conversations) {
-          if (conversations.messages.length > 0) {
             const u = {...user, user: true}
             friends.push(u);
-          }
         }
       }
       return channels.concat(friends);

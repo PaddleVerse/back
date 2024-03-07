@@ -28,4 +28,18 @@ export class MessageService {
     })
     return m;
   }
+
+  async deleteChannelMessages(channelId: number) {
+    const messages = await this.prisma.message.deleteMany({
+      where: { channel_id: channelId }
+    })
+    return messages;
+  }
+
+  async deleteConversationMessages(convoId: number) {
+    const messages = await this.prisma.message.deleteMany({
+      where: { conversation_id: convoId }
+    })
+    return messages;
+  }
 }
