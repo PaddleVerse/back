@@ -59,7 +59,8 @@ export class GatewaysGateway {
             status: Status.OFFLINE,
           }));
         await delete this.userService.clients[key];
-        // here the user should leave the room he is on
+        // here the user should leave the room he is on by calling the leaveRoom function
+        //
         this.server.emit("ok", { ok: 1 });
       }
     }

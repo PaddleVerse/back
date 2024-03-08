@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 
 type userT = {
-	id: number;
-	userName: string;
-	socketId: string;
-}
+  id: number;
+  userName: string;
+  socketId: string;
+};
 
 type room = {
   name: string;
@@ -35,20 +35,39 @@ export class GatewaysService {
     }
   }
 
+  async getRoomHost(name: string) {
+    const room = await this.getRoom(name);
+    return this.rooms[room].host;
+  }
+
   async addUserToRoom(name: string, user: userT) {
     const room = await this.getRoom(name);
 
     if (room !== -1) {
-		this.rooms[room].users.set(
-			user.id,
-			user
-      );
+      this.rooms[room].users.set(user.id, user);
     }
   }
-	async RemoveUserFromRoom(name: string, user: number) {
-		const room = await this.getRoom(name);
-		if (room !== -1) {
-			this.rooms[room].users.delete(user);
-		}
-	}
+  async RemoveUserFromRoom(name: string, user: number) {
+    const room = await this.getRoom(name);
+    if (room !== -1) {
+      this.rooms[room].users.delete(user);
+    }
+  }
+
+  async findRoomsByUserId(id: number): Promise<room[]> {
+    const filteredRooms = this.rooms.filter((room) => {
+      const found = room.users.get(id);
+      if (found) {
+        return found;
+      }
+    });
+    return filteredRooms;
+  }
+
+  async removeUserFromAllRooms(id: number): Promise<void> {
+    const rooms = await this.findRoomsByUserId(id);
+    for (const room of rooms) {
+      await this.RemoveUserFromRoom(room.name, id);
+    }
+  }
 }
