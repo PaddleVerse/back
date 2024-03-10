@@ -25,7 +25,7 @@ export class MessageController {
     @Body("user2") users2: string
   ) {
     try {
-      console.log(m, channel, users1, users2);
+      // console.log(m, channel, users1, users2);
       if (channel) {
         const ch = !isNaN(channel.id)
           ? await this.channelService.getChannelById(channel.id)

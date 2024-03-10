@@ -11,6 +11,7 @@ import { UserService } from "../user/user.service";
 import { Req, Status, user } from "@prisma/client";
 import { Payload } from "@prisma/client/runtime/library";
 import { GatewaysService } from "./gateways.service";
+import { ConversationsService } from "src/conversations/conversations.service";
 
 
 
@@ -23,6 +24,7 @@ export class GatewaysGateway {
   constructor(
     private readonly friendshipService: FriendshipService,
     private readonly userService: UserService,
+    private readonly convService: ConversationsService,
     private readonly gatewayService: GatewaysService
   ) {}
   @WebSocketServer() server: Server;
@@ -103,6 +105,10 @@ export class GatewaysGateway {
       await this.friendshipService.acceptFriend(
         payload?.reciverId,
         payload?.senderId
+      );
+      await this.convService.createConversation(
+        payload?.senderId,
+        payload?.reciverId
       );
       const id: any = this.getSocketId(payload?.senderId);
       if (id === null) {

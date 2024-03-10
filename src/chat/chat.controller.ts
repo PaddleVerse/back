@@ -57,11 +57,11 @@ export class ChatController {
       }
       for (const friend of friendsList) {
         const user = await this.userService.getUserById(friend.friendId);
-        const conversations = await this.conversationService.getConversation(Number(id), user.id);
-        if (conversations) {
+        // const conversations = await this.conversationService.getConversation(Number(id), user.id);
+        // if (conversations) {
             const u = {...user, user: true}
             friends.push(u);
-        }
+        // }
       }
       return channels.concat(friends);
     } catch (error) {
