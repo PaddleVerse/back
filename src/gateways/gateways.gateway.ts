@@ -150,25 +150,28 @@ export class GatewaysGateway {
   @SubscribeMessage("removeFriend")
   async handleRemoveFriend(client: any, payload: any): Promise<string> {
     try {
-      const id: any = await this.getSocketId(
-        payload?.is ? payload?.reciverId : payload?.senderId
-      );
-      await this.friendshipService.removeFriend(
-        payload?.senderId,
-        payload?.reciverId
-      );
-      await this.friendshipService.removeFriend(
-        payload?.reciverId,
-        payload?.senderId
-      );
-
-      if (id === null) {
-        this.server.to(client.id).emit("refresh", { ok: 0 });
-        return "User not found.";
-      }
-      this.server.to(id).emit("refresh", payload);
-      client.emit("refresh", payload);
-      return "Friend removed!";
+        const id: any = await this.getSocketId(
+          payload?.is ? payload?.reciverId : payload?.senderId
+        );
+        await this.friendshipService.removeFriend(
+          payload?.senderId,
+          payload?.reciverId
+        );
+        await this.friendshipService.removeFriend(
+          payload?.reciverId,
+          payload?.senderId
+        );
+        await this.convService.deleteConversation(
+          payload?.senderId,
+          payload?.reciverId
+        );
+        if (id === null) {
+          this.server.to(client.id).emit("refresh", { ok: 0 });
+          return "User not found.";
+        }
+        this.server.to(id).emit("refresh", payload);
+        client.emit("refresh", payload);
+        return "Friend removed!";
     } catch (error) {
       return "Failed to removed friend.";
     }
@@ -212,6 +215,10 @@ export class GatewaysGateway {
         payload?.reciverId,
         payload?.senderId,
         Req.RECIVED
+      );
+      await this.convService.deleteConversation(
+        payload?.senderId,
+        payload?.reciverId
       );
       const id: any = await this.getSocketId(payload?.reciverId);
       if (id === null) {
