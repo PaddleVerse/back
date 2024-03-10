@@ -9,7 +9,6 @@ import { MessageModule } from "../message/message.module";
 import { ChannelsService } from "../channels/channels.service";
 import { MessageService } from "../message/message.service";
 import { ConversationsService } from "src/conversations/conversations.service";
-import { ChatGateway } from "./chat.gateway";
 
 @Module({
   providers: [
@@ -19,7 +18,6 @@ import { ChatGateway } from "./chat.gateway";
     ChannelsService,
     MessageService,
     ConversationsService,
-    ChatGateway
   ],
   controllers: [
     ChatController,

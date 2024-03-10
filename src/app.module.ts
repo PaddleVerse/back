@@ -6,7 +6,6 @@ import { UserModule } from "./user/user.module";
 import { FriendshipService } from "./friendship/friendship.service";
 import { FriendshipController } from "./friendship/friendship.controller";
 import { FriendshipModule } from "./friendship/friendship.module";
-import { ChatGateway } from "./chat/chat.gateway";
 import { ChatModule } from "./chat/chat.module";
 import { ChatService } from "./chat/chat.service";
 import { ChannelsService } from "./channels/channels.service";
@@ -58,7 +57,6 @@ import { GatewaysModule } from './gateways/gateways.module';
   providers: [
     AppService,
     FriendshipService, SearchService,
-    ChatGateway,
     ChatService,
     ChannelsService,
     MessageService,
