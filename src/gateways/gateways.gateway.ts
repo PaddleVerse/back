@@ -13,8 +13,6 @@ import { Payload } from "@prisma/client/runtime/library";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 
-
-
 @WebSocketGateway({
   cors: {
     origin: "*",
@@ -272,6 +270,7 @@ export class GatewaysGateway {
     } catch (error) {}
   }
 
+  // still under development
   @SubscribeMessage("joinRoom")
   async handleJoinRoom(
     @ConnectedSocket() socket: Socket,
@@ -279,27 +278,71 @@ export class GatewaysGateway {
     @Body("roomName") roomName: string
   ) {
     try {
-      // console.log("join room", roomName, client.id, socket.id);
-      // const socketUser = await this.getSocketId(client.id);
-      // if (socketUser === null) {
-      //   throw new Error("User not found.");
+      console.log("client here", client.id);
+      const u = await this.getSocketId(Number(client.id));
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      // if (u !== socket.id) {
+      //   throw new Error("not the same socket");
       // }
-      // const room = await this.gatewayService.rooms.find((room) => room.name === roomName);
-      // if (!room) {
-      //   throw new Error("Room not found.");
-      // }
-      // const part = room.users.get(client.id);
-      // if (part) {
-      //   return;
-      // }
-      // socket.join(roomName);
+      const room = await this.gatewayService.getRoom(roomName);
+      if (room === -1) {
+        await this.gatewayService.addRoom(roomName, {
+          id: Number(client.id),
+          userName: client.username,
+          socketId: u,
+        });
+        socket.join(roomName);
+        this.server.to(u).emit("update");
+        return "done";
+      }
+
+      if (this.gatewayService.rooms.length > 0) {
+        const part = await this.gatewayService.rooms[room].users.get(client.id);
+        if (part) {
+          return;
+        }
+      }
+      await this.gatewayService.addUserToRoom(roomName, {
+        id: Number(client.id),
+        userName: client.username,
+        socketId: u,
+      });
+      socket.join(roomName);
+        this.server.to(u).emit("update");
+    } catch (error) {
+      this.server.to(socket.id).emit("error", error.toString());
+    }
+  }
+
+  @SubscribeMessage("channelmessage")
+  async handleChannelMessage(
+    @ConnectedSocket() socket: Socket,
+    @Body("message") message: string,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
+    try {
+      const r = await this.gatewayService.getRoom(roomName);
+      if (r === -1) {
+        throw new Error("Room not found.");
+      }
+      const u = await this.getSocketId(Number(user.id));
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      this.server.to(roomName).emit("update", {
+        message,
+        user: user.username,
+      });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
   }
 
   @SubscribeMessage("leaveRoom")
-  async handleLEaveRoom() {
+  async handleLeaveRoom() {
     try {
     } catch (error) {}
   }
