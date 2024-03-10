@@ -137,6 +137,7 @@ export class ChannelsController {
     }
   }
 
+  // in here i should add the users that are blocked and filter their messages
   @Get('/messages/:id')
   async getMessages(@Param('id') id: string, @Query('uid') user: string) {
     try {
