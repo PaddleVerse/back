@@ -37,6 +37,7 @@ export class UserController
     async updateUserPic(@Param('id') id: any, @UploadedFile() file: MulterFile)
     {
         const url = await this.userService.uploadImage(file);
+        console.log(url);
         return this.userService.updateUser(+id, { picture: url });
     }
 
