@@ -13,8 +13,6 @@ export class ParticipantsService {
     this.prisma = new PrismaClient();
   }
 
-
-  
   async createParticipant(dat: Prisma.channel_participantCreateInput) {
     const participant = await this.prisma.channel_participant.create({
       data: dat,
@@ -31,6 +29,16 @@ export class ParticipantsService {
     });
     return participant;
   }
+
+  async getParticipants(channel: number) {
+    const participant = await this.prisma.channel_participant.findMany({
+      where: {
+        channel_id: channel,
+      },
+    });
+    return participant;
+  }
+
   async getParticipantsByChannelId(channel: number) {
     const participant = await this.prisma.channel_participant.findMany({
       where: {
@@ -41,15 +49,18 @@ export class ParticipantsService {
   }
 
   async filterParticipationsByUID(id: number) {
-      const channels = await this.prisma.channel_participant.findMany({
-        where: {user_id: id},
-      });
+    const channels = await this.prisma.channel_participant.findMany({
+      where: { user_id: id },
+    });
     return channels;
   }
 
-  async updateParticipant(id: number, data: Prisma.channel_participantUpdateInput) {
+  async updateParticipant(
+    id: number,
+    data: Prisma.channel_participantUpdateInput
+  ) {
     const participant = await this.prisma.channel_participant.update({
-      where: {id},
+      where: { id },
       data,
     });
     return participant;
@@ -57,7 +68,7 @@ export class ParticipantsService {
 
   async deleteParticipant(id: number) {
     const participant = await this.prisma.channel_participant.delete({
-      where: {id},
+      where: { id },
     });
     return participant;
   }

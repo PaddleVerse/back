@@ -71,7 +71,8 @@ export class ChannelsController {
 
   @Get()
   async getAllChannels() {
-    const channels = await this.channelService.getChannels();
+    let channels = await this.channelService.getChannels();
+    channels = channels.filter((channel) => channel.state !== Appearance.private);
     return channels;
   }
 
@@ -157,7 +158,16 @@ export class ChannelsController {
       if (!participant) {
         throw new HttpException("you are not a participant", HttpStatus.BAD_REQUEST);
       }
-      const messages = await this.messagesService.getChannelMessages(channels.id);
+      const blocked = await this.channelService.prisma.friendship.findMany({
+        where: {
+          user_id: us.id,
+          status: "BLOCKED"
+        }
+      })
+      let messages = await this.messagesService.getChannelMessages(channels.id);
+      blocked.forEach((block) => {
+        messages = messages.filter((message) => message.sender_id !== block.friendId);
+      })
       return messages;
     } catch (error) {
       throw error;
