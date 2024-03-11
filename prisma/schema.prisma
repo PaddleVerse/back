@@ -39,6 +39,11 @@ enum FriendshipStatus {
   BLOCKED
 }
 
+enum N_Type {
+  MESSAGE
+  REQUEST
+}
+
 
 model user {
   id        Int      @id @default(autoincrement())
@@ -60,6 +65,7 @@ model user {
   achievements achievement[]
   channel_participants channel_participant[]
   ban ban_list[]
+  notifications notification[]
 }
 
 model SearchHistory {
@@ -149,4 +155,14 @@ model conversation {
   user_b_id    Int?     @default(0)
   createdAt DateTime @default(now())
   messages message[]
+}
+
+model notification {
+  id        Int      @id @default(autoincrement())
+  user_id    Int?     @default(0)
+  sender_name   String?
+  sender_picture   String?
+  type  N_Type?
+  createdAt DateTime @default(now())
+  user    user?     @relation(fields: [user_id], references: [id])
 }

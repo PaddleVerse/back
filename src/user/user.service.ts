@@ -39,6 +39,7 @@ export class UserService
                 friends: true,
                 achievements: true,
                 channel_participants: true,
+                notifications: true
             }
         });
         return users;
@@ -69,6 +70,7 @@ export class UserService
             friends: true,
             achievements: true,
             channel_participants: true,
+            notifications: true
           },
             where: {
                 id
@@ -100,6 +102,7 @@ export class UserService
                 friends: true,
                 achievements: true,
                 channel_participants: true,
+                notifications: true
             },
             orderBy: {
                 level: 'desc'
@@ -132,6 +135,7 @@ export class UserService
                 friends: true,
                 achievements: true,
                 channel_participants: true,
+                notifications: true
             },
             orderBy: {
                 level: 'desc'
@@ -185,6 +189,7 @@ export class UserService
                 friends: true,
                 achievements: true,
                 channel_participants: true,
+                notifications: true
             }
         });
         return user;
@@ -202,6 +207,23 @@ export class UserService
           const user = await this.prisma.user.findUnique({
               where: {
                   username
+              },
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                nickname: true,
+                password: true,
+                picture: true,
+                banner_picture: true,
+                status: true,
+                level: true,
+                twoFa : true,
+                twoFaSecret: true,
+                createdAt: true,
+                friends: true,
+                achievements: true,
+                notifications: true
               }
           });
           return user;
@@ -371,8 +393,9 @@ export class UserService
           {
             for (let j = 0; j < friend.friends.length; j++)
             {
-              if (user.friends[i].friendId === friend.friends[j].friendId && friend.friends[i].status === 'ACCEPTED' && user.friends[j].status === 'ACCEPTED')
-                friends.push(await this.getUserById(+user.friends[i].friendId));
+              if (user.friends[i].friendId === friend.friends[j].friendId
+                && friend.friends[i].status === 'ACCEPTED' && user.friends[j].status === 'ACCEPTED')
+                  friends.push(await this.getUserById(+user.friends[i].friendId));
               if (friends.length === 7)
                 return friends;
             }

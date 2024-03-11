@@ -29,6 +29,7 @@ import { SearchService } from './search/search.service';
 import { SearchController } from './search/search.controller';
 import { SearchModule } from './search/search.module';
 import { GatewaysModule } from './gateways/gateways.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import { GatewaysModule } from './gateways/gateways.module';
     ChannelsModule,
     MessageModule,
     ParticipantsModule,
-    ConversationsModule
+    ConversationsModule,
+    NotificationsModule
   ],
   controllers: [
     AppController,

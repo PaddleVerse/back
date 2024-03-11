@@ -8,10 +8,10 @@ import {
 import { Socket, Server } from "socket.io";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { UserService } from "../user/user.service";
-import { Req, Status, user } from "@prisma/client";
-import { Payload } from "@prisma/client/runtime/library";
+import { N_Type, Req, Status, user } from "@prisma/client";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
+import { NotificationsService } from "src/notifications/notifications.service";
 
 
 
@@ -25,7 +25,8 @@ export class GatewaysGateway {
     private readonly friendshipService: FriendshipService,
     private readonly userService: UserService,
     private readonly convService: ConversationsService,
-    private readonly gatewayService: GatewaysService
+    private readonly gatewayService: GatewaysService,
+    private readonly notificationService: NotificationsService
   ) {}
   @WebSocketServer() server: Server;
 
@@ -71,28 +72,32 @@ export class GatewaysGateway {
   @SubscribeMessage("friendRequest")
   async handleFriendRequest(client: any, payload: any): Promise<string> {
     try {
-      const id: any = await this.getSocketId(payload?.reciverId);
-      await this.friendshipService.addFriend(
-        payload?.senderId,
-        payload?.reciverId,
-        Req.SEND
-      );
-      await this.friendshipService.addFriend(
-        payload?.reciverId,
-        payload?.senderId,
-        Req.RECIVED
-      );
-      if (id === null) {
-        this.server.to(client.id).emit("refresh", { ok: 0 });
-        return "User not found.";
-      }
+        const id: any = await this.getSocketId(payload?.reciverId);
+        await this.friendshipService.addFriend(
+          payload?.senderId,
+          payload?.reciverId,
+          Req.SEND
+        );
+        await this.friendshipService.addFriend(
+          payload?.reciverId,
+          payload?.senderId,
+          Req.RECIVED
+        );
+        this.notificationService.createNotification(
+          payload?.reciverId,
+          N_Type.REQUEST
+        );
+        if (id === null) {
+          this.server.to(client.id).emit("refresh", { ok: 0 });
+          return "User not found.";
+        }
 
-      this.server.to(id).emit("refresh", payload);
-      client.emit("refresh", payload);
-      return "Friend request received!";
-    } catch (error) {
-      return "Failed to receive friend request.";
-    }
+        this.server.to(id).emit("refresh", payload);
+        client.emit("refresh", payload);
+        return "Friend request received!";
+      } catch (error) {
+        return "Failed to receive friend request.";
+      }
   }
 
   @SubscribeMessage("acceptFriendRequest")
