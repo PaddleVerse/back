@@ -34,17 +34,20 @@ export class GatewaysGateway {
     user &&
       (await this.userService.updateUser(user.id, { status: Status.ONLINE }));
     this.server.emit("ok", { ok: 1 });
-    // the chat part
-    // this.rooms.forEach((room) => {
-    //   if (room.host[userId]) {
-    //     console.log("host matched");
-    //   }
-    //   room.users.forEach((user, id) => {
-    //     if (id === userId) {
-    //       console.log("user matched");
-    //     }
-    //   })
-    // })
+    // the chat part, where the user should join the rooms he is in if he gets reconnected
+    this.gatewayService.rooms.forEach((room) => {
+      if (room.host.id === Number(userId)) {
+        client.join(room.name)
+        console.log("host matched");
+      } else {
+        room.users.forEach((user, id) => {
+          if (Number(userId) === user.id) {
+            client.join(room.name);
+            console.log("user matched", user);
+          }
+        })
+      }
+    })
     // end of chat part
     console.log(`User ${userId} connected with socket ID ${client.id}`);
   }
@@ -58,9 +61,22 @@ export class GatewaysGateway {
           (await this.userService.updateUser(user.id, {
             status: Status.OFFLINE,
           }));
-        await delete this.userService.clients[key];
         // here the user should leave the room he is on by calling the leaveRoom function
+        this.gatewayService.rooms.forEach((room) => {
+          if (room.host.id === Number(key)) {
+            client.leave(room.name);
+            console.log("host matched");
+          } else {
+            room.users.forEach((user, id) => {
+              if (Number(key) === user.id) {
+                client.leave(room.name);
+                console.log("user matched", user);
+              }
+            });
+          }
+        });
         //
+        await delete this.userService.clients[key];
         this.server.emit("ok", { ok: 1 });
       }
     }
