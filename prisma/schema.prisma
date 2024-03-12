@@ -101,6 +101,8 @@ model game_history {
 
 model channel{
   id           Int      @id @default(autoincrement())
+  picture String? @default("https://www.freepik.com/free-vector/flat-illustration-people-looking-up_14602291.htm#query=group%20cartoon&position=7&from_view=keyword&track=ais&uuid=5cdd0157-2810-4e64-b8ab-6d030cddd63e")
+  topic       String? @default("here to have fun and make friends, no toxicity allowed")
   key          String?
   state        Appearance? @default(public)
   name         String? @unique
