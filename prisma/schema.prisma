@@ -162,6 +162,7 @@ model notification {
   user_id    Int?     @default(0)
   sender_name   String?
   sender_picture   String?
+  sender_id    Int?     @default(0)
   type  N_Type?
   createdAt DateTime @default(now())
   user    user?     @relation(fields: [user_id], references: [id])

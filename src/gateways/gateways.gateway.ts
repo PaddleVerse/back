@@ -83,15 +83,18 @@ export class GatewaysGateway {
           payload?.senderId,
           Req.RECIVED
         );
-        this.notificationService.createNotification(
+        await this.notificationService.createNotification(
           payload?.reciverId,
-          N_Type.REQUEST
+          N_Type.REQUEST,
+          payload?.senderId
         );
+        
         if (id === null) {
           this.server.to(client.id).emit("refresh", { ok: 0 });
           return "User not found.";
         }
 
+        this.server.to(id).emit("notification", payload);
         this.server.to(id).emit("refresh", payload);
         client.emit("refresh", payload);
         return "Friend request received!";

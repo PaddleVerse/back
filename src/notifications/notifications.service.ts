@@ -36,14 +36,14 @@ export class NotificationsService
         {
             const existingNotification = await this.prisma.notification.findFirst({
                 where: {
-                    user_id: userId,
-                    type: type
+                    sender_id: senderId,
+                    type: type,
                 }
             });
             if (existingNotification) return null;
             const user = await this.prisma.user.findUnique({
                 where: {
-                    id: userId
+                    id: senderId
                 }
             });
             if (!user) return null;
@@ -52,6 +52,7 @@ export class NotificationsService
                     user_id: userId,
                     sender_name: user?.name,
                     sender_picture: user?.picture,
+                    sender_id : senderId,
                     type: type,
                 }
             });
