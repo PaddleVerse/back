@@ -50,14 +50,14 @@ export class ParticipantsController {
           HttpStatus.FORBIDDEN
         );
       }
+      if (pa)
+        throw new HttpException("user already in channel", HttpStatus.CONFLICT);
       if (!ch)
         throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
       if (ch.key && ch.key !== channel.key) {
         throw new HttpException("wrong key", HttpStatus.BAD_REQUEST);
       }
       if (!us) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
-      if (pa)
-        throw new HttpException("user already in channel", HttpStatus.CONFLICT);
       const participant = await this.participantsService.createParticipant({
         ...part,
         channel: { connect: { id: ch.id } },
