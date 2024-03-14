@@ -66,10 +66,18 @@ export class ParticipantsService {
     return participant;
   }
 
-  async deleteParticipant(id: number) {
-    const participant = await this.prisma.channel_participant.delete({
-      where: { id },
+  async deleteParticipantFromAll(userid: number) {
+    const participant = await this.prisma.channel_participant.deleteMany({
+      where: { user_id: userid },
     });
     return participant;
+  }
+
+  async deleteParticipant(channel: number, user: number) {
+    const participant = await this.getParticipantByIds(channel, user);
+    const deleted = await this.prisma.channel_participant.delete({
+      where: { id: participant.id },
+    });
+    return deleted;
   }
 }

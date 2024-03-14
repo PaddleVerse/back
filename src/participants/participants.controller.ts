@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -31,7 +32,7 @@ export class ParticipantsController {
   ) {
     try {
       const ch = await this.participantsService.channelService.getChannelById(
-        +channel.id
+        Number(channel.id)
       );
       const us = await this.participantsService.userService.getUserById(
         +user.id
@@ -51,6 +52,9 @@ export class ParticipantsController {
       }
       if (!ch)
         throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      if (ch.key && ch.key !== channel.key) {
+        throw new HttpException("wrong key", HttpStatus.BAD_REQUEST);
+      }
       if (!us) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
       if (pa)
         throw new HttpException("user already in channel", HttpStatus.CONFLICT);
@@ -130,6 +134,36 @@ export class ParticipantsController {
         update
       );
       return updated;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete()
+  async deletePaticipant(
+    @Query('channel') channel: string,
+    @Query('user') user: string,
+  ) {
+    try {
+      const ch = await this.participantsService.channelService.getChannelById(
+        Number(channel)
+      );
+      const us = await this.participantsService.userService.getUserById(
+        Number(user)
+      );
+      if (!ch)
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      if (!us) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      const participant = await this.participantsService.getParticipantByIds(
+        ch.id,
+        us.id
+      );
+      if (!participant)
+        throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
+      const deleted = await this.participantsService.prisma.channel_participant.delete({
+        where: { id: participant.id },
+      });
+      return deleted;
     } catch (error) {
       throw error;
     }

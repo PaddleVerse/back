@@ -67,7 +67,8 @@ export class BanController {
         user: { connect: { id: Number(user) } },
       });
       const deleted = await this.PaticipantService.deleteParticipant(
-        participant.id
+        participant.id,
+        channelData.id
       );
       channelData.ban.push(banned);
       channelData.participants.filter((part) => part.id === Number(user)).pop();
