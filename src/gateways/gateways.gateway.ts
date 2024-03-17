@@ -33,22 +33,23 @@ export class GatewaysGateway {
     const user = await this.userService.getUserById(+userId);
     user &&
       (await this.userService.updateUser(user.id, { status: Status.ONLINE }));
-    this.server.emit("ok", { ok: 1 });
     // the chat part, where the user should join the rooms he is in if he gets reconnected
-    this.gatewayService.rooms.forEach((room) => {
-      if (room.host.id === Number(userId)) {
-        client.join(room.name)
-        console.log("host matched");
-      } else {
-        room.users.forEach((user, id) => {
-          if (Number(userId) === user.id) {
-            client.join(room.name);
-            console.log("user matched", user);
-          }
-        })
-      }
-    })
-    // end of chat part
+    console.log("here", this.gatewayService.rooms)
+      this.gatewayService.rooms.forEach((room) => {
+        if (room.host.id === Number(userId)) {
+          console.log("user here in host")
+          client.join(room.name);
+        } else {
+          room.users.forEach((user, id) => {
+            console.log(userId, user.id)
+            if (Number(userId) === user.id) {
+              client.join(room.name);
+            }
+          });
+        }
+      });
+      // end of chat part
+      this.server.emit("ok", { ok: 1 });
     console.log(`User ${userId} connected with socket ID ${client.id}`);
   }
 
@@ -65,12 +66,10 @@ export class GatewaysGateway {
         this.gatewayService.rooms.forEach((room) => {
           if (room.host.id === Number(key)) {
             client.leave(room.name);
-            console.log("host matched");
           } else {
             room.users.forEach((user, id) => {
               if (Number(key) === user.id) {
                 client.leave(room.name);
-                console.log("user matched", user);
               }
             });
           }
@@ -166,28 +165,28 @@ export class GatewaysGateway {
   @SubscribeMessage("removeFriend")
   async handleRemoveFriend(client: any, payload: any): Promise<string> {
     try {
-        const id: any = await this.getSocketId(
-          payload?.is ? payload?.reciverId : payload?.senderId
-        );
-        await this.friendshipService.removeFriend(
-          payload?.senderId,
-          payload?.reciverId
-        );
-        await this.friendshipService.removeFriend(
-          payload?.reciverId,
-          payload?.senderId
-        );
-        await this.convService.deleteConversation(
-          payload?.senderId,
-          payload?.reciverId
-        );
-        if (id === null) {
-          this.server.to(client.id).emit("refresh", { ok: 0 });
-          return "User not found.";
-        }
-        this.server.to(id).emit("refresh", payload);
-        client.emit("refresh", payload);
-        return "Friend removed!";
+      const id: any = await this.getSocketId(
+        payload?.is ? payload?.reciverId : payload?.senderId
+      );
+      await this.friendshipService.removeFriend(
+        payload?.senderId,
+        payload?.reciverId
+      );
+      await this.friendshipService.removeFriend(
+        payload?.reciverId,
+        payload?.senderId
+      );
+      await this.convService.deleteConversation(
+        payload?.senderId,
+        payload?.reciverId
+      );
+      if (id === null) {
+        this.server.to(client.id).emit("refresh", { ok: 0 });
+        return "User not found.";
+      }
+      this.server.to(id).emit("refresh", payload);
+      client.emit("refresh", payload);
+      return "Friend removed!";
     } catch (error) {
       return "Failed to removed friend.";
     }
@@ -301,14 +300,10 @@ export class GatewaysGateway {
     @Body("roomName") roomName: string
   ) {
     try {
-      console.log("client here", client.id);
-      const u = await this.getSocketId(Number(client.id));
+      const u = this.getSocketId(Number(client.id));
       if (u === null) {
         throw new Error("User not found.");
       }
-      // if (u !== socket.id) {
-      //   throw new Error("not the same socket");
-      // }
       const room = await this.gatewayService.getRoom(roomName);
       if (room === -1) {
         await this.gatewayService.addRoom(roomName, {
@@ -333,7 +328,7 @@ export class GatewaysGateway {
         socketId: u,
       });
       socket.join(roomName);
-        this.server.to(u).emit("update");
+      this.server.to(u).emit("update");
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
@@ -342,11 +337,11 @@ export class GatewaysGateway {
   @SubscribeMessage("channelmessage")
   async handleChannelMessage(
     @ConnectedSocket() socket: Socket,
-    @Body("message") message: string,
     @Body("roomName") roomName: string,
     @Body("user") user: user
   ) {
     try {
+      console.log("here in channel messages", roomName)
       const r = await this.gatewayService.getRoom(roomName);
       if (r === -1) {
         throw new Error("Room not found.");
@@ -355,10 +350,7 @@ export class GatewaysGateway {
       if (u === null) {
         throw new Error("User not found.");
       }
-      this.server.to(roomName).emit("update", {
-        message,
-        user: user.username,
-      });
+      this.server.to(roomName).emit("update");
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
