@@ -72,7 +72,9 @@ export class ChannelsController {
   @Get()
   async getAllChannels() {
     let channels = await this.channelService.getChannels();
-    channels = channels.filter((channel) => channel.state !== Appearance.private);
+    channels = channels.filter(
+      (channel) => channel.state !== Appearance.private
+    );
     return channels;
   }
 
@@ -83,6 +85,40 @@ export class ChannelsController {
         ? await this.channelService.getChannelById(Number(id))
         : await this.channelService.getChannelByName(id);
       return channels;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Get("/participants/:id")
+  async getChannelParticipants(
+    @Param("id") id: string,
+    @Query("uid") user: string
+  ) {
+    try {
+      const channels = !isNaN(Number(id))
+        ? await this.channelService.getChannelById(Number(id))
+        : await this.channelService.getChannelByName(id);
+      if (!channels) {
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      }
+      const us = await this.userService.getUserById(Number(user));
+      if (!us) {
+        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      }
+      const participant = await this.participantService.getParticipantByIds(
+        channels.id,
+        us.id
+      );
+      if (!participant) {
+        throw new HttpException(
+          "you are not a participant",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      const participants =
+        await this.participantService.getParticipantsByChannelId(channels.id);
+      return participants;
     } catch (error) {
       console.log(error);
     }
@@ -139,8 +175,8 @@ export class ChannelsController {
   }
 
   // in here i should add the users that are blocked and filter their messages
-  @Get('/messages/:id')
-  async getMessages(@Param('id') id: string, @Query('uid') user: string) {
+  @Get("/messages/:id")
+  async getMessages(@Param("id") id: string, @Query("uid") user: string) {
     try {
       const channels = !isNaN(Number(id))
         ? await this.channelService.getChannelById(Number(id))
@@ -156,18 +192,23 @@ export class ChannelsController {
         us.id
       );
       if (!participant) {
-        throw new HttpException("you are not a participant", HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          "you are not a participant",
+          HttpStatus.BAD_REQUEST
+        );
       }
       const blocked = await this.channelService.prisma.friendship.findMany({
         where: {
           user_id: us.id,
-          status: "BLOCKED"
-        }
-      })
+          status: "BLOCKED",
+        },
+      });
       let messages = await this.messagesService.getChannelMessages(channels.id);
       blocked.forEach((block) => {
-        messages = messages.filter((message) => message.sender_id !== block.friendId);
-      })
+        messages = messages.filter(
+          (message) => message.sender_id !== block.friendId
+        );
+      });
       return messages;
     } catch (error) {
       throw error;
