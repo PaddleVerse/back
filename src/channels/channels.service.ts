@@ -60,7 +60,9 @@ export class ChannelsService {
   }
 
   async getChannels() {
-    const channels = await this.prisma.channel.findMany();
+    const channels = await this.prisma.channel.findMany({
+      include: {participants: true, ban: true, messages: true}
+    });
     return channels;
   }
 

@@ -34,14 +34,11 @@ export class GatewaysGateway {
     user &&
       (await this.userService.updateUser(user.id, { status: Status.ONLINE }));
     // the chat part, where the user should join the rooms he is in if he gets reconnected
-    console.log("here", this.gatewayService.rooms)
       this.gatewayService.rooms.forEach((room) => {
         if (room.host.id === Number(userId)) {
-          console.log("user here in host")
           client.join(room.name);
         } else {
           room.users.forEach((user, id) => {
-            console.log(userId, user.id)
             if (Number(userId) === user.id) {
               client.join(room.name);
             }
@@ -341,7 +338,6 @@ export class GatewaysGateway {
     @Body("user") user: user
   ) {
     try {
-      console.log("here in channel messages", roomName)
       const r = await this.gatewayService.getRoom(roomName);
       if (r === -1) {
         throw new Error("Room not found.");

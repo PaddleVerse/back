@@ -62,10 +62,10 @@ export class ChannelsController {
         newChannel.participants.push(admin);
         return newChannel;
       } catch (error) {
-        console.log(error);
+        throw error;
       }
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   }
 
@@ -86,7 +86,7 @@ export class ChannelsController {
         : await this.channelService.getChannelByName(id);
       return channels;
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   }
 
@@ -120,7 +120,7 @@ export class ChannelsController {
         await this.participantService.getParticipantsByChannelId(channels.id);
       return participants;
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   }
 

@@ -23,7 +23,6 @@ export class GatewaysService {
   }
 
   async addRoom(name: string, host: userT) {
-    console.log("host", host);
     const room = await this.getRoom(name);
     if (room === -1) {
       this.rooms.push({ name, host, users: new Map() });

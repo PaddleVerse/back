@@ -34,13 +34,18 @@ export class ParticipantsController {
       const ch = await this.participantsService.channelService.getChannelById(
         Number(channel.id)
       );
+      if (!ch)
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
       const us = await this.participantsService.userService.getUserById(
         +user.id
       );
+      if (!us) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
       const pa = await this.participantsService.getParticipantByIds(
         ch.id,
         us.id
       );
+      if (pa)
+        throw new HttpException("user already in channel", HttpStatus.CONFLICT);
       // added banned from channel
       const banlist = await this.banService.getChannelBanList(ch.id);
       const banned = banlist.find((b) => b.user_id === us.id);
@@ -50,14 +55,9 @@ export class ParticipantsController {
           HttpStatus.FORBIDDEN
         );
       }
-      if (pa)
-        throw new HttpException("user already in channel", HttpStatus.CONFLICT);
-      if (!ch)
-        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
       if (ch.key && ch.key !== channel.key) {
         throw new HttpException("wrong key", HttpStatus.BAD_REQUEST);
       }
-      if (!us) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
       const participant = await this.participantsService.createParticipant({
         ...part,
         channel: { connect: { id: ch.id } },
