@@ -44,6 +44,7 @@ export class MessageController {
           ...m,
           channel: { connect: { id: ch.id } },
         });
+        ch.messages.push(message);
         return message;
       } else {
         const u1 = await this.conversationService.userService.getUserById(Number(users1));

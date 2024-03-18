@@ -59,7 +59,7 @@ export class ChatController {
         const user = await this.userService.getUserById(friend.friendId);
         const conversations = await this.conversationService.getConversation(Number(id), user.id);
         if (conversations) {
-            const u = {...user, user: true}
+            const u = {...user, user: true, conversations: conversations}
             friends.push(u);
         }
       }
