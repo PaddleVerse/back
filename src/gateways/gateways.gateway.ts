@@ -8,7 +8,7 @@ import {
 import { Socket, Server } from "socket.io";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { UserService } from "../user/user.service";
-import { N_Type, Req, Status, user } from "@prisma/client";
+import { N_Type, PrismaClient, Req, Status, user } from "@prisma/client";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
@@ -21,13 +21,14 @@ import { NotificationsService } from "src/notifications/notifications.service";
   },
 })
 export class GatewaysGateway {
+  private readonly prisma: PrismaClient;
   constructor(
     private readonly friendshipService: FriendshipService,
     private readonly userService: UserService,
     private readonly convService: ConversationsService,
     private readonly gatewayService: GatewaysService,
     private readonly notificationService: NotificationsService
-  ) {}
+    ) { this.prisma = new PrismaClient(); }
   @WebSocketServer() server: Server;
 
   async handleConnection(client: any) {
@@ -266,6 +267,23 @@ export class GatewaysGateway {
       return "Friend removed!";
     } catch (error) {
       return "Failed to cancele friend.";
+    }
+  }
+
+  @SubscribeMessage("!notified")
+  async handleNotified(client: any, payload: any): Promise<string> {
+    try {
+      await this.prisma.user.update({
+        where: {
+          id: +payload?.userId,
+        },
+        data: {
+          notified: false,
+        },
+      });
+      return "Notification deleted!";
+    } catch (error) {
+      return "Failed to delete notification.";
     }
   }
 

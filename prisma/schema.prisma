@@ -60,12 +60,13 @@ model user {
   createdAt DateTime @default(now())
   twoFa    Boolean? @default(false)
   twoFaSecret String?
+  notified Boolean? @default(false)
 
   friends Friendship[]
   achievements achievement[]
   channel_participants channel_participant[]
   ban ban_list[]
-  notifications notification[]
+  notifications notification[] 
 }
 
 model SearchHistory {
