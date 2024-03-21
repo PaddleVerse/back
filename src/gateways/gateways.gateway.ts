@@ -312,7 +312,6 @@ export class GatewaysGateway {
         this.server.to(u).emit("update");
         return "done";
       }
-
       if (this.gatewayService.rooms.length > 0) {
         const part = await this.gatewayService.rooms[room].users.get(client.id);
         if (part) {
