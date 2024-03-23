@@ -139,10 +139,10 @@ export class ParticipantsController {
     }
   }
 
-  @Delete()
+  @Delete("leave")
   async deletePaticipant(
-    @Query('channel') channel: string,
-    @Query('user') user: string,
+    @Query("channel") channel: string,
+    @Query("user") user: string
   ) {
     try {
       const ch = await this.participantsService.channelService.getChannelById(
@@ -160,9 +160,90 @@ export class ParticipantsController {
       );
       if (!participant)
         throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
-      const deleted = await this.participantsService.prisma.channel_participant.delete({
-        where: { id: participant.id },
-      });
+      // if (participant.role === Role.ADMIN) {
+      //   const members = await this.participantsService.getParticipants(ch.id);
+      //   // if (members.length === 1) { // the case where there is only one person in the channel
+      //   //   const deleted = await this.participantsService.prisma.channel_participant.delete({
+      //   //     where: { id: participant.id },
+      //   //   });
+      //   //   return deletedChannel;
+      //   // }
+      //   if (members.length > 1) {
+      //     members[1].role = Role.ADMIN;
+      //     const updated = await this.participantsService.updateParticipant(
+      //       members[1].id,
+      //       members[1]
+      //     );
+      //   }
+      // }
+      const deleted =
+        await this.participantsService.prisma.channel_participant.delete({
+          where: { id: participant.id },
+        });
+      return deleted;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete("kick")
+  async kickPaticipant(
+    @Query("channel") channel: string,
+    @Query("user") user: string,
+    @Query('target') target: string
+  ) {
+    try {
+      const ch = await this.participantsService.channelService.getChannelById(
+        Number(channel)
+      );
+      if (!ch)
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      const us = await this.participantsService.userService.getUserById(
+        Number(user)
+      );
+      if (!us) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      const ta = await this.participantsService.userService.getUserById(
+        Number(target)
+        );
+        if (!ta) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      const participant = await this.participantsService.getParticipantByIds(
+        ch.id,
+        us.id
+      );
+      if (!participant)
+        throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
+      const taParticipant = await this.participantsService.getParticipantByIds(
+        ch.id,
+        ta.id
+        );
+        if (!taParticipant)
+          throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
+        if (taParticipant.role === Role.ADMIN) {
+          throw new HttpException("can't kick an admin", HttpStatus.BAD_REQUEST);
+        }
+      if (participant.role === Role.MEMBER) {
+        throw new HttpException("you are not an admin/mod", HttpStatus.BAD_REQUEST);
+      }
+      // if (participant.role === Role.ADMIN) {
+      //   const members = await this.participantsService.getParticipants(ch.id);
+      //   // if (members.length === 1) { // the case where there is only one person in the channel
+      //   //   const deleted = await this.participantsService.prisma.channel_participant.delete({
+      //   //     where: { id: participant.id },
+      //   //   });
+      //   //   return deletedChannel;
+      //   // }
+      //   if (members.length > 1) {
+      //     members[1].role = Role.ADMIN;
+      //     const updated = await this.participantsService.updateParticipant(
+      //       members[1].id,
+      //       members[1]
+      //     );
+      //   }
+      // }
+      const deleted =
+        await this.participantsService.prisma.channel_participant.delete({
+          where: { id: taParticipant.id },
+        });
       return deleted;
     } catch (error) {
       throw error;
