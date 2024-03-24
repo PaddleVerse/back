@@ -16,19 +16,25 @@ export class SearchService
         return await this.prisma.searchHistory.findMany();
     }
 
-    async filterSearch(name : string, userId : number)
+    async filterSearch(name: string, userId: number)
     {
-        try {
-            const users : any = await this.userService.getUsers();
-            if (users.length === 0) return [];
-            const otherUsers = await users.filter((user : any) => user.id !== userId);
-            if (otherUsers.length === 0) return [];
-
-            const result = await otherUsers.filter((user : any) => user.name.toLowerCase().includes(name.toLowerCase()));
-            return result;
-        } catch (error) {
-            return error;
+        try
+        {
+            const filteredUsers = await this.prisma.user.findMany({
+            where: {
+                id: {
+                    not: userId,
+                },
+                name: {
+                    contains: name.toLowerCase(),
+                    mode: 'insensitive',
+                },
+            },
+            });
+        
+            return filteredUsers;
         }
+        catch (error) { return []; }
     }
 
     async getSearchedUsers()
