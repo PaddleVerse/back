@@ -98,10 +98,10 @@ export class ParticipantsController {
       const u = await this.participantsService.userService.getUserById(
         Number(id)
       );
+      if (!u) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
       const ch = await this.participantsService.channelService.getChannelById(
         Number(channelId)
       );
-      if (!u) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
       if (!ch)
         throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
       const admin = await this.participantsService.getParticipantByIds(

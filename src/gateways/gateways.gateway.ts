@@ -34,19 +34,19 @@ export class GatewaysGateway {
     user &&
       (await this.userService.updateUser(user.id, { status: Status.ONLINE }));
     // the chat part, where the user should join the rooms he is in if he gets reconnected
-      this.gatewayService.rooms.forEach((room) => {
-        if (room.host.id === Number(userId)) {
-          client.join(room.name);
-        } else {
-          room.users.forEach((user, id) => {
-            if (Number(userId) === user.id) {
-              client.join(room.name);
-            }
-          });
-        }
-      });
-      // end of chat part
-      this.server.emit("ok", { ok: 1 });
+    this.gatewayService.rooms.forEach((room) => {
+      if (room.host.id === Number(userId)) {
+        client.join(room.name);
+      } else {
+        room.users.forEach((user, id) => {
+          if (Number(userId) === user.id) {
+            client.join(room.name);
+          }
+        });
+      }
+    });
+    // end of chat part
+    this.server.emit("ok", { ok: 1 });
     console.log(`User ${userId} connected with socket ID ${client.id}`);
   }
 
@@ -355,5 +355,18 @@ export class GatewaysGateway {
   async handleLeaveRoom() {
     try {
     } catch (error) {}
+  }
+
+  @SubscribeMessage("channelUpdate")
+  async handleChannelUpdate(
+    @ConnectedSocket() Socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
+    try {
+      this.server.to(roomName).emit("update");
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

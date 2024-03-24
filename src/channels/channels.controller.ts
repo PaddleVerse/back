@@ -257,41 +257,41 @@ export class ChannelsController {
     }
   }
 
-  @Put("/image/:id")
-  @UseInterceptors(FileInterceptor("image"))
-  async updateImage(
-    @UploadedFile() file: MulterFile,
-    @Query("channel") channelId: string,
-    @Query("user") user: string
-  ) {
-    try {
-      const channels = await this.channelService.getChannelById(
-        Number(channelId)
-      );
-      if (!channels)
-        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
-      const us = await this.userService.getUserById(Number(user));
-      if (!us) {
-        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
-      }
-      const participant = await this.participantService.getParticipantByIds(
-        channels.id,
-        us.id
-      );
-      if (participant.role === Role.MEMBER || !participant) {
-        throw new HttpException(
-          "you are not an admin to this channel",
-          HttpStatus.BAD_REQUEST
-        );
-      }
-      const url = await this.channelService.uploadImage(file);
-      const updateChannel = await this.channelService.updateChannel(
-        channels.id,
-        { picture: url }
-      );
-      return { ...updateChannel, success: true };
-    } catch (error) {
-      return { success: false, error: error };
-    }
-  }
+  // @Put("/image/:id")
+  // @UseInterceptors(FileInterceptor("image"))
+  // async updateImage(
+  //   @UploadedFile() file: MulterFile,
+  //   @Query("channel") channelId: string,
+  //   @Query("user") user: string
+  // ) {
+  //   try {
+  //     const channels = await this.channelService.getChannelById(
+  //       Number(channelId)
+  //     );
+  //     if (!channels)
+  //       throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+  //     const us = await this.userService.getUserById(Number(user));
+  //     if (!us) {
+  //       throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+  //     }
+  //     const participant = await this.participantService.getParticipantByIds(
+  //       channels.id,
+  //       us.id
+  //     );
+  //     if (participant.role === Role.MEMBER || !participant) {
+  //       throw new HttpException(
+  //         "you are not an admin to this channel",
+  //         HttpStatus.BAD_REQUEST
+  //       );
+  //     }
+  //     const url = await this.channelService.uploadImage(file);
+  //     const updateChannel = await this.channelService.updateChannel(
+  //       channels.id,
+  //       { picture: url }
+  //     );
+  //     return { ...updateChannel, success: true };
+  //   } catch (error) {
+  //     return { success: false, error: error };
+  //   }
+  // }
 }
