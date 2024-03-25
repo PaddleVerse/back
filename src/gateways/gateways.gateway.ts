@@ -279,6 +279,7 @@ export class GatewaysGateway {
 
   @SubscribeMessage("dmmessage")
   async handleDmMessage(
+    @ConnectedSocket() socket: Socket,
     @Body("sender") client: any,
     @Body("reciever") reciever: any
   ) {
@@ -286,6 +287,7 @@ export class GatewaysGateway {
       //some logic here to handle the message between the two users, mainly check the sockets and if they exist in the data base or not
       const id: any = this.getSocketId(reciever);
       this.server.to(id).emit("update"); // final result
+      this.server.to(socket.id).emit("update"); // final result
     } catch (error) {}
   }
 
@@ -325,6 +327,7 @@ export class GatewaysGateway {
       });
       socket.join(roomName);
       this.server.to(u).emit("update");
+      console.log(client, roomName);
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }

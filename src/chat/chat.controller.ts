@@ -38,7 +38,7 @@ export class ChatController {
   ) {}
 
   @Get("chatlist/:id")
-  async getChatList(@Param("id") id: string, @Param("id") id2: string) {
+  async getChatList(@Param("id") id: string) {
     try {
       const channelList = await this.chatService.filterParticipantbyuserId(+id);
       const user1 = await this.userService.getUserById(+id);
