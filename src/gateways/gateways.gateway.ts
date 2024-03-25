@@ -33,39 +33,33 @@ export class GatewaysGateway {
 
   async handleConnection(client: any) {
     const userId = await client.handshake.query?.userId;
-    this.userService.clients[userId] = { socketId: client.id };
+    const socketId = client.id;
+    this.userService.clients[userId] = { socketId };
     const user = await this.userService.getUserById(+userId);
-    user &&
-      (await this.userService.updateUser(user.id, { status: Status.ONLINE }));
-    this.server.emit("ok", { ok: 1 });
-    // the chat part
-    // this.rooms.forEach((room) => {
-    //   if (room.host[userId]) {
-    //     console.log("host matched");
-    //   }
-    //   room.users.forEach((user, id) => {
-    //     if (id === userId) {
-    //       console.log("user matched");
-    //     }
-    //   })
-    // })
-    // end of chat part
-    console.log(`User ${userId} connected with socket ID ${client.id}`);
+    if(user) {
+      await this.userService.updateUser(user.id, { status: Status.ONLINE });
+      // Join the user to a room with their userId
+      client.join(userId + "");
+      this.server.to(userId).emit("connected", { userId, socketId });
+    }
+    console.log(`User ${userId} connected with socket ID ${socketId}`);
   }
 
   async handleDisconnect(client: any) {
+    const socketId = client.id;
     for (const key in this.userService.clients) {
-      if (this.userService.clients[key].socketId === client.id) {
+      if (this.userService.clients[key].socketId === socketId) {
         console.log(`Client with id ${key} disconnected.`);
         const user = await this.userService.getUserById(+key);
-        user &&
-          (await this.userService.updateUser(user.id, {
+        if(user) {
+          await this.userService.updateUser(user.id, {
             status: Status.OFFLINE,
-          }));
-        await delete this.userService.clients[key];
-        // here the user should leave the room he is on by calling the leaveRoom function
-        //
-        this.server.emit("ok", { ok: 1 });
+          });
+          // Leave the room with the userId
+          client.leave(key + "");
+          this.server.to(key).emit("disconnected", { userId: key, socketId });
+          delete this.userService.clients[key];
+        }
       }
     }
   }
@@ -95,9 +89,9 @@ export class GatewaysGateway {
           return "User not found.";
         }
 
-        this.server.to(id).emit("notification", payload);
-        this.server.to(id).emit("refresh", payload);
-        client.emit("refresh", payload);
+        this.server.to(payload?.reciverId + "").emit("notification", payload);
+        this.server.to(payload?.reciverId + "").emit("refresh", payload);
+        this.server.to(payload?.senderId + "").emit("refresh", payload);
         return "Friend request received!";
       } catch (error) {
         return "Failed to receive friend request.";
@@ -124,8 +118,8 @@ export class GatewaysGateway {
         this.server.to(client.id).emit("refresh", { ok: 0 });
         return "User not found.";
       }
-      this.server.to(id).emit("refresh", payload);
-      client.emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
 
       return "Friend request accepted!";
     } catch (error) {
@@ -150,8 +144,8 @@ export class GatewaysGateway {
         this.server.to(client.id).emit("refresh", { ok: 0 });
         return "User not found.";
       }
-      this.server.to(id).emit("refresh", payload);
-      client.emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
     } catch (error) {
       return "Failed to reject friend request.";
     }
@@ -180,8 +174,8 @@ export class GatewaysGateway {
           this.server.to(client.id).emit("refresh", { ok: 0 });
           return "User not found.";
         }
-        this.server.to(id).emit("refresh", payload);
-        client.emit("refresh", payload);
+        this.server.to(payload?.reciverId + "").emit("refresh", payload);
+        this.server.to(payload?.senderId + "").emit("refresh", payload);
         return "Friend removed!";
     } catch (error) {
       return "Failed to removed friend.";
@@ -205,8 +199,8 @@ export class GatewaysGateway {
         return "User not found.";
       }
 
-      this.server.to(id).emit("refresh", payload);
-      client.emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
 
       return "Friend request canceled!";
     } catch (error) {
@@ -237,8 +231,8 @@ export class GatewaysGateway {
         return "User not found.";
       }
 
-      this.server.to(id).emit("refresh", payload);
-      client.emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
 
       return "Friend request canceled!";
     } catch (error) {
@@ -262,8 +256,8 @@ export class GatewaysGateway {
         this.server.to(client.id).emit("refresh", { ok: 0 });
         return "User not found.";
       }
-      this.server.to(id).emit("refresh", payload);
-      client.emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
       return "Friend removed!";
     } catch (error) {
       return "Failed to cancele friend.";
