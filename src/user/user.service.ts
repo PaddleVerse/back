@@ -26,6 +26,7 @@ export class UserService
         const users = await this.prisma.user.findMany({
             select: {
                 id: true,
+                first_time: true,
                 username: true,
                 name: true,
                 nickname: true,
@@ -57,6 +58,7 @@ export class UserService
         const user = await this.prisma.user.findUnique({
           select: {
             id: true,
+            first_time: true,
             username: true,
             name: true,
             nickname: true,
@@ -91,6 +93,7 @@ export class UserService
         const users = await this.prisma.user.findMany({
             select: {
                 id: true,
+                first_time: true,
                 username: true,
                 name: true,
                 nickname: true,
@@ -124,6 +127,7 @@ export class UserService
         const users = await this.prisma.user.findMany({
             select: {
                 id: true,
+                first_time: true,
                 username: true,
                 name: true,
                 nickname: true,
@@ -210,6 +214,7 @@ export class UserService
               },
               select: {
                 id: true,
+                first_time: true,
                 username: true,
                 name: true,
                 nickname: true,
@@ -369,6 +374,8 @@ export class UserService
       async editUser(id: number, data: UpdateUserDto)
       {
         const { name , nickname } = data;
+        if (!name || !nickname || name.length < 3 || nickname.length < 3)
+          return null;
         const updatedUser = await this.prisma.user.update({
             where: {
                 id
@@ -401,6 +408,26 @@ export class UserService
             }
           }
           return friends;
+        }
+        catch (error)
+        {
+          return null;
+        }
+      }
+      
+      async updateUserVisite(id: number, data: any)
+      {
+        try
+        {
+          const user = await this.prisma.user.update({
+            where: {
+              id,
+            },
+            data: {
+              first_time: data.first_time
+            }
+          });
+          return user;
         }
         catch (error)
         {

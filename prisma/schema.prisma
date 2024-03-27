@@ -60,6 +60,7 @@ model user {
   createdAt DateTime @default(now())
   twoFa    Boolean? @default(false)
   twoFaSecret String?
+  first_time Boolean? @default(true)
 
   friends Friendship[]
   achievements achievement[]
