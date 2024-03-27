@@ -37,10 +37,13 @@ export class UserService
                 twoFa : true,
                 twoFaSecret: true,
                 createdAt: true,
+                notified : true,
                 friends: true,
                 achievements: true,
                 channel_participants: true,
-                notifications: true
+                notifications: {
+                  orderBy: { createdAt: 'desc' }
+                }
             }
         });
         return users;
@@ -67,12 +70,15 @@ export class UserService
             status: true,
             level: true,
             createdAt: true,
+            notified : true,
             twoFaSecret: true,
             twoFa: true,
             friends: true,
             achievements: true,
             channel_participants: true,
-            notifications: true
+            notifications: {
+              orderBy: { createdAt: 'desc' }
+            }
           },
             where: {
                 id
@@ -102,10 +108,13 @@ export class UserService
                 status: true,
                 level: true,
                 createdAt: true,
+                notified : true,
                 friends: true,
                 achievements: true,
                 channel_participants: true,
-                notifications: true
+                notifications: {
+                  orderBy: { createdAt: 'desc' }
+                }
             },
             orderBy: {
                 level: 'desc'
@@ -136,10 +145,13 @@ export class UserService
                 status: true,
                 level: true,
                 createdAt: true,
+                notified : true,
                 friends: true,
                 achievements: true,
                 channel_participants: true,
-                notifications: true
+                notifications: {
+                  orderBy: { createdAt: 'desc' }
+                }
             },
             orderBy: {
                 level: 'desc'
@@ -190,10 +202,13 @@ export class UserService
                 status: true,
                 level: true,
                 createdAt: true,
+                notified : true,
                 friends: true,
                 achievements: true,
                 channel_participants: true,
-                notifications: true
+                notifications: {
+                  orderBy: { createdAt: 'desc' }
+                }
             }
         });
         return user;
@@ -226,9 +241,12 @@ export class UserService
                 twoFa : true,
                 twoFaSecret: true,
                 createdAt: true,
+                notified : true,
                 friends: true,
                 achievements: true,
-                notifications: true
+                notifications: {
+                  orderBy: { createdAt: 'desc' }
+                }
               }
           });
           return user;

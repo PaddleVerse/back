@@ -34,9 +34,18 @@ export class NotificationsService
     {
         try
         {
+            await this.prisma.user.update({
+                where: {
+                    id: +userId
+                },
+                data: {
+                    notified: true
+                }
+            });
             const existingNotification = await this.prisma.notification.findFirst({
                 where: {
                     sender_id: senderId,
+                    user_id: userId,
                     type: type,
                 }
             });
