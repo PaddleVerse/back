@@ -221,6 +221,46 @@ export class ChannelsController {
     }
   }
 
+  @Get("/messages/lastMessage/:id")
+  async getLastMessages(@Param("id") id: string, @Query("uid") user: string) {
+    try {
+      const channels = !isNaN(Number(id))
+        ? await this.channelService.getChannelById(Number(id))
+        : await this.channelService.getChannelByName(id);
+      const us = await this.userService.getUserById(Number(user));
+      if (!us) {
+        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      }
+      if (!channels)
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      const participant = await this.participantService.getParticipantByIds(
+        channels.id,
+        us.id
+      );
+      if (!participant) {
+        throw new HttpException(
+          "you are not a participant",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      const blocked = await this.channelService.prisma.friendship.findMany({
+        where: {
+          user_id: us.id,
+          status: "BLOCKED",
+        },
+      });
+      let messages = await this.messagesService.getChannelMessages(channels.id);
+      blocked.forEach((block) => {
+        messages = messages.filter(
+          (message) => message.sender_id !== block.friendId
+        );
+      });
+      return messages[messages.length - 1];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Post("/image")
   @UseInterceptors(FileInterceptor("image"))
   async uploadImage(

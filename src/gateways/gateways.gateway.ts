@@ -312,7 +312,7 @@ export class GatewaysGateway {
           socketId: u,
         });
         socket.join(roomName);
-        this.server.to(u).emit("update");
+        this.server.to(u).emit("channelupdate");
         return "done";
       }
       if (this.gatewayService.rooms.length > 0) {
@@ -327,8 +327,7 @@ export class GatewaysGateway {
         socketId: u,
       });
       socket.join(roomName);
-      this.server.to(u).emit("update");
-      console.log(client, roomName);
+      this.server.to(u).emit("channelupdate");
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
