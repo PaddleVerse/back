@@ -291,6 +291,7 @@ export class GatewaysGateway {
     } catch (error) {}
   }
 
+  
   // still under development
   @SubscribeMessage("joinRoom")
   async handleJoinRoom(

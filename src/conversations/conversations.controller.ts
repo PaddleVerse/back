@@ -15,9 +15,10 @@ import { MessageService } from "src/message/message.service";
 
 @Controller("conversations")
 export class ConversationsController {
-  constructor(readonly conversationsService: ConversationsService,
-    readonly messagesService: MessageService,
-  ) { }
+  constructor(
+    readonly conversationsService: ConversationsService,
+    readonly messagesService: MessageService
+  ) {}
 
   @Post()
   async createConversation(
@@ -36,27 +37,10 @@ export class ConversationsController {
   }
 
   @Get()
-  async getConversation(@Query("uid1") id1: string, @Query("uid2") id2: string) {
-    try {
-      const conversation = await this.conversationsService.getConversation(
-        Number(id1),
-        Number(id2)
-        );
-        if (!conversation) {
-          throw new HttpException(
-            "Conversation does not exist",
-            HttpStatus.NOT_FOUND
-            );
-          }
-          return conversation;
-    }
-    catch (error) {
-      throw error;
-    }
-  }
-
-  @Delete()
-  async deleteConversation(@Query("uid1") id1: string, @Query("uid2") id2: string) {
+  async getConversation(
+    @Query("uid1") id1: string,
+    @Query("uid2") id2: string
+  ) {
     try {
       const conversation = await this.conversationsService.getConversation(
         Number(id1),
@@ -68,7 +52,77 @@ export class ConversationsController {
           HttpStatus.NOT_FOUND
         );
       }
-      const message = await this.messagesService.getConversationMessages(conversation.id);
+      return conversation;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get("messages")
+  async getConversationMessages(
+    @Query("uid1") id1: string,
+    @Query("uid2") id2: string
+  ) {
+    try {
+      const conversation = await this.conversationsService.getConversation(
+        Number(id1),
+        Number(id2)
+      );
+      if (!conversation) {
+        throw new HttpException(
+          "Conversation does not exist",
+          HttpStatus.NOT_FOUND
+        );
+      }
+      return conversation.messages;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get("lastMessage")
+  async getLastMessage(
+    @Query("uid1") id1: string,
+    @Query("uid2") id2: string
+  ) {
+    try {
+      const conversation = await this.conversationsService.getConversation(
+        Number(id1),
+        Number(id2)
+      );
+      if (!conversation) {
+        throw new HttpException(
+          "Conversation does not exist",
+          HttpStatus.NOT_FOUND
+        );
+      }
+      return conversation.messages[conversation.messages.length - 1] || "";
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+
+  @Delete()
+  async deleteConversation(
+    @Query("uid1") id1: string,
+    @Query("uid2") id2: string
+  ) {
+    try {
+      const conversation = await this.conversationsService.getConversation(
+        Number(id1),
+        Number(id2)
+      );
+      if (!conversation) {
+        throw new HttpException(
+          "Conversation does not exist",
+          HttpStatus.NOT_FOUND
+        );
+      }
+      const message = await this.messagesService.getConversationMessages(
+        conversation.id
+      );
       const deleted = await this.conversationsService.deleteConversation(
         Number(id1),
         Number(id2)
