@@ -217,6 +217,7 @@ export class ChannelsController {
       });
       return messages;
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }

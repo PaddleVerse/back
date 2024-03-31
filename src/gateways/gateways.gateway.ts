@@ -286,12 +286,11 @@ export class GatewaysGateway {
     try {
       //some logic here to handle the message between the two users, mainly check the sockets and if they exist in the data base or not
       const id: any = this.getSocketId(reciever);
-      this.server.to(id).emit("dmupdate", {user1: reciever, user2: client}); // final result
-      this.server.to(socket.id).emit("dmupdate" ,{user1: reciever, user2: client}); // final result
+      this.server.to(id).emit("update", { dm: true }); // final result
+      this.server.to(socket.id).emit("update", { dm: true }); // final result
     } catch (error) {}
   }
 
-  
   // still under development
   @SubscribeMessage("joinRoom")
   async handleJoinRoom(
@@ -312,7 +311,7 @@ export class GatewaysGateway {
           socketId: u,
         });
         socket.join(roomName);
-        this.server.to(u).emit("channelupdate");
+        this.server.to(u).emit("update", { channel: true });
         return "done";
       }
       if (this.gatewayService.rooms.length > 0) {
@@ -327,7 +326,7 @@ export class GatewaysGateway {
         socketId: u,
       });
       socket.join(roomName);
-      this.server.to(u).emit("channelupdate");
+      this.server.to(u).emit("update", { channel: true });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
@@ -348,15 +347,30 @@ export class GatewaysGateway {
       if (u === null) {
         throw new Error("User not found.");
       }
-      this.server.to(roomName).emit("channelupdate");
+      this.server.to(roomName).emit("update", { channel: true });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
   }
 
   @SubscribeMessage("leaveRoom")
-  async handleLeaveRoom() {
+  async handleLeaveRoom(
+    @ConnectedSocket() socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
     try {
+      const r = await this.gatewayService.getRoom(roomName);
+      if (r === -1) {
+        throw new Error("Room not found.");
+      }
+      const u = await this.getSocketId(Number(user.id));
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
+      socket.leave(roomName);
+      this.server.to(u).emit("update", { channel: true });
     } catch (error) {}
   }
 
@@ -367,7 +381,7 @@ export class GatewaysGateway {
     @Body("user") user: user
   ) {
     try {
-      this.server.to(roomName).emit("channelupdate");
+      this.server.to(roomName).emit("update", { channel: true });
     } catch (error) {
       console.log(error);
     }
