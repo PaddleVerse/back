@@ -36,10 +36,13 @@ export class GatewaysGateway {
     // the chat part, where the user should join the rooms he is in if he gets reconnected
     this.gatewayService.rooms.forEach((room) => {
       if (room.host.id === Number(userId)) {
+        // console.log("host");
+        room.host.socketId = client.id;
         client.join(room.name);
       } else {
         room.users.forEach((user, id) => {
           if (Number(userId) === user.id) {
+            user.socketId = client.id;
             client.join(room.name);
           }
         });
@@ -311,7 +314,7 @@ export class GatewaysGateway {
           socketId: u,
         });
         socket.join(roomName);
-        this.server.to(u).emit("update", { channel: true });
+        this.server.to(roomName).emit("update", { type: "join" });
         return "done";
       }
       if (this.gatewayService.rooms.length > 0) {
@@ -326,7 +329,7 @@ export class GatewaysGateway {
         socketId: u,
       });
       socket.join(roomName);
-      this.server.to(u).emit("update", { channel: true });
+      this.server.to(roomName).emit("update", { type: "join" });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
@@ -369,8 +372,9 @@ export class GatewaysGateway {
         throw new Error("User not found.");
       }
       await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
+      this.server.to(roomName).emit("update", { type: "leave" });
       socket.leave(roomName);
-      this.server.to(u).emit("update", { channel: true });
+      // this.server.to(socket.id).emit("update");
     } catch (error) {}
   }
 

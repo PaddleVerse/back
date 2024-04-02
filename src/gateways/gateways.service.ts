@@ -51,7 +51,11 @@ export class GatewaysService {
   async RemoveUserFromRoom(name: string, user: number) {
     const room = await this.getRoom(name);
     if (room !== -1) {
-      this.rooms[room].users.delete(user);
+      if (this.rooms[room].host.id === user) {
+        this.deleteRoom(name);
+      } else {
+        this.rooms[room].users.delete(user);
+      }
     }
   }
 
