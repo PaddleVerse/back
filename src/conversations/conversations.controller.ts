@@ -74,7 +74,7 @@ export class ConversationsController {
           HttpStatus.NOT_FOUND
         );
       }
-      return conversation.messages;
+      return conversation.messages.sort((a, b)=> a.createdAt.getTime() - b.createdAt.getTime());
     } catch (error) {
       throw error;
     }
@@ -96,7 +96,11 @@ export class ConversationsController {
           HttpStatus.NOT_FOUND
         );
       }
-      return conversation.messages[conversation.messages.length - 1] || "";
+      return (
+        conversation.messages.sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+        )[conversation.messages.length - 1] || ""
+      );
     } catch (error) {
       throw error;
     }
