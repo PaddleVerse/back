@@ -1,6 +1,7 @@
 import { Body } from "@nestjs/common";
 import {
   ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -22,13 +23,14 @@ import { NotificationsService } from "src/notifications/notifications.service";
 })
 export class GatewaysGateway {
   private readonly prisma: PrismaClient;
+  private rooms: { [key: string]: { [key: string]: string } } = {};
   constructor(
     private readonly friendshipService: FriendshipService,
     private readonly userService: UserService,
     private readonly convService: ConversationsService,
     private readonly gatewayService: GatewaysService,
     private readonly notificationService: NotificationsService
-    ) { this.prisma = new PrismaClient(); }
+  ) { this.prisma = new PrismaClient(); }
   @WebSocketServer() server: Server;
 
   async handleConnection(client: any) {
@@ -36,7 +38,7 @@ export class GatewaysGateway {
     const socketId = client.id;
     this.userService.clients[userId] = { socketId };
     const user = await this.userService.getUserById(+userId);
-    if(user) {
+    if (user) {
       await this.userService.updateUser(user.id, { status: Status.ONLINE });
       // Join the user to a room with their userId
       client.join(userId + "");
@@ -51,7 +53,7 @@ export class GatewaysGateway {
       if (this.userService.clients[key].socketId === socketId) {
         console.log(`Client with id ${key} disconnected.`);
         const user = await this.userService.getUserById(+key);
-        if(user) {
+        if (user) {
           await this.userService.updateUser(user.id, {
             status: Status.OFFLINE,
           });
@@ -59,6 +61,21 @@ export class GatewaysGateway {
           client.leave(key + "");
           this.server.to(key).emit("disconnected", { userId: key, socketId });
           delete this.userService.clients[key];
+          // leave the game room if the user is in one and if the room has two players make player2 into player1, if not delete the room
+          for (const room in this.rooms) {
+            if (this.rooms[room][key]) {
+              if (Object.keys(this.rooms[room]).length === 2) {
+                for (const id in this.rooms[room]) {
+                  if (this.rooms[room][id] === 'player2') {
+                    this.rooms[room][id] = 'player1';
+                  }
+                }
+              } else {
+                delete this.rooms[room];
+              }
+            }
+          }
+          
         }
       }
     }
@@ -67,35 +84,35 @@ export class GatewaysGateway {
   @SubscribeMessage("friendRequest")
   async handleFriendRequest(client: any, payload: any): Promise<string> {
     try {
-        const id: any = await this.getSocketId(payload?.reciverId);
-        await this.friendshipService.addFriend(
-          payload?.senderId,
-          payload?.reciverId,
-          Req.SEND
-        );
-        await this.friendshipService.addFriend(
-          payload?.reciverId,
-          payload?.senderId,
-          Req.RECIVED
-        );
-        await this.notificationService.createNotification(
-          payload?.reciverId,
-          N_Type.REQUEST,
-          payload?.senderId
-        );
-        
-        if (id === null) {
-          this.server.to(client.id).emit("refresh", { ok: 0 });
-          return "User not found.";
-        }
+      const id: any = await this.getSocketId(payload?.reciverId);
+      await this.friendshipService.addFriend(
+        payload?.senderId,
+        payload?.reciverId,
+        Req.SEND
+      );
+      await this.friendshipService.addFriend(
+        payload?.reciverId,
+        payload?.senderId,
+        Req.RECIVED
+      );
+      await this.notificationService.createNotification(
+        payload?.reciverId,
+        N_Type.REQUEST,
+        payload?.senderId
+      );
 
-        this.server.to(payload?.reciverId + "").emit("notification", payload);
-        this.server.to(payload?.reciverId + "").emit("refresh", payload);
-        this.server.to(payload?.senderId + "").emit("refresh", payload);
-        return "Friend request received!";
-      } catch (error) {
-        return "Failed to receive friend request.";
+      if (id === null) {
+        this.server.to(client.id).emit("refresh", { ok: 0 });
+        return "User not found.";
       }
+
+      this.server.to(payload?.reciverId + "").emit("notification", payload);
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      return "Friend request received!";
+    } catch (error) {
+      return "Failed to receive friend request.";
+    }
   }
 
   @SubscribeMessage("acceptFriendRequest")
@@ -155,28 +172,28 @@ export class GatewaysGateway {
   @SubscribeMessage("removeFriend")
   async handleRemoveFriend(client: any, payload: any): Promise<string> {
     try {
-        const id: any = await this.getSocketId(
-          payload?.is ? payload?.reciverId : payload?.senderId
-        );
-        await this.friendshipService.removeFriend(
-          payload?.senderId,
-          payload?.reciverId
-        );
-        await this.friendshipService.removeFriend(
-          payload?.reciverId,
-          payload?.senderId
-        );
-        await this.convService.deleteConversation(
-          payload?.senderId,
-          payload?.reciverId
-        );
-        if (id === null) {
-          this.server.to(client.id).emit("refresh", { ok: 0 });
-          return "User not found.";
-        }
-        this.server.to(payload?.reciverId + "").emit("refresh", payload);
-        this.server.to(payload?.senderId + "").emit("refresh", payload);
-        return "Friend removed!";
+      const id: any = await this.getSocketId(
+        payload?.is ? payload?.reciverId : payload?.senderId
+      );
+      await this.friendshipService.removeFriend(
+        payload?.senderId,
+        payload?.reciverId
+      );
+      await this.friendshipService.removeFriend(
+        payload?.reciverId,
+        payload?.senderId
+      );
+      await this.convService.deleteConversation(
+        payload?.senderId,
+        payload?.reciverId
+      );
+      if (id === null) {
+        this.server.to(client.id).emit("refresh", { ok: 0 });
+        return "User not found.";
+      }
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      return "Friend removed!";
     } catch (error) {
       return "Failed to removed friend.";
     }
@@ -296,7 +313,7 @@ export class GatewaysGateway {
       //some logic here to handle the message between the two users, mainly check the sockets and if they exist in the data base or not
       const id: any = this.getSocketId(reciever);
       this.server.to(id).emit("update"); // final result
-    } catch (error) {}
+    } catch (error) { }
   }
 
   @SubscribeMessage("joinRoom")
@@ -328,6 +345,34 @@ export class GatewaysGateway {
   @SubscribeMessage("leaveRoom")
   async handleLEaveRoom() {
     try {
-    } catch (error) {}
+    } catch (error) { }
   }
+
+  // game logic
+  @SubscribeMessage('joinGame')
+  async handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { senderId: string; room: string }): Promise<void> {
+    // Join the client to the specified room
+    client.join(data.room);
+    console.log(`Client ${data.senderId} joined room ${data.room}`);
+    // Simple logic to track room memberships for demonstration
+    if (!this.rooms[data.room]) {
+      this.rooms[data.room] = {};
+    }
+    // Add the client to the room but assign to it either player1 or player2 depending if the room is empty or not
+    this.rooms[data.room][client.id] = Object.keys(this.rooms[data.room]).length === 0 ? 'player1' : 'player2';
+    console.log(this.rooms[data.room]);
+
+    // Notify the client they have joined
+    this.server.to(client.id).emit('joinedGame', `You have joined room ${data.room}`);
+  }
+
+
+  @SubscribeMessage("movePaddleGame")
+  async handleMovePaddleGame(client: any, payload: any): Promise<string> {
+    // Send the moves to the clients in the same room, except the sender
+    // console.log(payload);
+    client.broadcast.to(payload.room).emit("paddlePositionUpdate", payload);
+    return "Yep";
+  }
+
 }
