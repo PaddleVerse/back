@@ -29,14 +29,14 @@ export class GatewaysGateway {
 
   async handleConnection(client: any) {
     const userId = await client.handshake.query?.userId;
-    this.userService.clients[userId] = { socketId: client.id };
+    // this.userService.clients[userId] = { socketId: client.id };
+    this.userService.clients[userId] = { socketId: client.id, socket: client };
     const user = await this.userService.getUserById(+userId);
     user &&
       (await this.userService.updateUser(user.id, { status: Status.ONLINE }));
     // the chat part, where the user should join the rooms he is in if he gets reconnected
     this.gatewayService.rooms.forEach((room) => {
       if (room.host.id === Number(userId)) {
-        // console.log("host");
         room.host.socketId = client.id;
         client.join(room.name);
       } else {
@@ -279,6 +279,11 @@ export class GatewaysGateway {
       ? null
       : this.userService.clients[userId].socketId;
   }
+  getSocket(userId: number): Socket {
+    return this.userService.clients[userId] === undefined
+      ? null
+      : this.userService.clients[userId].socket;
+  }
 
   @SubscribeMessage("dmmessage")
   async handleDmMessage(
@@ -377,6 +382,52 @@ export class GatewaysGateway {
       this.server.to(roomName).emit("update", { type: "leave" });
       socket.leave(roomName);
       // this.server.to(socket.id).emit("update");
+    } catch (error) {}
+  }
+  @SubscribeMessage("kick")
+  async handleKickRoom(
+    @ConnectedSocket() socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
+    try {
+      const r = await this.gatewayService.getRoom(roomName);
+      if (r === -1) {
+        throw new Error("Room not found.");
+      }
+      const u = await this.getSocketId(Number(user.id));
+      const s = await this.getSocket(Number(user.id));
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
+      this.server.to(u).emit("update", { type: "kicked" });
+      s.leave(roomName);
+      this.server.to(roomName).emit("update", { type: "channel" });
+    } catch (error) {}
+  }
+
+  @SubscribeMessage("ban")
+  async handleBanRoom(
+    @ConnectedSocket() socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
+    try {
+      const r = await this.gatewayService.getRoom(roomName);
+      if (r === -1) {
+        throw new Error("Room not found.");
+      }
+      const u = await this.getSocketId(Number(user.id));
+      const s = await this.getSocket(Number(user.id));
+
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
+      this.server.to(socket.id).emit("update", {type: "banned"});
+      s.leave(roomName);
+      this.server.to(roomName).emit("update", { type: "channel" });
     } catch (error) {}
   }
 

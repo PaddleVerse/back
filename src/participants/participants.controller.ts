@@ -160,26 +160,32 @@ export class ParticipantsController {
       );
       if (!participant)
         throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
-      // if (participant.role === Role.ADMIN) {
-      //   const members = await this.participantsService.getParticipants(ch.id);
-      //   // if (members.length === 1) { // the case where there is only one person in the channel
-      //   //   const deleted = await this.participantsService.prisma.channel_participant.delete({
-      //   //     where: { id: participant.id },
-      //   //   });
-      //   //   return deletedChannel;
-      //   // }
-      //   if (members.length > 1) {
-      //     members[1].role = Role.ADMIN;
-      //     const updated = await this.participantsService.updateParticipant(
-      //       members[1].id,
-      //       members[1]
-      //     );
-      //   }
-      // }
+      const participants = await this.participantsService.getParticipants(
+        ch.id
+      );
+      if (participants.length === 1) {
+        const deleted =
+          await this.participantsService.prisma.channel_participant.delete({
+            where: { id: participant.id },
+          });
+        const deletedChannel =
+          await this.participantsService.prisma.channel.delete({
+            where: { id: ch.id },
+          });
+        return deleted;
+      }
+      if (participants.length > 1) {
+        participants[1].role = Role.ADMIN;
+        const updated = await this.participantsService.updateParticipant(
+          participants[1].id,
+          participants[1]
+        ) 
+      }
       const deleted =
         await this.participantsService.prisma.channel_participant.delete({
           where: { id: participant.id },
         });
+
       return deleted;
     } catch (error) {
       throw error;
@@ -190,7 +196,7 @@ export class ParticipantsController {
   async kickPaticipant(
     @Query("channel") channel: string,
     @Query("user") user: string,
-    @Query('target') target: string
+    @Query("target") target: string
   ) {
     try {
       const ch = await this.participantsService.channelService.getChannelById(
@@ -204,8 +210,8 @@ export class ParticipantsController {
       if (!us) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
       const ta = await this.participantsService.userService.getUserById(
         Number(target)
-        );
-        if (!ta) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      );
+      if (!ta) throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
       const participant = await this.participantsService.getParticipantByIds(
         ch.id,
         us.id
@@ -215,14 +221,17 @@ export class ParticipantsController {
       const taParticipant = await this.participantsService.getParticipantByIds(
         ch.id,
         ta.id
-        );
-        if (!taParticipant)
-          throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
-        if (taParticipant.role === Role.ADMIN) {
-          throw new HttpException("can't kick an admin", HttpStatus.BAD_REQUEST);
-        }
+      );
+      if (!taParticipant)
+        throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
+      if (taParticipant.role === Role.ADMIN) {
+        throw new HttpException("can't kick an admin", HttpStatus.BAD_REQUEST);
+      }
       if (participant.role === Role.MEMBER) {
-        throw new HttpException("you are not an admin/mod", HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          "you are not an admin/mod",
+          HttpStatus.BAD_REQUEST
+        );
       }
       // if (participant.role === Role.ADMIN) {
       //   const members = await this.participantsService.getParticipants(ch.id);
