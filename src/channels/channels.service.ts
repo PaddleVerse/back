@@ -8,6 +8,10 @@ import {
   animals,
 } from "unique-names-generator";
 
+import { MulterFile } from 'multer';
+
+import * as fs from 'fs';
+
 @Injectable()
 export class ChannelsService {
   prisma: PrismaClient;
@@ -54,21 +58,36 @@ export class ChannelsService {
   async getChannelByName(name: string) {
     const channel = await this.prisma.channel.findUnique({
       where: { name: name },
-      include: {participants: true, ban: true, messages: true}
+      include: { participants: true, ban: true, messages: true },
     });
     return channel;
   }
 
   async getChannels() {
-    const channels = await this.prisma.channel.findMany();
+    const channels = await this.prisma.channel.findMany({
+      include: { participants: true, ban: true, messages: true },
+    });
     return channels;
   }
 
   async filterChannelsByName(name: string) {
     const channels = await this.prisma.channel.findMany({
       where: { name: name },
-      include : {participants: true, ban: true, messages: true}
+      include: { participants: true, ban: true, messages: true },
     });
     return channels;
+  }
+
+  async uploadImage(file: MulterFile): Promise<string> {
+    try {
+      const filename = `${Date.now()}-${file.originalname}`;
+      const filePath = `images/${filename}`;
+
+      await fs.promises.writeFile(filePath, file.buffer);
+
+      return `http://localhost:8080/${filename}`;
+    } catch (error) {
+      return null;
+    }
   }
 }

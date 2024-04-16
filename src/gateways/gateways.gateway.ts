@@ -13,8 +13,6 @@ import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
 
-
-
 @WebSocketGateway({
   cors: {
     origin: "*",
@@ -34,15 +32,32 @@ export class GatewaysGateway {
   async handleConnection(client: any) {
     const userId = await client.handshake.query?.userId;
     const socketId = client.id;
-    this.userService.clients[userId] = { socketId };
+
+    this.userService.clients[userId] = { socketId: client.id, socket: client };
     const user = await this.userService.getUserById(+userId);
-    if(user) {
+    if (user)
+    {
       await this.userService.updateUser(user.id, { status: Status.ONLINE });
-      // Join the user to a room with their userId
       client.join(userId + "");
       this.server.to(userId).emit("connected", { userId, socketId });
     }
-    console.log(`User ${userId} connected with socket ID ${socketId}`);
+    // the chat part, where the user should join the rooms he is in if he gets reconnected
+    this.gatewayService.rooms.forEach((room) => {
+      if (room.host.id === Number(userId)) {
+        room.host.socketId = client.id;
+        client.join(room.name);
+      } else {
+        room.users.forEach((user, id) => {
+          if (Number(userId) === user.id) {
+            user.socketId = client.id;
+            client.join(room.name);
+          }
+        });
+      }
+    });
+    // end of chat part
+    this.server.emit("ok", { ok: 1 });
+    console.log(`User ${userId} connected with socket ID ${client.id}`);
   }
 
   async handleDisconnect(client: any) {
@@ -56,6 +71,17 @@ export class GatewaysGateway {
             status: Status.OFFLINE,
           });
           // Leave the room with the userId
+          this.gatewayService.rooms.forEach((room) => {
+            if (room.host.id === Number(key)) {
+              client.leave(room.name);
+            } else {
+              room.users.forEach((user, id) => {
+                if (Number(key) === user.id) {
+                  client.leave(room.name);
+                }
+              });
+            }
+          });
           client.leave(key + "");
           this.server.to(key).emit("disconnected", { userId: key, socketId });
           delete this.userService.clients[key];
@@ -286,19 +312,29 @@ export class GatewaysGateway {
       ? null
       : this.userService.clients[userId].socketId;
   }
+  getSocket(userId: number): Socket {
+    return this.userService.clients[userId] === undefined
+      ? null
+      : this.userService.clients[userId].socket;
+  }
 
   @SubscribeMessage("dmmessage")
   async handleDmMessage(
+    @ConnectedSocket() socket: Socket,
     @Body("sender") client: any,
     @Body("reciever") reciever: any
   ) {
     try {
       //some logic here to handle the message between the two users, mainly check the sockets and if they exist in the data base or not
       const id: any = this.getSocketId(reciever);
-      this.server.to(id).emit("update"); // final result
+      console.log(client, reciever, "the reciever socket id: ", id, "and the sender socket id: ", socket.id, this.getSocketId(client));
+      this.server.to(id).emit("update", { dm: true }); // final result
+      console.log("sending to the socket owner")
+      this.server.to(socket.id).emit("update", { dm: true }); // final result
     } catch (error) {}
   }
 
+  // still under development
   @SubscribeMessage("joinRoom")
   async handleJoinRoom(
     @ConnectedSocket() socket: Socket,
@@ -306,28 +342,138 @@ export class GatewaysGateway {
     @Body("roomName") roomName: string
   ) {
     try {
-      // console.log("join room", roomName, client.id, socket.id);
-      // const socketUser = await this.getSocketId(client.id);
-      // if (socketUser === null) {
-      //   throw new Error("User not found.");
-      // }
-      // const room = await this.gatewayService.rooms.find((room) => room.name === roomName);
-      // if (!room) {
-      //   throw new Error("Room not found.");
-      // }
-      // const part = room.users.get(client.id);
-      // if (part) {
-      //   return;
-      // }
-      // socket.join(roomName);
+      const u = this.getSocketId(Number(client.id));
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      const room = await this.gatewayService.getRoom(roomName);
+      if (room === -1) {
+        await this.gatewayService.addRoom(roomName, {
+          id: Number(client.id),
+          userName: client.username,
+          socketId: u,
+        });
+        socket.join(roomName);
+        this.server.to(roomName).emit("update", { type: "join" });
+        return "done";
+      }
+      if (this.gatewayService.rooms.length > 0) {
+        const part = await this.gatewayService.rooms[room].users.get(client.id);
+        if (part) {
+          return;
+        }
+      }
+      await this.gatewayService.addUserToRoom(roomName, {
+        id: Number(client.id),
+        userName: client.username,
+        socketId: u,
+      });
+      socket.join(roomName);
+      this.server.to(roomName).emit("update", { type: "join" });
+    } catch (error) {
+      this.server.to(socket.id).emit("error", error.toString());
+    }
+  }
+
+  @SubscribeMessage("channelmessage")
+  async handleChannelMessage(
+    @ConnectedSocket() socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
+    try {
+      const r = await this.gatewayService.getRoom(roomName);
+      if (r === -1) {
+        throw new Error("Room not found.");
+      }
+      const u = await this.getSocketId(Number(user.id));
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      this.server.to(roomName).emit("update", { channel: true });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
   }
 
   @SubscribeMessage("leaveRoom")
-  async handleLEaveRoom() {
+  async handleLeaveRoom(
+    @ConnectedSocket() socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
     try {
+      const r = await this.gatewayService.getRoom(roomName);
+      if (r === -1) {
+        throw new Error("Room not found.");
+      }
+      const u = await this.getSocketId(Number(user.id));
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
+      this.server.to(roomName).emit("update", { type: "leave" });
+      socket.leave(roomName);
+      // this.server.to(socket.id).emit("update");
     } catch (error) {}
+  }
+  @SubscribeMessage("kick")
+  async handleKickRoom(
+    @ConnectedSocket() socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
+    try {
+      const r = await this.gatewayService.getRoom(roomName);
+      if (r === -1) {
+        throw new Error("Room not found.");
+      }
+      const u = await this.getSocketId(Number(user.id));
+      const s = await this.getSocket(Number(user.id));
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
+      this.server.to(u).emit("update", { type: "kicked" });
+      s.leave(roomName);
+      this.server.to(roomName).emit("update", { type: "channel" });
+    } catch (error) {}
+  }
+
+  @SubscribeMessage("ban")
+  async handleBanRoom(
+    @ConnectedSocket() socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
+    try {
+      const r = await this.gatewayService.getRoom(roomName);
+      if (r === -1) {
+        throw new Error("Room not found.");
+      }
+      const u = await this.getSocketId(Number(user.id));
+      const s = await this.getSocket(Number(user.id));
+
+      if (u === null) {
+        throw new Error("User not found.");
+      }
+      await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
+      this.server.to(socket.id).emit("update", {type: "banned"});
+      s.leave(roomName);
+      this.server.to(roomName).emit("update", { type: "channel" });
+    } catch (error) {}
+  }
+
+  @SubscribeMessage("channelUpdate")
+  async handleChannelUpdate(
+    @ConnectedSocket() Socket: Socket,
+    @Body("roomName") roomName: string,
+    @Body("user") user: user
+  ) {
+    try {
+      this.server.to(roomName).emit("update", { channel: true });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

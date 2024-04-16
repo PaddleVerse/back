@@ -25,7 +25,6 @@ export class MessageController {
     @Body("user2") users2: string
   ) {
     try {
-      // console.log(m, channel, users1, users2);
       if (channel) {
         const ch = !isNaN(channel.id)
           ? await this.channelService.getChannelById(channel.id)
@@ -60,7 +59,6 @@ export class MessageController {
           ...m,
           conv: { connect: { id: co.id } },
         });
-        co.messages.push(message);
         return message;
       }
     } catch (error) {

@@ -42,6 +42,7 @@ export class BanController {
     @Body("uid") user: string
   ) {
     try {
+      console.log("the channel is: ", channel,  "the user is: ", user);
       const us = await this.userService.getUserById(Number(user));
       if (!us) {
         throw new HttpException("User not found", 404);
@@ -49,13 +50,14 @@ export class BanController {
       const channelData = await this.channelService.getChannelById(
         Number(channel)
       );
-	  if (!channelData) {
-		throw new HttpException("Channel not found", 404);
-	  }
+      if (!channelData) {
+        throw new HttpException("Channel not found", 404);
+      }
       const participant = await this.PaticipantService.getParticipantByIds(
         Number(channel),
         Number(user)
       );
+      console.log("the participant object is: ", participant);
       if (!participant) {
         throw new HttpException("Participant not found", 404);
       }
@@ -67,10 +69,9 @@ export class BanController {
         user: { connect: { id: Number(user) } },
       });
       const deleted = await this.PaticipantService.deleteParticipant(
-        participant.id
+        participant.user_id,
+        channelData.id
       );
-      channelData.ban.push(banned);
-      channelData.participants.filter((part) => part.id === Number(user)).pop();
       return banned;
     } catch (error) {
       throw error;

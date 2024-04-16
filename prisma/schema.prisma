@@ -53,7 +53,7 @@ model user {
   name      String?
   nickname  String? @default("zuse")
   password  String
-  picture   String? @default("https://i.ibb.co/FsdsTYc/s-Instagram-photo-Soulless-Manga-Jujutsu-Kaisen-Artist-syrnrr-CLa5z-N2l-D1-L-JPG.jpg")
+  picture   String? @default("http://localhost:8080/1709559281974-wallpaperflare.com_wallpaper.jpg")
   banner_picture String? @default("http://localhost:8080/bg.jpg")
   status    Status  @default(OFFLINE)
   level     Int?     @default(600)
@@ -109,6 +109,8 @@ model game_history {
 
 model channel{
   id           Int      @id @default(autoincrement())
+  picture String? @default("http://localhost:8080/1709546788254-test7.png")
+  topic       String? @default("here to have fun and make friends, no toxicity allowed")
   key          String?
   state        Appearance? @default(public)
   name         String? @unique

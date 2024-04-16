@@ -3,10 +3,11 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import { MulterFile } from 'multer';
+import { Socket } from 'socket.io';
 import { UpdateUserDto } from 'src/auth/dto/update-user.dto/update-user.dto';
 
 interface ClientData {
-  [userId: number]: { socketId: string;};
+  [userId: number]: { socketId: string; socket: Socket};
 }
 
 @Injectable()

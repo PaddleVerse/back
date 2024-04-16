@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { user } from "@prisma/client";
 
 type userT = {
   id: number;
@@ -8,7 +9,7 @@ type userT = {
 
 type room = {
   name: string;
-  host: Record<number, string>;
+  host: userT;
   users: Map<number, userT>;
 };
 
@@ -21,7 +22,7 @@ export class GatewaysService {
     return room;
   }
 
-  async addRoom(name: string, host: Record<number, string>) {
+  async addRoom(name: string, host: userT) {
     const room = await this.getRoom(name);
     if (room === -1) {
       this.rooms.push({ name, host, users: new Map() });
@@ -50,7 +51,11 @@ export class GatewaysService {
   async RemoveUserFromRoom(name: string, user: number) {
     const room = await this.getRoom(name);
     if (room !== -1) {
-      this.rooms[room].users.delete(user);
+      if (this.rooms[room].host.id === user) {
+        this.deleteRoom(name);
+      } else {
+        this.rooms[room].users.delete(user);
+      }
     }
   }
 

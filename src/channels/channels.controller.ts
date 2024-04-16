@@ -8,14 +8,18 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from "@nestjs/common";
 import { ChannelsService } from "./channels.service";
-import { Appearance, Prisma, Role, user } from "@prisma/client";
+import { Appearance, channel, Prisma, Role, user } from "@prisma/client";
 import { UserService } from "src/user/user.service";
 import { ParticipantsService } from "src/participants/participants.service";
 import { BanService } from "src/ban/ban.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { MessageService } from "src/message/message.service";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { MulterFile } from "multer";
 
 @Controller("channels")
 export class ChannelsController {
@@ -34,7 +38,7 @@ export class ChannelsController {
   ) {
     try {
       try {
-        const ch = await this.channelService.getChannelByName(info.name);
+        const ch = await this.channelService.getChannelByName(info.name!);
         if (ch)
           throw new HttpException(
             "channel already exist",
@@ -60,18 +64,21 @@ export class ChannelsController {
           user: { connect: { id: user.id } },
         });
         newChannel.participants.push(admin);
-        return newChannel;
+        return { ...newChannel, success: true };
       } catch (error) {
-        console.log(error);
+        throw error;
       }
     } catch (error) {
-      console.log(error);
+      return { success: false, error: error };
     }
   }
 
   @Get()
   async getAllChannels() {
-    const channels = await this.channelService.getChannels();
+    let channels = await this.channelService.getChannels();
+    channels = channels.filter(
+      (channel) => channel.state !== Appearance.private
+    );
     return channels;
   }
 
@@ -83,7 +90,41 @@ export class ChannelsController {
         : await this.channelService.getChannelByName(id);
       return channels;
     } catch (error) {
-      console.log(error);
+      throw error;
+    }
+  }
+
+  @Get("/participants/:id")
+  async getChannelParticipants(
+    @Param("id") id: string,
+    @Query("uid") user: string
+  ) {
+    try {
+      const channels = !isNaN(Number(id))
+        ? await this.channelService.getChannelById(Number(id))
+        : await this.channelService.getChannelByName(id);
+      if (!channels) {
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      }
+      const us = await this.userService.getUserById(Number(user));
+      if (!us) {
+        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      }
+      const participant = await this.participantService.getParticipantByIds(
+        channels.id,
+        us.id
+      );
+      if (!participant) {
+        throw new HttpException(
+          "you are not a participant",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      const participants =
+        await this.participantService.getParticipantsByChannelId(channels.id);
+      return participants;
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -95,6 +136,7 @@ export class ChannelsController {
   ) {
     try {
       try {
+        console.log(updates);
         const channels = !isNaN(Number(id))
           ? await this.channelService.getChannelById(Number(id))
           : await this.channelService.getChannelByName(id);
@@ -128,6 +170,7 @@ export class ChannelsController {
           channels.id,
           updates
         );
+        console.log(updatedChannel);
         return updatedChannel;
       } catch (error) {
         throw error;
@@ -137,8 +180,9 @@ export class ChannelsController {
     }
   }
 
-  @Get('/messages/:id')
-  async getMessages(@Param('id') id: string, @Query('uid') user: string) {
+  // in here i should add the users that are blocked and filter their messages
+  @Get("/messages/:id")
+  async getMessages(@Param("id") id: string, @Query("uid") user: string) {
     try {
       const channels = !isNaN(Number(id))
         ? await this.channelService.getChannelById(Number(id))
@@ -154,12 +198,111 @@ export class ChannelsController {
         us.id
       );
       if (!participant) {
-        throw new HttpException("you are not a participant", HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          "you are not a participant",
+          HttpStatus.BAD_REQUEST
+        );
       }
-      const messages = await this.messagesService.getChannelMessages(channels.id);
-      return messages;
+      const blocked = await this.channelService.prisma.friendship.findMany({
+        where: {
+          user_id: us.id,
+          status: "BLOCKED",
+        },
+      });
+      let messages = await this.messagesService.getChannelMessages(channels.id);
+      blocked.forEach((block) => {
+        messages = messages.filter(
+          (message) => message.sender_id !== block.friendId
+        );
+      });
+      // console.log(messages);
+
+      return messages.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      );
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  @Get("/messages/lastMessage/:id")
+  async getLastMessages(@Param("id") id: string, @Query("uid") user: string) {
+    try {
+      const channels = !isNaN(Number(id))
+        ? await this.channelService.getChannelById(Number(id))
+        : await this.channelService.getChannelByName(id);
+      const us = await this.userService.getUserById(Number(user));
+      if (!us) {
+        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      }
+      if (!channels)
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      const participant = await this.participantService.getParticipantByIds(
+        channels.id,
+        us.id
+      );
+      if (!participant) {
+        throw new HttpException(
+          "you are not a participant",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      const blocked = await this.channelService.prisma.friendship.findMany({
+        where: {
+          user_id: us.id,
+          status: "BLOCKED",
+        },
+      });
+      let messages = await this.messagesService.getChannelMessages(channels.id);
+      blocked.forEach((block) => {
+        messages = messages.filter(
+          (message) => message.sender_id !== block.friendId
+        );
+      });
+      return messages.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      )[messages.length - 1];
     } catch (error) {
       throw error;
+    }
+  }
+
+  @Post("/image")
+  @UseInterceptors(FileInterceptor("image"))
+  async uploadImage(
+    @UploadedFile() file: MulterFile,
+    @Query("channel") channelId: string,
+    @Query("user") user: string
+  ) {
+    try {
+      const channels = await this.channelService.getChannelById(
+        Number(channelId)
+      );
+      if (!channels)
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      const us = await this.userService.getUserById(Number(user));
+      if (!us) {
+        throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
+      }
+      const participant = await this.participantService.getParticipantByIds(
+        channels.id,
+        us.id
+      );
+      if (participant.role === Role.MEMBER || !participant) {
+        throw new HttpException(
+          "you are not an admin to this channel",
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      const url = await this.channelService.uploadImage(file);
+      const updateChannel = await this.channelService.updateChannel(
+        channels.id,
+        { picture: url }
+      );
+      return { ...updateChannel, success: true };
+    } catch (error) {
+      return { success: false, error: error };
     }
   }
 }
