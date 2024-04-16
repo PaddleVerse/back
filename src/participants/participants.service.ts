@@ -75,6 +75,8 @@ export class ParticipantsService {
 
   async deleteParticipant(channel: number, user: number) {
     const participant = await this.getParticipantByIds(channel, user);
+    console.log(`${user} and the channel id is: ${channel}`);
+    console.log("the participant is: ", participant);
     const deleted = await this.prisma.channel_participant.delete({
       where: { id: participant.id },
     });

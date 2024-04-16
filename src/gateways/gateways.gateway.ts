@@ -458,7 +458,7 @@ export class GatewaysGateway {
         throw new Error("User not found.");
       }
       await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
-      this.server.to(socket.id).emit("update", {type: "banned"});
+      this.server.to(u).emit("update", {type: "banned"});
       s.leave(roomName);
       this.server.to(roomName).emit("update", { type: "channel" });
     } catch (error) {}

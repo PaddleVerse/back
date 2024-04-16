@@ -68,9 +68,10 @@ export class BanController {
         channel: { connect: { id: Number(channel) } },
         user: { connect: { id: Number(user) } },
       });
+      console.log("the banned object is: ", banned,"and the participant object" ,participant);
       const deleted = await this.PaticipantService.deleteParticipant(
-        participant.user_id,
-        channelData.id
+        channelData.id,
+        participant.user_id
       );
       return banned;
     } catch (error) {

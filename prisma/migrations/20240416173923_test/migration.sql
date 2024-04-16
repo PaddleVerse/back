@@ -25,7 +25,7 @@ CREATE TABLE "user" (
     "name" TEXT,
     "nickname" TEXT DEFAULT 'zuse',
     "password" TEXT NOT NULL,
-    "picture" TEXT DEFAULT 'https://i.ibb.co/FsdsTYc/s-Instagram-photo-Soulless-Manga-Jujutsu-Kaisen-Artist-syrnrr-CLa5z-N2l-D1-L-JPG.jpg',
+    "picture" TEXT DEFAULT 'http://localhost:8080/1709559281974-wallpaperflare.com_wallpaper.jpg',
     "banner_picture" TEXT DEFAULT 'http://localhost:8080/bg.jpg',
     "status" "Status" NOT NULL DEFAULT 'OFFLINE',
     "level" INTEGER DEFAULT 600,
@@ -87,6 +87,8 @@ CREATE TABLE "game_history" (
 -- CreateTable
 CREATE TABLE "channel" (
     "id" SERIAL NOT NULL,
+    "picture" TEXT DEFAULT 'http://localhost:8080/1709546788254-test7.png',
+    "topic" TEXT DEFAULT 'here to have fun and make friends, no toxicity allowed',
     "key" TEXT,
     "state" "Appearance" DEFAULT 'public',
     "name" TEXT,
