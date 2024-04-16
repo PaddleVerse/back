@@ -15,7 +15,15 @@ import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
 import { zip } from "rxjs";
 
-
+class Ball {
+  constructor(
+    public position: { x: number; y: number; z: number },
+    public velocity: { x: number; y: number; z: number }
+  ) { 
+    this.position = { x: 0, y: 20, z: 0 };
+    this.velocity = { x: 0, y: 0, z: 0 };
+  }
+}
 
 @WebSocketGateway({
   cors: {
@@ -26,7 +34,7 @@ export class GatewaysGateway {
   private readonly prisma: PrismaClient;
   private rooms: { [key: string]: { [key: string]: string } } = {};
   private intervalId: NodeJS.Timer;
-  private ballPos = { x: 0, y: 20, z: 0 };
+  private ball = new Ball({ x: 0, y: 20, z: 0 }, { x: 0, y: 0, z: 0 });
 
   constructor(
     private readonly friendshipService: FriendshipService,
@@ -34,7 +42,7 @@ export class GatewaysGateway {
     private readonly convService: ConversationsService,
     private readonly gatewayService: GatewaysService,
     private readonly notificationService: NotificationsService
-  ) { this.prisma = new PrismaClient(); this.sendMovmentToClient(); }
+  ) { this.prisma = new PrismaClient(); }
   @WebSocketServer() server: Server;
 
   async handleConnection(client: any) {
@@ -65,37 +73,9 @@ export class GatewaysGateway {
         this.server.to(userId).emit("disconnected", { userId: +userId, socketId });
         // Clean up the user's socket information.
         delete this.userService.clients[userId];
-
-        // Iterate over each room to manage player roles
-        Object.keys(this.rooms).forEach(room => {
-          if (this.rooms[room].player1 === socketId) {
-            this.rooms[room].player1 = null;
-            this.notifyRemainingPlayer(room, 'player2');
-          } else if (this.rooms[room].player2 === socketId) {
-            this.rooms[room].player2 = null;
-            this.notifyRemainingPlayer(room, 'player1');
-          }
-
-          // If both player slots are null, delete the room
-          if (!this.rooms[room].player1 && !this.rooms[room].player2) {
-            delete this.rooms[room];
-          }
-        });
       }
-    } else {
-      console.error(`Failed to find a matching user for socket ID ${socketId}`);
     }
   }
-
-  // Helper method to notify the remaining player
-  private notifyRemainingPlayer(room: string, remainingRole: string) {
-    const remainingPlayerId = this.rooms[room][remainingRole];
-    if (remainingPlayerId) {
-      this.server.to(remainingPlayerId).emit("update", { message: `Your opponent has disconnected. You are now the only player in the room.` });
-    }
-  }
-
-
 
   @SubscribeMessage("friendRequest")
   async handleFriendRequest(client: any, payload: any): Promise<string> {
@@ -362,62 +342,5 @@ export class GatewaysGateway {
   async handleLEaveRoom() {
     try {
     } catch (error) { }
-  }
-
-  // game logic
-  // game logic
-  @SubscribeMessage('joinGame')
-  async handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() data: { senderId: string; room: string }): Promise<void> {
-    // Join the client to the specified room
-    client.join(data.room);
-    console.log(`Client ${data.senderId} joined room ${data.room}`);
-
-    // Initialize the room if not already done
-    if (!this.rooms[data.room]) {
-      this.rooms[data.room] = {
-        player1: null,
-        player2: null
-      };
-    }
-
-    // Assign player roles
-    if (!this.rooms[data.room].player1 || this.rooms[data.room].player1 === client.id) {
-      this.rooms[data.room].player1 = client.id;
-      this.server.to(client.id).emit('role', 'player1');
-    } else if (!this.rooms[data.room].player2 || this.rooms[data.room].player2 === client.id) {
-      this.rooms[data.room].player2 = client.id;
-      this.server.to(client.id).emit('role', 'player2');
-    } else {
-      // Room already has both players
-      this.server.to(client.id).emit('role', 'spec');
-      return;
-    }
-
-    console.log(`Room status: ${JSON.stringify(this.rooms[data.room])}`);
-
-    // Notify the client they have joined
-    // this.server.to(client.id).emit('joined', `You are ${this.rooms[data.room][client.id]}`);
-  }
-
-
-
-  @SubscribeMessage("movePaddleGame")
-  async handleMovePaddleGame(client: any, payload: any): Promise<string> {
-    // Send the moves to the clients in the same room, except the sender
-    // console.log(payload);
-    client.broadcast.to(payload.room).emit("paddlePositionUpdate", payload);
-    return "Yep";
-  }
-  sendMovmentToClient() {
-    this.intervalId = setInterval(() => {
-      // move the ball in a circle on the x and z axis
-      this.ballPos.x = 10 * Math.cos(Date.now() / 1000);
-      this.ballPos.z = 10 * Math.sin(Date.now() / 1000);
-      // Send the ball position to all clients in the room
-      this.server.to('lMa0J3z3').emit('moveBall', this.ballPos);
-
-
-    }
-      , 1000 / 10);
-  }
-}
+  };
+};
