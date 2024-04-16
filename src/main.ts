@@ -15,7 +15,7 @@ async function bootstrap() {
       methods: ['GET','HEAD','PUT','PATCH','POST','DELETE'],
       credentials: true
   });
-  // app.enableCors();
+  
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(8080);
 }
