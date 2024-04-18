@@ -51,19 +51,33 @@ export class ChatController {
       for (const value of channelList) {
         const ch = await this.channelService.getChannelById(value.channel_id);
         if (ch) {
-            const cha = { ...ch, user: false }
-            channels.push(cha);
+          const cha = { ...ch, user: false };
+          channels.push(cha);
         }
       }
       for (const friend of friendsList) {
         const user = await this.userService.getUserById(friend.friendId);
-        const conversations = await this.conversationService.getConversation(Number(id), user.id);
+        const conversations = await this.conversationService.getConversation(
+          Number(id),
+          user.id
+        );
         if (conversations) {
-            const u = {...user, user: true, conversations: conversations}
-            friends.push(u);
+          const u = { ...user, user: true, conversations: conversations };
+          friends.push(u);
         }
       }
-      return channels.concat(friends);
+      const list = channels.concat(friends);
+      const sortedList = list.sort((a, b) => {
+        return (
+          (a.user
+            ? a.conversations.messages[a.conversations.messages.length - 1]
+            : a.messages[a.messages.length - 1]) -
+          (b.user
+            ? b.conversations.messages[b.conversations.messages.length - 1]
+            : b.messages[b.messages.length - 1])
+        );
+      });
+      return sortedList;
     } catch (error) {
       throw new HttpException("no records found", HttpStatus.BAD_REQUEST);
     }
