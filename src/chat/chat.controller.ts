@@ -67,17 +67,19 @@ export class ChatController {
         }
       }
       const list = channels.concat(friends);
-      const sortedList = list.sort((a, b) => {
-        return (
-          (a.user
-            ? a.conversations.messages[a.conversations.messages.length - 1]
-            : a.messages[a.messages.length - 1]) -
-          (b.user
+      list.sort((a, b) => {
+        const messageA = a.user
+          ? a.conversations.messages[a.conversations.messages.length - 1]
+          : a.messages[a.messages.length - 1]
+        const messageB = b.user
             ? b.conversations.messages[b.conversations.messages.length - 1]
-            : b.messages[b.messages.length - 1])
-        );
+          : b.messages[b.messages.length - 1]
+        
+        console.log(messageA?.createdAt, messageB?.createdAt)
+        console.log(messageA?.createdAt.getTime() - messageB?.createdAt.getTime())
+        return messageB?.createdAt - messageA?.createdAt;
       });
-      return sortedList;
+      return list;
     } catch (error) {
       throw new HttpException("no records found", HttpStatus.BAD_REQUEST);
     }
