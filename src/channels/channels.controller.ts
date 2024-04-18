@@ -305,4 +305,29 @@ export class ChannelsController {
       return { success: false, error: error };
     }
   }
+
+  @Get('inviteList/:id')
+  async  getUsers(@Param('id') id: string) 
+  {
+    try {
+      const users = await this.userService.getUsers()
+     let list = [];
+     for (const user of users) {
+       const pa = await this.participantService.getParticipantByIds(
+         Number(id),
+         user.id
+       );
+       console.log(pa);
+       if (!(pa?.id > 0)) {
+         list.push(user);
+       }
+     }
+      // console.log(list);
+      return list;
+    }
+    catch (error) {
+      throw error;
+    }
+    }
+
 }
