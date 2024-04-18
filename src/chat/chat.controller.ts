@@ -70,14 +70,17 @@ export class ChatController {
       list.sort((a, b) => {
         const messageA = a.user
           ? a.conversations.messages[a.conversations.messages.length - 1]
-          : a.messages[a.messages.length - 1]
+          : a.messages[a.messages.length - 1];
         const messageB = b.user
-            ? b.conversations.messages[b.conversations.messages.length - 1]
-          : b.messages[b.messages.length - 1]
-        
-        console.log(messageA?.createdAt, messageB?.createdAt)
-        console.log(messageA?.createdAt.getTime() - messageB?.createdAt.getTime())
-        return messageB?.createdAt - messageA?.createdAt;
+          ? b.conversations.messages[b.conversations.messages.length - 1]
+          : b.messages[b.messages.length - 1];
+        if (!messageA && messageB) {
+          return 1;
+        }
+        if (messageA && !messageB) {
+          return -1;
+        }
+        return messageB?.createdAt.getTime() - messageA?.createdAt.getTime();
       });
       return list;
     } catch (error) {
