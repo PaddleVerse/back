@@ -41,7 +41,6 @@ class Ball {
 		this.position.x += this.velocity.x;
 		this.position.y += this.velocity.y;
 		this.position.z += this.velocity.z;
-		this.applyRotation();
 		// this.applySpeedLimit();
 
 		this.min = {
@@ -56,7 +55,7 @@ class Ball {
 		};
 	}
 
-	applyGravity(GRAVITY: number = 0.05): void {
+	applyGravity(GRAVITY: number = 0.01): void {
 		this.velocity.y -= GRAVITY;
 	}
 
@@ -71,13 +70,7 @@ class Ball {
 		this.position.z = centerZ + Math.sin(Date.now() * SPIN_SPEED) * radiusAboveGround;
 	}
 
-	applyRotation(): void {
-		// rotation of the ball depending on the velocity and the direction
-		if (this.velocity.x === 0 && this.velocity.z === 0) return;
-		this.rotation.x += this.velocity.z;
-		this.rotation.y += this.velocity.x;
-		this.rotation.z += this.velocity.y;
-	}
+	
 	applySpeedLimit(maxSpeed: number = 0.5): void {
 		let signX = Math.sign(this.velocity.x);
 		let signY = Math.sign(this.velocity.y);

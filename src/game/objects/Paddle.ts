@@ -1,21 +1,26 @@
+import { BoundingBox } from "../types/BoundingBox";
 import { Vector3 } from "../types/Vector3";
 
 class Paddle {
-	id: number;
+	id: string;
 	position: Vector3;
 	velocity: Vector3;
 	rotationX: number;
+	bounds: BoundingBox;
 
-	constructor(id: number, position: Vector3) {
+	constructor(id: string, position: Vector3) {
 		this.id = id;
 		this.position = position;
 		this.velocity = { x: 0, y: 0, z: 0 };
 		this.rotationX = Math.PI / 2;
+		this.bounds = new BoundingBox(0.1, 3, 1.2, this.position, {x: this.rotationX, y: 0, z: 0});
 	}
-
+	
 	update(data: { paddle: Vector3 }): void {
 		this.position = data.paddle;
+		this.bounds.updatePosition(this.position);
+		console.log(this.bounds);
 	}
-}
+	}
 
 export default Paddle;

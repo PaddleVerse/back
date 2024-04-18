@@ -1,11 +1,10 @@
 import { Vector3 } from "../types/Vector3";
-import { BoundingBox } from "../types/BoundingBox";
 
 class Table {
 	position: Vector3;
-	tableBounds: BoundingBox | null;
-	netBound: BoundingBox | null;
-	tableTopBound: BoundingBox | null;
+	tableBounds: any | null;
+	netBound: any | null;
+	tableTopBound: any | null;
 
 	constructor() {
 		this.position = { x: 0, y: 0, z: 0 };
