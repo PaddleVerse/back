@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import * as fs from 'fs';
 import { MulterFile } from 'multer';
 import { Socket } from 'socket.io';
 import { UpdateUserDto } from 'src/auth/dto/update-user.dto/update-user.dto';
+import * as cloudinary from 'cloudinary';
 
 interface ClientData {
   [userId: number]: { socketId: string; socket: Socket};
@@ -17,7 +17,12 @@ export class UserService
   public clients: ClientData = {};
     constructor () 
     {
-        this.prisma = new PrismaClient();
+      this.prisma = new PrismaClient();
+      cloudinary.v2.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      });
     }
 
     async getUsers()
@@ -376,18 +381,10 @@ export class UserService
         }
       }
 
-      async uploadImage(file: MulterFile): Promise<string>
-      {
-        try
-        {
-          const filename = `${Date.now()}-${file.originalname}`;
-          const filePath = `images/${filename}`;
-        
-          await fs.promises.writeFile(filePath, file.buffer);
-        
-          return `http://localhost:8080/${filename}`;
-        }
-        catch (error) { return null; }
+      async uploadImage(file: MulterFile): Promise<string> {
+        const base64String = file.buffer.toString('base64');
+        const result = await cloudinary.v2.uploader.upload(`data:${file.mimetype};base64,${base64String}`, { resource_type: 'auto' });
+        return result.secure_url;
       }
 
       async editUser(id: number, data: UpdateUserDto)
