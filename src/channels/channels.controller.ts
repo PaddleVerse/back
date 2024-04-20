@@ -136,7 +136,6 @@ export class ChannelsController {
   ) {
     try {
       try {
-        console.log(updates);
         const channels = !isNaN(Number(id))
           ? await this.channelService.getChannelById(Number(id))
           : await this.channelService.getChannelByName(id);
@@ -170,7 +169,6 @@ export class ChannelsController {
           channels.id,
           updates
         );
-        console.log(updatedChannel);
         return updatedChannel;
       } catch (error) {
         throw error;
@@ -215,13 +213,10 @@ export class ChannelsController {
           (message) => message.sender_id !== block.friendId
         );
       });
-      // console.log(messages);
-
       return messages.sort(
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
       );
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -321,7 +316,6 @@ export class ChannelsController {
          list.push(user);
        }
      }
-      console.log("the list of the users", list);
       return list;
     }
     catch (error) {

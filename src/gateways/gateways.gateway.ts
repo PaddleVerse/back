@@ -294,9 +294,7 @@ export class GatewaysGateway {
     try {
       //some logic here to handle the message between the two users, mainly check the sockets and if they exist in the data base or not
       const id: any = this.getSocketId(reciever);
-      console.log(client, reciever, "the reciever socket id: ", id, "and the sender socket id: ", socket.id, this.getSocketId(client));
       this.server.to(id).emit("update", { dm: true }); // final result
-      console.log("sending to the socket owner")
       this.server.to(socket.id).emit("update", { dm: true }); // final result
     } catch (error) {}
   }
@@ -451,7 +449,6 @@ export class GatewaysGateway {
     try {
       this.server.to(roomName).emit("update", { channel: true });
     } catch (error) {
-      console.log(error);
     }
   }
 }

@@ -42,7 +42,7 @@ export class BanController {
     @Body("uid") user: string
   ) {
     try {
-      console.log("the channel is: ", channel,  "the user is: ", user);
+
       const us = await this.userService.getUserById(Number(user));
       if (!us) {
         throw new HttpException("User not found", 404);
@@ -57,7 +57,6 @@ export class BanController {
         Number(channel),
         Number(user)
       );
-      console.log("the participant object is: ", participant);
       if (!participant) {
         throw new HttpException("Participant not found", 404);
       }
