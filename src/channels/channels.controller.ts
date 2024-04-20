@@ -317,12 +317,11 @@ export class ChannelsController {
          Number(id),
          user.id
        );
-       console.log(pa);
        if (!(pa?.id > 0)) {
          list.push(user);
        }
      }
-      // console.log(list);
+      console.log("the list of the users", list);
       return list;
     }
     catch (error) {

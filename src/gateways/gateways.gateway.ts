@@ -306,7 +306,8 @@ export class GatewaysGateway {
   async handleJoinRoom(
     @ConnectedSocket() socket: Socket,
     @Body("user") client: user,
-    @Body("roomName") roomName: string
+    @Body("roomName") roomName: string,
+    @Body("type") type: string
   ) {
     try {
       const u = this.getSocketId(Number(client.id));
@@ -330,12 +331,22 @@ export class GatewaysGateway {
           return;
         }
       }
-      await this.gatewayService.addUserToRoom(roomName, {
-        id: Number(client.id),
-        userName: client.username,
-        socketId: u,
-      });
-      socket.join(roomName);
+      if (type === "self") {
+        await this.gatewayService.addUserToRoom(roomName, {
+          id: Number(client.id),
+          userName: client.username,
+          socketId: u,
+        });
+        socket.join(roomName);
+      } else {
+        const soc = this.getSocket(client.id);
+        await this.gatewayService.addUserToRoom(roomName, {
+          id: Number(client.id),
+          userName: client.username,
+          socketId: soc.id,
+        });
+        soc.join(roomName);
+      }
       this.server.to(roomName).emit("update", { type: "join" });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
