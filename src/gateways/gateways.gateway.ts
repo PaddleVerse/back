@@ -434,7 +434,7 @@ export class GatewaysGateway {
         throw new Error("User not found.");
       }
       await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
-      this.server.to(socket.id).emit("update", {type: "banned"});
+      this.server.to(socket.id).emit("update", { type: "banned" });
       s.leave(roomName);
       this.server.to(roomName).emit("update", { type: "channel" });
     } catch (error) {}
@@ -448,7 +448,40 @@ export class GatewaysGateway {
   ) {
     try {
       this.server.to(roomName).emit("update", { channel: true });
-    } catch (error) {
-    }
+    } catch (error) {}
+  }
+
+  @SubscribeMessage("typing")
+  async handleTyping(
+    @Body("sender") user: user,
+    @Body("reciever") reciever: user,
+    @Body("roomName") roomName: string,
+    @Body("roomId") roomId: string,
+    @Body("type") type: string
+  ) {
+    try {
+      if (type === "dm") {
+        const id: any = this.getSocketId(reciever.id);
+        this.server.to(id).emit("update", {
+          target: "dm",
+          typing: true,
+          type: "typing",
+          sender: user,
+          reciever: reciever,
+          t: true,
+        });
+      } else {
+        this.server.to(roomName).emit("update", {
+          typing: true,
+          type: "typing",
+          target: "channel",
+          sender: user,
+          reciever: reciever,
+          id: roomId,
+          roomName: roomName,
+          t: false,
+        });
+      }
+    } catch (error) {}
   }
 }
