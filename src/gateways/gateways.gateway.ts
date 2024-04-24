@@ -1,6 +1,7 @@
 import { Body } from "@nestjs/common";
 import {
   ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -12,6 +13,17 @@ import { N_Type, PrismaClient, Req, Status, user } from "@prisma/client";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
+import { zip } from "rxjs";
+
+class Ball {
+  constructor(
+    public position: { x: number; y: number; z: number },
+    public velocity: { x: number; y: number; z: number }
+  ) { 
+    this.position = { x: 0, y: 20, z: 0 };
+    this.velocity = { x: 0, y: 0, z: 0 };
+  }
+}
 
 @WebSocketGateway({
   cors: {
@@ -20,13 +32,17 @@ import { NotificationsService } from "src/notifications/notifications.service";
 })
 export class GatewaysGateway {
   private readonly prisma: PrismaClient;
+  private rooms: { [key: string]: { [key: string]: string } } = {};
+  private intervalId: NodeJS.Timer;
+  private ball = new Ball({ x: 0, y: 20, z: 0 }, { x: 0, y: 0, z: 0 });
+
   constructor(
     private readonly friendshipService: FriendshipService,
     private readonly userService: UserService,
     private readonly convService: ConversationsService,
     private readonly gatewayService: GatewaysService,
     private readonly notificationService: NotificationsService
-    ) { this.prisma = new PrismaClient(); }
+  ) { this.prisma = new PrismaClient(); }
   @WebSocketServer() server: Server;
 
   async handleConnection(client: any) {
@@ -93,35 +109,35 @@ export class GatewaysGateway {
   @SubscribeMessage("friendRequest")
   async handleFriendRequest(client: any, payload: any): Promise<string> {
     try {
-        const id: any = await this.getSocketId(payload?.reciverId);
-        await this.friendshipService.addFriend(
-          payload?.senderId,
-          payload?.reciverId,
-          Req.SEND
-        );
-        await this.friendshipService.addFriend(
-          payload?.reciverId,
-          payload?.senderId,
-          Req.RECIVED
-        );
-        await this.notificationService.createNotification(
-          payload?.reciverId,
-          N_Type.REQUEST,
-          payload?.senderId
-        );
-        
-        if (id === null) {
-          this.server.to(client.id).emit("refresh", { ok: 0 });
-          return "User not found.";
-        }
+      const id: any = await this.getSocketId(payload?.reciverId);
+      await this.friendshipService.addFriend(
+        payload?.senderId,
+        payload?.reciverId,
+        Req.SEND
+      );
+      await this.friendshipService.addFriend(
+        payload?.reciverId,
+        payload?.senderId,
+        Req.RECIVED
+      );
+      await this.notificationService.createNotification(
+        payload?.reciverId,
+        N_Type.REQUEST,
+        payload?.senderId
+      );
 
-        this.server.to(payload?.reciverId + "").emit("notification", payload);
-        this.server.to(payload?.reciverId + "").emit("refresh", payload);
-        this.server.to(payload?.senderId + "").emit("refresh", payload);
-        return "Friend request received!";
-      } catch (error) {
-        return "Failed to receive friend request.";
+      if (id === null) {
+        this.server.to(client.id).emit("refresh", { ok: 0 });
+        return "User not found.";
       }
+
+      this.server.to(payload?.reciverId + "").emit("notification", payload);
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      return "Friend request received!";
+    } catch (error) {
+      return "Failed to receive friend request.";
+    }
   }
 
   @SubscribeMessage("acceptFriendRequest")
@@ -181,28 +197,28 @@ export class GatewaysGateway {
   @SubscribeMessage("removeFriend")
   async handleRemoveFriend(client: any, payload: any): Promise<string> {
     try {
-        const id: any = await this.getSocketId(
-          payload?.is ? payload?.reciverId : payload?.senderId
-        );
-        await this.friendshipService.removeFriend(
-          payload?.senderId,
-          payload?.reciverId
-        );
-        await this.friendshipService.removeFriend(
-          payload?.reciverId,
-          payload?.senderId
-        );
-        await this.convService.deleteConversation(
-          payload?.senderId,
-          payload?.reciverId
-        );
-        if (id === null) {
-          this.server.to(client.id).emit("refresh", { ok: 0 });
-          return "User not found.";
-        }
-        this.server.to(payload?.reciverId + "").emit("refresh", payload);
-        this.server.to(payload?.senderId + "").emit("refresh", payload);
-        return "Friend removed!";
+      const id: any = await this.getSocketId(
+        payload?.is ? payload?.reciverId : payload?.senderId
+      );
+      await this.friendshipService.removeFriend(
+        payload?.senderId,
+        payload?.reciverId
+      );
+      await this.friendshipService.removeFriend(
+        payload?.reciverId,
+        payload?.senderId
+      );
+      await this.convService.deleteConversation(
+        payload?.senderId,
+        payload?.reciverId
+      );
+      if (id === null) {
+        this.server.to(client.id).emit("refresh", { ok: 0 });
+        return "User not found.";
+      }
+      this.server.to(payload?.reciverId + "").emit("refresh", payload);
+      this.server.to(payload?.senderId + "").emit("refresh", payload);
+      return "Friend removed!";
     } catch (error) {
       return "Failed to removed friend.";
     }
