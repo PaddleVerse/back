@@ -32,7 +32,10 @@ class GameRoom {
     this.game = new Game(this.players);
     this.game.startGame();
   }
-  
+
+  endGameLeave(): void {
+    this.game = null;
+  }
 
 
   removePlayer(player: Player): void {

@@ -51,7 +51,7 @@ export default class GameGateway {
 
 	async handleConnection(client: any) {
 
-		console.log(`Client connected: ${client.id}`);
+		// console.log(`Client connected: ${client.id}`);
 	}
 
 	async handleDisconnect(client: any) {
@@ -60,25 +60,22 @@ export default class GameGateway {
 		const userId = Object.keys(this.userService.clients).find(key => this.userService.clients[key].socketId === socketId);
 
 		if (userId) {
-			console.log(`Client with user ID ${userId} and socket ID ${socketId} disconnected.`);
+			// console.log(`Client with user ID ${userId} and socket ID ${socketId} disconnected.`);
 			const user = await this.userService.getUserById(+userId);
 			if (user) {
-				// Iterate over each room to manage player roles
-				// Object.keys(this.rooms).forEach(room => {
-				// 	if (this.rooms[room].player1 === socketId) {
-				// 		this.rooms[room].player1 = null;
-				// 		this.notifyRemainingPlayer(room, 'player2');
-				// 	} else if (this.rooms[room].player2 === socketId) {
-				// 		this.rooms[room].player2 = null;
-				// 		this.notifyRemainingPlayer(room, 'player1');
-				// 	}
-
-				// 	// If both player slots are null, delete the room
-				// 	if (!this.rooms[room].player1 && !this.rooms[room].player2) {
-				// 		delete this.rooms[room];
-				// 		this.ball.position = { x: 0, y: 205, z: 0 };
-				// 	}
-				// });
+				// find the player and which room they are in
+				let room = null;
+				for (const roomKey in this.rooms) {
+					let players = this.rooms[roomKey].players;
+					for (const player of players) {
+						// delete the player from the room
+						if (player.id === socketId) {
+							room = roomKey;
+							this.rooms[room] = null;
+							break;
+						}
+					}
+				}
 			}
 		} else {
 			console.error(`Failed to find a matching user for socket ID ${socketId}`);
@@ -142,7 +139,9 @@ export default class GameGateway {
 	async handleMovePaddleGame(client: any, payload: any): Promise<string> {
 		if (!this.rooms[payload.room]) return;
 		const game = this.rooms[payload.room].game;
-		game.movePaddle(client.id, payload.paddle);
+		if (!game) return;
+		game.movePaddle(client.id, payload);
+		console.log(payload);
 		client.broadcast.to(payload.room).emit("paddlePositionUpdate", payload);
 		return "Yep";
 	}
@@ -158,6 +157,7 @@ export default class GameGateway {
 		this.mainLoopId = setInterval(() => {
 			// move the ball in a circle on the x and z axis
 			for (const room in this.rooms) {
+				if (!this.rooms[room]) continue;
 				if (this.rooms[room].game) {
 					this.rooms[room].game.update();
 					this.server.to(room).emit('moveBall', this.rooms[room].game.ball);

@@ -23,17 +23,26 @@ class Game {
     }
     startGame(): void {
         this.winner = null;
-        this.players[0].paddle.position = { x: 13, y: 10, z: 0 };
-        this.players[1].paddle.position = { x: -13, y: 10, z: 0 };
         this.score[this.players[0].id] = 0;
         this.score[this.players[1].id] = 0;
+        this.players[0].paddle.update({ paddle: { x: 16, y: 10, z: 0 } });
+        this.players[1].paddle.update({ paddle: { x: -16, y: 10, z: 0 } });
         // delay of 3 seconds before the ball spawns
-        setTimeout(() => {
-            this.spawnBall();
-        }, 3000);
+        this.spawnBall();
+
+        // setTimeout(() => {
+        //     this.spawnBall();
+        // }, 3000);
     }
     endGame(): void {
         this.winner = this.score[0] > this.score[1] ? 0 : 1;
+    }
+    endGameLeave(player : Player): void {
+        this.players.forEach((p) => {
+            if (p.id !== player.id) {
+                this.players = [p]; 
+            }
+        });
     }
 
     updateScore(player: number, score: number): void {
@@ -46,18 +55,21 @@ class Game {
 
     update(): void {
         if (!this.ball) return;
-        checkCollisionTable(this.ball, this.table);
-        checkCollisionGround(this.ball);
-        checkCollisionNet(this.table.netBound, this.ball);
+        // checkFutureCollisionPaddle(this.players[0].paddle, this.ball, 0.01667);
+        // checkFutureCollisionPaddle(this.players[1].paddle, this.ball, 0.01667);
         checkCollisionPaddle(this.players[0].paddle, this.ball);
         checkCollisionPaddle(this.players[1].paddle, this.ball);
+        checkCollisionTable(this.ball, this.table);
+        checkCollisionGround(this.ball);
         this.ball.update();
+        // checkCollisionNet(this.table.netBound, this.ball);
     }
-    movePaddle(playerid: string, position: Vector3): void {
+    movePaddle(playerid: string, payload: any): void {
         this.players.forEach((player) => {
             if (player.id === playerid) {
                 // player.paddle.position = position;
-                player.paddle.update({ paddle: position });
+                player.paddle.velocity = payload.velocity;
+                player.paddle.update({ paddle: payload.paddle });
             }
         });
     }

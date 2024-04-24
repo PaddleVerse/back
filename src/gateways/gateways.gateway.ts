@@ -56,7 +56,7 @@ export class GatewaysGateway {
       client.join(userId + "");
       this.server.to(userId).emit("connected", { userId, socketId });
     }
-    console.log(`User ${userId} connected with socket ID ${socketId}`);
+    // console.log(`User ${userId} connected with socket ID ${socketId}`);
   }
 
   async handleDisconnect(client: any) {
@@ -65,7 +65,7 @@ export class GatewaysGateway {
     const userId = Object.keys(this.userService.clients).find(key => this.userService.clients[key].socketId === socketId);
 
     if (userId) {
-      console.log(`Client with user ID ${userId} and socket ID ${socketId} disconnected.`);
+      // console.log(`Client with user ID ${userId} and socket ID ${socketId} disconnected.`);
       const user = await this.userService.getUserById(+userId);
       if (user) {
         await this.userService.updateUser(user.id, { status: Status.OFFLINE });

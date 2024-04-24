@@ -1,5 +1,5 @@
 import { Vector3 } from "../types/Vector3";
-
+import { BoundingBox } from "../types/BoundingBox";
 class Table {
 	position: Vector3;
 	tableBounds: any | null;
@@ -9,7 +9,7 @@ class Table {
 	constructor() {
 		this.position = { x: 0, y: 0, z: 0 };
 		this.tableBounds = null;
-		this.netBound = null;
+		this.netBound = new BoundingBox(17.5, 1.6, 17.5, { x: 8.5, y: 9, z: 8 }, { x: 0, y: 0, z: 0 });
 		this.tableTopBound = null;
 	}
 

@@ -10,11 +10,12 @@ class Ball {
 	max: Vector3;
 	lastHit: any; // Define a more specific type if possible
 	hitTable: boolean;
-
+	maxSpeed: number;
 	constructor(
 		radius: number = 0.3,
 		position: Vector3 = { x: 0, y: 15, z: 0 },
-		velocity: Vector3 = { x: 0, y: 0, z: 0 }
+		velocity: Vector3 = { x: 0, y: 0, z: 0 },
+		maxSpeed: number = 0.9
 	) {
 		this.position = { ...position };
 		this.velocity = { ...velocity };
@@ -33,15 +34,16 @@ class Ball {
 		};
 		this.lastHit = null;
 		this.hitTable = false;
+		this.maxSpeed = maxSpeed;
 	}
 
 	update(): void {
 		this.applyGravity();
+		this.applyAirResistance();
 		// this.applySpinning();
 		this.position.x += this.velocity.x;
 		this.position.y += this.velocity.y;
 		this.position.z += this.velocity.z;
-		// this.applySpeedLimit();
 
 		this.min = {
 			x: this.position.x - this.radius,
@@ -70,21 +72,23 @@ class Ball {
 		this.position.z = centerZ + Math.sin(Date.now() * SPIN_SPEED) * radiusAboveGround;
 	}
 
-	
-	applySpeedLimit(maxSpeed: number = 0.5): void {
-		let signX = Math.sign(this.velocity.x);
-		let signY = Math.sign(this.velocity.y);
-		let signZ = Math.sign(this.velocity.z);
-		if (Math.abs(this.velocity.x) > maxSpeed) {
-			this.velocity.x = maxSpeed * signX;
-		}
-		if (Math.abs(this.velocity.y) > maxSpeed) {
-			this.velocity.y = maxSpeed * signY;
-		}
-		if (Math.abs(this.velocity.z) > maxSpeed) {
-			this.velocity.z = maxSpeed * signZ;
-		}
+	applyAirResistance(): void {
+		const AIR_RESISTANCE = 0.0015; // Adjust this value for desired air resistance
+		this.velocity.x *= 1 - AIR_RESISTANCE;
+		// this.velocity.y *= 1 - AIR_R÷ESISTANCE;
+		this.velocity.z *= 1 - AIR_RESISTANCE;
 	}
+	// applySpeedLimit(): void {
+	// 	const velocityMagnitude = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2 + this.velocity.z ** 2);
+	// 	if (velocityMagnitude > this.maxSpeed) {
+	// 		// Normalize the velocity vector and then multiply by maxSpeed
+	// 		this.velocity.x = (this.velocity.x / velocityMagnitude) * this.maxSpeed;
+	// 		this.velocity.y = (this.velocity.y / velocityMagnitude) * this.maxSpeed;
+	// 		this.velocity.z = (this.velocity.z / velocityMagnitude) * this.maxSpeed;
+	// 		console.log("Speed limit reached!");
+	// 		console.log(this.velocity);
+	// 	}
+	// }
 }
 
 export default Ball;

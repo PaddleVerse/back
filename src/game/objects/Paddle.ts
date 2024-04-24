@@ -13,13 +13,12 @@ class Paddle {
 		this.position = position;
 		this.velocity = { x: 0, y: 0, z: 0 };
 		this.rotationX = Math.PI / 2;
-		this.bounds = new BoundingBox(0.1, 3, 1.2, this.position, {x: this.rotationX, y: 0, z: 0});
+		this.bounds = new BoundingBox(0.1, 3, 1.2, { x: this.position.x, y: this.position.y + 1, z: this.position.z });
 	}
-	
+
 	update(data: { paddle: Vector3 }): void {
 		this.position = data.paddle;
 		this.bounds.updatePosition(this.position);
-		console.log(this.bounds);
 	}
 	}
 

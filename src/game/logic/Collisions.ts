@@ -2,6 +2,7 @@ import Ball from "../objects/Ball";
 import Paddle from "../objects/Paddle";
 import Table from "../objects/Table";
 import { BoundingBox } from "../types/BoundingBox";
+
 function checkCollisionTable(ball: Ball, table: Table): void {
   // Use 'tableBounds' which contains 'width', 'height', 'depth', and 'center'.
   if (!table.tableBounds) return; // Early return if tableBounds is not defined
@@ -55,24 +56,40 @@ function checkCollisionNet(netBox: BoundingBox, ball: Ball): void {
 }
 
 function checkCollisionPaddle(paddle: Paddle, ball: Ball): void {
-  const paddleBounds = paddle.bounds;
-  if (!paddleBounds) return;
+  const { max, min } = paddle.bounds;
+  if (!max || !min) return;
 
-  if (paddleBounds.max.x > ball.min.x && paddleBounds.min.x < ball.max.x) {
-    if (paddleBounds.max.y > ball.min.y && paddleBounds.min.y < ball.max.y) {
-      if (paddleBounds.max.z > ball.min.z && paddleBounds.min.z < ball.max.z) {
-        ball.velocity.y = ball.velocity.y * 0.9; // Reverse and dampen the y-velocity
-        ball.velocity.x = -ball.velocity.x * 1.2; // Reduce x-velocity
-        ball.velocity.z = ball.velocity.z * 0.8 * Math.random(); // Reduce z-velocity
-        ball.position.y = paddleBounds.max.y + ball.radius; // Adjust ball position to sit on the paddle
-      }
-    }
+  // Check if the bounding boxes overlap take the ball's radius into account
+  const isCollision =
+    max.x > ball.min.x &&
+    min.x < ball.max.x &&
+    max.y > ball.min.y &&
+    min.y < ball.max.y &&
+    max.z > ball.min.z &&
+    min.z < ball.max.z; 
+  if (isCollision) {
+    handleCollisionResponse(paddle, ball);
   }
 }
+
+
+
+function handleCollisionResponse(paddle: Paddle, ball: Ball): void {
+  // Update velocities with some factor
+  ball.velocity.x = -(ball.velocity.x * 1.4);
+  ball.velocity.y = 0.2 + (paddle.velocity.y / 3);
+  ball.velocity.z = paddle.velocity.z * 0.8;
+  ball.position.x = paddle.position.x + ball.velocity.x;
+  console.log(ball.velocity);
+  console.log(paddle.velocity);
+ 
+}
+
+
 
 export {
   checkCollisionTable,
   checkCollisionGround,
   checkCollisionNet,
-  checkCollisionPaddle,
+  checkCollisionPaddle
 };
