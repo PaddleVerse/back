@@ -65,7 +65,8 @@ export default class GameGateway {
 				// find the player and which room they are in
 				let room = null;
 				for (const roomKey in this.rooms) {
-					let players = this.rooms[roomKey].players;
+					let players = this.rooms && this.rooms[roomKey] ? this.rooms[roomKey].players : null;
+					if (!players) continue;
 					for (const player of players) {
 						// delete the player from the room
 						if (player.id === socketId) {
@@ -147,8 +148,17 @@ export default class GameGateway {
 		const s = await this.gatewayService.matchmaking(usr)
 		if (s)
 		{
-			this.gatewayService.matchQueue.forEach(async (value) => {
-				await this.server.to(value.socketId).emit('start', {});
+			const matchQueue = await this.gatewayService.matchQueue;
+
+			const values = Array.from(matchQueue.values());
+
+			values.forEach(async (value, index) => {
+				const otherUserIndex = index === 0 ? 1 : 0;
+				const otherUserId = await values[otherUserIndex].id;
+
+				await this.server.to(value.socketId).emit('start', {
+					id: otherUserId
+				});
 			});
 			this.gatewayService.matchQueue.clear();
 		}
