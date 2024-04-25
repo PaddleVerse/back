@@ -484,4 +484,14 @@ export class GatewaysGateway {
       }
     } catch (error) {}
   }
+
+  @SubscribeMessage("GameInvite")
+  async handleGameInvite(@Body('sender') sender: user, @Body('reciever') reciever: user) {
+    try {
+      const id: any = this.getSocketId(reciever.id);
+      this.server.to(id).emit("invited", { sender: sender });
+    } catch (error) {
+
+    }
+  }
 }
