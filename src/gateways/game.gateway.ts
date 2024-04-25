@@ -13,21 +13,20 @@ import { N_Type, PrismaClient, Req, Status, user } from "@prisma/client";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
-import { zip } from "rxjs";
-import Ball from "src/game/objects/Ball";
-import Table from "src/game/objects/Table";
-import { checkCollisionGround, checkCollisionNet, checkCollisionTable } from "src/game/logic/Collisions";
-import Paddle  from "src/game/objects/Paddle";
+
 import GameRoom from "src/game/objects/GameRoom";
-import Game from "src/game/objects/Game";
-import Player from "src/game/objects/Player";
+
+type userT = {
+	id: number;
+	userName: string;
+	socketId: string;
+  };
 
 @WebSocketGateway({
 	cors: {
 		origin: "*",
 	},
 })
-
 export default class GameGateway {
 	private readonly prisma: PrismaClient;
 	private rooms: {
@@ -101,36 +100,6 @@ export default class GameGateway {
 			this.rooms[data.room] = room;
 			room.addPlayer(client.id, this.server, client);
 		}
-
-		// Initialize the room if not already done
-		// client.join(data.room);
-		// console.log(`Client ${data.senderId} joined room ${data.room}`);
-
-		// // Initialize the room if not already done
-		// if (!this.rooms[data.room]) {
-		// 	this.rooms[data.room] = {
-		// 		player1: null,
-		// 		player2: null
-		// 	};
-		// }
-
-		// // Assign player roles
-		// if (!this.rooms[data.room].player1 || this.rooms[data.room].player1 === client.id) {
-		// 	this.rooms[data.room].player1 = client.id;
-			
-		// 	this.server.to(client.id).emit('role', 'player1');
-		// } else if (!this.rooms[data.room].player2 || this.rooms[data.room].player2 === client.id) {
-		// 	this.rooms[data.room].player2 = client.id;
-		// 	this.server.to(client.id).emit('role', 'player2');
-		// } else {
-		// 	// Room already has both players
-		// 	this.server.to(client.id).emit('role', 'spec');
-		// 	return;
-		// }
-
-
-		// Notify the client they have joined
-		// this.server.to(client.id).emit('joined', `You are ${this.rooms[data.room][client.id]}`);
 	}
 
 
@@ -153,6 +122,7 @@ export default class GameGateway {
 		game.ball.velocity = { x: 0.4, y: 0, z: 0 };
 		return "Yep";
 	}
+
 	mainLoop() {
 		this.mainLoopId = setInterval(() => {
 			// move the ball in a circle on the x and z axis
@@ -163,24 +133,30 @@ export default class GameGateway {
 					this.server.to(room).emit('moveBall', this.rooms[room].game.ball);
 				}
 			}
-			// this.ball.position.x = 10 * Math.cos(Date.now() / 1000);
-			// this.ball.position.z = 10 * Math.sin(Date.now() / 1000);
-			// this.ball.velocity.y = 0.1;
-			// if there is a player in the room
-			// if (!this.rooms['lMa0J3z3']) return;
-			// if (this.rooms['lMa0J3z3'].player1 || this.rooms['lMa0J3z3'].player2) {
-			// 	// move the ball
-			// 	checkCollisionTable(this.ball, this.table);
-			// 	checkCollisionGround(this.ball);
-			// 	checkCollisionNet(this.table.netBound, this.ball);
-				
-			// 	this.ball.update();
-			// 	// send the ball position to the players in the room
-			// 	this.server.to('lMa0J3z3').emit('moveBall', this.ball);
-			// }
-			// console.log(this.ball)
-
+		}, 1000 / 60);
+	}
+	@SubscribeMessage("matchMaking")
+	async MatchMakingHandler(client: any, payload: any) {
+		const user = await this.userService.getUserById(payload.id);
+		
+		const usr : userT = {
+			id: user.id,
+			userName: user.username,
+			socketId: this.getSocketId(user.id)
 		}
-			, 1000 / 60);
+		const s = await this.gatewayService.matchmaking(usr)
+		if (s)
+		{
+			this.gatewayService.matchQueue.forEach(async (value) => {
+				await this.server.to(value.socketId).emit('start', {});
+			});
+			this.gatewayService.matchQueue.clear();
+		}
+	}
+
+	getSocketId(userId: number): string {
+		return this.userService.clients[userId] === undefined
+		  ? null
+		  : this.userService.clients[userId].socketId;
 	}
 }

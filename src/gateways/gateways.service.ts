@@ -16,6 +16,7 @@ type room = {
 @Injectable()
 export class GatewaysService {
   rooms: room[] = [];
+  matchQueue = new Map<number, userT>();
 
   async getRoom(name: string) {
     const room = await this.rooms.findIndex((room) => room.name === name);
@@ -74,5 +75,22 @@ export class GatewaysService {
     for (const room of rooms) {
       await this.RemoveUserFromRoom(room.name, id);
     }
+  }
+
+  async matchmaking(user: any): Promise<boolean> {
+    this.matchQueue.set(user.id, user);
+    // console.log(this.matchQueue);
+    if (this.matchQueue.size >= 2) {
+      const users = Array.from(this.matchQueue.values());
+      const user1 = users[0];
+      const user2 = users[1];
+      // this.matchQueue.delete(user1.id);
+      // this.matchQueue.delete(user2.id);
+      await this.addRoom(user1.userName + user2.userName, user1);
+      await this.addUserToRoom(user1.userName + user2.userName, user1);
+      await this.addUserToRoom(user1.userName + user2.userName, user2);
+      return true;
+    }
+    return false;
   }
 }

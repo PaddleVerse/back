@@ -25,6 +25,8 @@ class Ball {
   }
 }
 
+
+
 @WebSocketGateway({
   cors: {
     origin: "*",
