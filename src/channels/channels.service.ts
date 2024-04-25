@@ -77,17 +77,4 @@ export class ChannelsService {
     });
     return channels;
   }
-
-  async uploadImage(file: MulterFile): Promise<string> {
-    try {
-      const filename = `${Date.now()}-${file.originalname}`;
-      const filePath = `images/${filename}`;
-
-      await fs.promises.writeFile(filePath, file.buffer);
-
-      return `http://localhost:8080/${filename}`;
-    } catch (error) {
-      return null;
-    }
-  }
 }

@@ -290,7 +290,7 @@ export class ChannelsController {
           HttpStatus.BAD_REQUEST
         );
       }
-      const url = await this.channelService.uploadImage(file);
+      const url = await this.userService.uploadImage(file);
       const updateChannel = await this.channelService.updateChannel(
         channels.id,
         { picture: url }
