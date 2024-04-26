@@ -79,7 +79,7 @@ export class GatewaysService {
 
   async matchmaking(user: any): Promise<boolean> {
     this.matchQueue.set(user.id, user);
-    // console.log(this.matchQueue);
+    console.log(this.matchQueue);
     if (this.matchQueue.size >= 2) {
       const users = Array.from(this.matchQueue.values());
       const user1 = users[0];
@@ -92,5 +92,17 @@ export class GatewaysService {
       return true;
     }
     return false;
+  }
+
+  async leaveMatchmaking(user: any): Promise<void> {
+    this.matchQueue.delete(user.id);
+  }
+
+  async leaveRoom(user: any): Promise<void> {
+    this.leaveMatchmaking(user);
+    const rooms = await this.findRoomsByUserId(user.id);
+    for (const room of rooms) {
+      await this.RemoveUserFromRoom(room.name, user.id);
+    }
   }
 }

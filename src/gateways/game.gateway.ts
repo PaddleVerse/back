@@ -164,6 +164,22 @@ export default class GameGateway {
 		}
 	}
 
+	@SubscribeMessage("leaveRoom")
+	async leaveRoomHandler(client: any, payload: any) {
+		console.log("leaveRoom");
+		const room = await this.gatewayService.getRoom(payload.room);
+		// console.log(room);
+
+		const user = await this.userService.getUserById(payload.id);
+		if (!user) return;
+		const usr : userT = {
+			id: user.id,
+			userName: user.username,
+			socketId: this.getSocketId(user.id)
+		}
+		await this.gatewayService.leaveRoom(usr);
+	}
+
 	getSocketId(userId: number): string {
 		return this.userService.clients[userId] === undefined
 		  ? null
