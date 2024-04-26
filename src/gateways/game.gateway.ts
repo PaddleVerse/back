@@ -167,9 +167,15 @@ export default class GameGateway {
 	@SubscribeMessage("leaveRoom")
 	async leaveRoomHandler(client: any, payload: any) {
 		console.log("leaveRoom");
-		const room = await this.gatewayService.getRoom(payload.room);
-		// console.log(room);
+		const room = this.rooms[payload.room];
+		if (!room) return;
 
+		for (const player of room.players) {
+			// check who wins
+			this.server.to(player.id).emit("leftRoom");
+		}
+
+		this.rooms[payload.room] = null;
 		const user = await this.userService.getUserById(payload.id);
 		if (!user) return;
 		const usr : userT = {
