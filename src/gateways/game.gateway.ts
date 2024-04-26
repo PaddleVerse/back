@@ -141,7 +141,6 @@ export default class GameGateway {
 		const game = this.rooms[payload.room].game;
 		if (!game) return;
 		game.movePaddle(client.id, payload);
-		console.log(payload);
 		client.broadcast.to(payload.room).emit("paddlePositionUpdate", payload);
 		return "Yep";
 	}

@@ -3,6 +3,7 @@ import Table from "./table";
 import { checkCollisionGround, checkCollisionNet, checkCollisionPaddle, checkCollisionTable } from "../logic/Collisions";
 import Player from "./Player";
 import { Vector3 } from "../types/Vector3";
+import checkScore from "../logic/PointCounting";
 
 // Assuming the Score type as a record mapping player index to score:
 
@@ -52,16 +53,22 @@ class Game {
     spawnBall(): void {
         this.ball = new Ball(0.3, { x: 0, y: 15, z: 0 }, { x: 0, y: 0, z: 0 });
     }
-
+    resetBall(): void {
+        this.ball.velocity = { x: 0, y: 0, z: 0 };
+        // delay of 3 seconds before the ball spawns
+        setTimeout(() => {
+            this.ball.position = { x: 0, y: 15, z: 0 };
+            this.ball.velocity = { x: 0.4, y: 0, z: 0 };
+        }, 3000);
+    }
     update(): void {
         if (!this.ball) return;
-        // checkFutureCollisionPaddle(this.players[0].paddle, this.ball, 0.01667);
-        // checkFutureCollisionPaddle(this.players[1].paddle, this.ball, 0.01667);
-        checkCollisionPaddle(this.players[0].paddle, this.ball);
-        checkCollisionPaddle(this.players[1].paddle, this.ball);
+        checkCollisionPaddle(this.players[0], this.ball);
+        checkCollisionPaddle(this.players[1], this.ball);
         checkCollisionTable(this.ball, this.table);
         checkCollisionGround(this.ball);
         this.ball.update();
+        checkScore(this);
         // checkCollisionNet(this.table.netBound, this.ball);
     }
     movePaddle(playerid: string, payload: any): void {

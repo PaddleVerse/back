@@ -1,5 +1,6 @@
 import Ball from "../objects/Ball";
 import Paddle from "../objects/Paddle";
+import Player from "../objects/Player";
 import Table from "../objects/Table";
 import { BoundingBox } from "../types/BoundingBox";
 
@@ -38,6 +39,7 @@ function checkCollisionGround(ball: Ball): void {
     ball.velocity.x = ball.velocity.x * 0.8; // Reduce x-velocity
     ball.velocity.z = ball.velocity.z * 0.8; // Reduce z-velocity
     ball.position.y = ground + ball.radius; // Adjust ball position to sit on the ground
+    ball.hitGround = true;
   }
 }
 
@@ -55,7 +57,9 @@ function checkCollisionNet(netBox: BoundingBox, ball: Ball): void {
   }
 }
 
-function checkCollisionPaddle(paddle: Paddle, ball: Ball): void {
+function checkCollisionPaddle(player: Player, ball: Ball): void {
+  const paddle = player.paddle;
+  if (!paddle) return;
   const { max, min } = paddle.bounds;
   if (!max || !min) return;
 
@@ -69,6 +73,7 @@ function checkCollisionPaddle(paddle: Paddle, ball: Ball): void {
     min.z < ball.max.z; 
   if (isCollision) {
     handleCollisionResponse(paddle, ball);
+    ball.lastHit = player;
   }
 }
 
@@ -80,8 +85,7 @@ function handleCollisionResponse(paddle: Paddle, ball: Ball): void {
   ball.velocity.y = 0.2 + (paddle.velocity.y / 3);
   ball.velocity.z = paddle.velocity.z * 0.8;
   ball.position.x = paddle.position.x + ball.velocity.x;
-  console.log(ball.velocity);
-  console.log(paddle.velocity);
+
  
 }
 
