@@ -77,21 +77,22 @@ export class GatewaysService {
     }
   }
 
-  async matchmaking(user: any): Promise<boolean> {
+  async matchmaking(user: any): Promise<string | null> {
     this.matchQueue.set(user.id, user);
     console.log(this.matchQueue);
     if (this.matchQueue.size >= 2) {
       const users = Array.from(this.matchQueue.values());
       const user1 = users[0];
       const user2 = users[1];
+      const room = user1.userName + user2.userName + Date.now();
       // this.matchQueue.delete(user1.id);
       // this.matchQueue.delete(user2.id);
-      await this.addRoom(user1.userName + user2.userName, user1);
+      await this.addRoom(room, user1);
       await this.addUserToRoom(user1.userName + user2.userName, user1);
       await this.addUserToRoom(user1.userName + user2.userName, user2);
-      return true;
+      return room;
     }
-    return false;
+    return null;
   }
 
   async leaveMatchmaking(user: any): Promise<void> {

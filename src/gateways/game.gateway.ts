@@ -33,11 +33,6 @@ export default class GameGateway {
 		[key: string]: GameRoom;
 	} = {};
 	private mainLoopId: NodeJS.Timer;
-	// private gameRoom = new GameRoom('lMa0J3z3');
-	
-	// private ball = new Ball(0.3, { x: 0, y: 15, z: 0 }, { x: 0, y: 0, z: 0 });
-	// private table = new Table();
-	// private paddle = new Paddle(1, { x: 13.0, y: 10.0, z: 0.0 });
 
 	constructor(
 		private readonly friendshipService: FriendshipService,
@@ -145,8 +140,8 @@ export default class GameGateway {
 			userName: user.username,
 			socketId: this.getSocketId(user.id)
 		}
-		const s = await this.gatewayService.matchmaking(usr)
-		if (s)
+		const room = await this.gatewayService.matchmaking(usr)
+		if (room)
 		{
 			const matchQueue = await this.gatewayService.matchQueue;
 
@@ -157,7 +152,8 @@ export default class GameGateway {
 				const otherUserId = await values[otherUserIndex].id;
 
 				await this.server.to(value.socketId).emit('start', {
-					id: otherUserId
+					id: otherUserId,
+					room: room,
 				});
 			});
 			this.gatewayService.matchQueue.clear();
@@ -174,7 +170,6 @@ export default class GameGateway {
 			// check who wins
 			this.server.to(player.id).emit("leftRoom");
 		}
-
 		this.rooms[payload.room] = null;
 		const user = await this.userService.getUserById(payload.id);
 		if (!user) return;
