@@ -22,6 +22,7 @@ function checkCollisionTable(ball: Ball, table: Table): void {
         ball.position.z - ball.radius < center.z + depth / 2
       ) {
         ball.hitTable = true;
+        ball.hitTablePosition = { ...ball.position };
         // Reacting to the collision 
         ball.velocity.y = -ball.velocity.y * 0.9; // Reverse and dampen the y-velocity
         ball.velocity.x = ball.velocity.x * 0.8; // Reduce x-velocity

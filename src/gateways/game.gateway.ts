@@ -92,7 +92,7 @@ export default class GameGateway {
 		if (this.rooms[data.room]) {
 			this.rooms[data.room].addPlayer(client.id,this.server, client);
 		} else {
-			let room = new GameRoom(data.room);
+			let room = new GameRoom(data.room, this.server);
 			this.rooms[data.room] = room;
 			room.addPlayer(client.id, this.server, client);
 		}

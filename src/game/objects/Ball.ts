@@ -9,8 +9,9 @@ class Ball {
 	mass: number;
 	min: Vector3;
 	max: Vector3;
-	lastHit: Player; // Define a more specific type if possible
+	lastHit: Player;
 	hitTable: boolean;
+	hitTablePosition: Vector3;
 	hitGround: boolean;
 	maxSpeed: number;
 	constructor(
