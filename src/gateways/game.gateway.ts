@@ -106,7 +106,6 @@ export default class GameGateway {
 		const game = this.rooms[payload.room].game;
 		if (!game) return;
 		game.movePaddle(client.id, payload);
-		console.log(payload);
 		client.broadcast.to(payload.room).emit("paddlePositionUpdate", payload);
 		return "Yep";
 	}
@@ -121,16 +120,17 @@ export default class GameGateway {
 
 	mainLoop() {
 		this.mainLoopId = setInterval(() => {
-			// move the ball in a circle on the x and z axis
 			for (const room in this.rooms) {
 				if (!this.rooms[room]) continue;
 				if (this.rooms[room].game) {
 					this.rooms[room].game.update();
+					if (!this.rooms[room].game.ball) continue;
 					this.server.to(room).emit('moveBall', this.rooms[room].game.ball);
 				}
 			}
 		}, 1000 / 60);
 	}
+
 	@SubscribeMessage("matchMaking")
 	async MatchMakingHandler(client: any, payload: any) {
 		const user = await this.userService.getUserById(payload.id);
@@ -160,9 +160,8 @@ export default class GameGateway {
 		}
 	}
 
-	@SubscribeMessage("leaveRoom")
+	@SubscribeMessage("leftRoom")
 	async leaveRoomHandler(client: any, payload: any) {
-		console.log("leaveRoom");
 		const room = this.rooms[payload.room];
 		if (!room) return;
 
@@ -170,7 +169,8 @@ export default class GameGateway {
 			// check who wins
 			this.server.to(player.id).emit("leftRoom");
 		}
-		this.rooms[payload.room] = null;
+
+		delete this.rooms[payload.room];
 		const user = await this.userService.getUserById(payload.id);
 		if (!user) return;
 		const usr : userT = {
