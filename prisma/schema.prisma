@@ -180,7 +180,7 @@ model paddle {
   id        Int      @id @default(autoincrement())
   user_id    Int?     @default(0)
   image    String?
-  color     String?
+  color     String? @unique
   enabled   Boolean? @default(false)
   createdAt DateTime @default(now())
   user    user?     @relation(fields: [user_id], references: [id])
@@ -190,7 +190,7 @@ model ball {
   id        Int      @id @default(autoincrement())
   user_id    Int?     @default(0)
   image     String?
-  color     String?
+  color     String? @unique
   enabled   Boolean? @default(false)
   createdAt DateTime @default(now())
   user    user?     @relation(fields: [user_id], references: [id])

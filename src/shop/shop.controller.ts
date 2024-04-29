@@ -17,4 +17,10 @@ export class ShopController {
   {
       return await this.shopService.createPaddle(body);
   }
+
+  @Post('paddle/enable')
+  async enablePaddle(@Body() body : any)
+  {
+      return await this.shopService.enablePaddle(body);
+  }
 }

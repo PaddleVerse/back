@@ -53,4 +53,29 @@ export class ShopService
             console.error(error);
         }
     }
+    
+    async enablePaddle(body : any)
+    {
+        try {
+            if (!body) return {status : 'error', message : 'Invalid request'};
+
+            const user = await this.prisma.user.findUnique({ where: { id: body?.user_id }, select: { paddles: true }});
+            const paddels : any = user.paddles;
+            const res = await paddels.forEach(async (paddle : any) => {
+                if (paddle.enabled)
+                {
+                    console.log("res");
+                    return {status : 'error', message : 'Paddle already equipped'};
+                }
+            });
+            await this.prisma.paddle.update({
+                data: { enabled: true },
+                where: { color: body?.color , user_id: body?.user_id}
+            })
+            return {status : 'success', message : 'Paddle equipped'};
+        }
+        catch (error) {
+            return {status : 'error', message : 'Paddle not equipped'};
+        }
+    }
 }
