@@ -1,4 +1,5 @@
 import { Vector3 } from "../types/Vector3";
+import Player from "./Player";
 
 class Ball {
 	position: Vector3;
@@ -8,8 +9,10 @@ class Ball {
 	mass: number;
 	min: Vector3;
 	max: Vector3;
-	lastHit: any; // Define a more specific type if possible
+	lastHit: Player;
 	hitTable: boolean;
+	hitTablePosition: Vector3;
+	hitGround: boolean;
 	maxSpeed: number;
 	constructor(
 		radius: number = 0.3,
@@ -34,6 +37,7 @@ class Ball {
 		};
 		this.lastHit = null;
 		this.hitTable = false;
+		this.hitGround = false;
 		this.maxSpeed = maxSpeed;
 	}
 
@@ -58,6 +62,7 @@ class Ball {
 	}
 
 	applyGravity(GRAVITY: number = 0.01): void {
+		if (this.velocity.y > -0.9)
 		this.velocity.y -= GRAVITY;
 	}
 

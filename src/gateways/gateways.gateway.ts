@@ -15,15 +15,6 @@ import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
 import { zip } from "rxjs";
 
-class Ball {
-  constructor(
-    public position: { x: number; y: number; z: number },
-    public velocity: { x: number; y: number; z: number }
-  ) { 
-    this.position = { x: 0, y: 20, z: 0 };
-    this.velocity = { x: 0, y: 0, z: 0 };
-  }
-}
 
 @WebSocketGateway({
   cors: {
@@ -32,9 +23,6 @@ class Ball {
 })
 export class GatewaysGateway {
   private readonly prisma: PrismaClient;
-  private rooms: { [key: string]: { [key: string]: string } } = {};
-  private intervalId: NodeJS.Timer;
-  private ball = new Ball({ x: 0, y: 20, z: 0 }, { x: 0, y: 0, z: 0 });
 
   constructor(
     private readonly friendshipService: FriendshipService,
