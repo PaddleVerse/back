@@ -23,26 +23,25 @@ import { ParticipantsService } from "./participants/participants.service";
 import { BanService } from "./ban/ban.service";
 import { ConversationsService } from "./conversations/conversations.service";
 import { ConversationsModule } from "./conversations/conversations.module";
-import { ServeStaticModule } from "@nestjs/serve-static";
-import { join } from "path";
 import { SearchService } from './search/search.service';
 import { SearchController } from './search/search.controller';
 import { SearchModule } from './search/search.module';
 import { GatewaysModule } from './gateways/gateways.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
     FriendshipModule,
-    ServeStaticModule.forRoot({ rootPath: join(__dirname, '..' ,'images'), }),
     SearchModule,
     GatewaysModule,
     ChatModule,
     ChannelsModule,
     MessageModule,
     ParticipantsModule,
-    ConversationsModule
+    ConversationsModule,
+    NotificationsModule,
   ],
   controllers: [
     AppController,

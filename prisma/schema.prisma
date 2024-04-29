@@ -39,6 +39,11 @@ enum FriendshipStatus {
   BLOCKED
 }
 
+enum N_Type {
+  MESSAGE
+  REQUEST
+}
+
 
 model user {
   id        Int      @id @default(autoincrement())
@@ -48,18 +53,21 @@ model user {
   name      String?
   nickname  String? @default("zuse")
   password  String
-  picture   String? @default("http://localhost:8080/1709559281974-wallpaperflare.com_wallpaper.jpg")
-  banner_picture String? @default("http://localhost:8080/bg.jpg")
+  picture   String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713806275/kx6iknqyvu0uyqhhpfro.jpg")
+  banner_picture String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713526102/zxwritc0rqvtjvcwbqiv.jpg")
   status    Status  @default(OFFLINE)
   level     Int?     @default(600)
   createdAt DateTime @default(now())
   twoFa    Boolean? @default(false)
   twoFaSecret String?
+  first_time Boolean? @default(true)
+  notified Boolean? @default(false)
 
   friends Friendship[]
   achievements achievement[]
   channel_participants channel_participant[]
   ban ban_list[]
+  notifications notification[] 
 }
 
 model SearchHistory {
@@ -151,4 +159,15 @@ model conversation {
   user_b_id    Int?     @default(0)
   createdAt DateTime @default(now())
   messages message[]
+}
+
+model notification {
+  id        Int      @id @default(autoincrement())
+  user_id    Int?     @default(0)
+  sender_name   String?
+  sender_picture   String?
+  sender_id    Int?     @default(0)
+  type  N_Type?
+  createdAt DateTime @default(now())
+  user    user?     @relation(fields: [user_id], references: [id])
 }

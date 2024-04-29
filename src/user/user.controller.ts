@@ -37,14 +37,19 @@ export class UserController
     async updateUserPic(@Param('id') id: any, @UploadedFile() file: MulterFile)
     {
         const url = await this.userService.uploadImage(file);
-        console.log(url);
-        return this.userService.updateUser(+id, { picture: url });
+        return await this.userService.updateUser(+id, { picture: url });
     }
 
     @Put(':id')
     async updateUser(@Param('id') id: any, @Body() data: any)
+    {   
+        return await this.userService.editUser(+id, data);
+    }
+
+    @Put('visible/:id')
+    async updateUserVisite(@Param('id') id: any, @Body() data: any)
     {
-        return this.userService.editUser(+id, data);
+        return await this.userService.updateUserVisite(+id, data);
     }
 
     @Delete(':id')
