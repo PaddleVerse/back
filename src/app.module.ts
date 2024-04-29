@@ -28,6 +28,7 @@ import { SearchController } from './search/search.controller';
 import { SearchModule } from './search/search.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ShopModule } from './shop/shop.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     ParticipantsModule,
     ConversationsModule,
     NotificationsModule,
+    ShopModule,
   ],
   controllers: [
     AppController,

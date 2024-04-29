@@ -61,13 +61,17 @@ model user {
   twoFa    Boolean? @default(false)
   twoFaSecret String?
   first_time Boolean? @default(true)
-  notified Boolean? @default(false)
+  notified Boolean?   @default(false)
+  coins Int?          @default(1000)
 
   friends Friendship[]
   achievements achievement[]
   channel_participants channel_participant[]
   ban ban_list[]
-  notifications notification[] 
+  notifications notification[]
+
+  paddles paddle[]
+  balls ball[]
 }
 
 model SearchHistory {
@@ -77,13 +81,13 @@ model SearchHistory {
 }
 
 model Friendship {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   user_id    Int?     @default(0)
-  friendId  Int?     @default(0)
+  friendId  Int?      @default(0)
   status    FriendshipStatus
-  request  Req? @default(SEND)
-  user    user?     @relation(fields: [user_id], references: [id])
-  createdAt DateTime @default(now())
+  request  Req?       @default(SEND)
+  user    user?       @relation(fields: [user_id], references: [id])
+  createdAt DateTime  @default(now())
 }
 
 
@@ -92,15 +96,15 @@ model achievement {
   name      String?
   description String?
   picture   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   user_id    Int?     @default(0)
-  user    user?     @relation(fields: [user_id], references: [id])
+  user    user?       @relation(fields: [user_id], references: [id])
 }
 
 model game_history {
   id        Int      @id @default(autoincrement())
   user_a_id    Int?     @default(0)
-  user_b_id    Int?     @default(0)
+  user_b_id    Int?       @default(0)
   user_a_score    Int?     @default(0)
   user_b_score    Int?     @default(0)
   start_time    DateTime?
@@ -168,6 +172,26 @@ model notification {
   sender_picture   String?
   sender_id    Int?     @default(0)
   type  N_Type?
+  createdAt DateTime @default(now())
+  user    user?     @relation(fields: [user_id], references: [id])
+}
+
+model paddle {
+  id        Int      @id @default(autoincrement())
+  user_id    Int?     @default(0)
+  image    String?
+  color     String?
+  enabled   Boolean? @default(false)
+  createdAt DateTime @default(now())
+  user    user?     @relation(fields: [user_id], references: [id])
+}
+
+model ball {
+  id        Int      @id @default(autoincrement())
+  user_id    Int?     @default(0)
+  image     String?
+  color     String?
+  enabled   Boolean? @default(false)
   createdAt DateTime @default(now())
   user    user?     @relation(fields: [user_id], references: [id])
 }

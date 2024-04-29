@@ -47,6 +47,9 @@ export class UserService
                 friends: true,
                 achievements: true,
                 channel_participants: true,
+                coins : true,
+                paddles : true,
+                balls : true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
                 }
@@ -82,12 +85,15 @@ export class UserService
             friends: true,
             achievements: true,
             channel_participants: true,
+            coins : true,
+            paddles : true,
+            balls : true,
             notifications: {
               orderBy: { createdAt: 'desc' }
             }
           },
             where: {
-                id
+              id
             }
         });
         return user;
@@ -118,6 +124,9 @@ export class UserService
                 friends: true,
                 achievements: true,
                 channel_participants: true,
+                coins : true,
+                paddles : true,
+                balls : true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
                 }
@@ -155,6 +164,9 @@ export class UserService
                 friends: true,
                 achievements: true,
                 channel_participants: true,
+                coins : true,
+                paddles : true,
+                balls : true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
                 }
@@ -212,6 +224,9 @@ export class UserService
                 friends: true,
                 achievements: true,
                 channel_participants: true,
+                coins : true,
+                paddles : true,
+                balls : true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
                 }
@@ -252,7 +267,10 @@ export class UserService
                 achievements: true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
-                }
+                },
+                paddles : true,
+                balls : true,
+                coins : true,
               }
           });
           return user;
