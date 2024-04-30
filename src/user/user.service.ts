@@ -50,6 +50,7 @@ export class UserService
                 coins : true,
                 paddles : true,
                 balls : true,
+                tables : true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
                 }
@@ -88,6 +89,7 @@ export class UserService
             coins : true,
             paddles : true,
             balls : true,
+            tables : true,
             notifications: {
               orderBy: { createdAt: 'desc' }
             }
@@ -127,6 +129,7 @@ export class UserService
                 coins : true,
                 paddles : true,
                 balls : true,
+                tables : true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
                 }
@@ -167,6 +170,7 @@ export class UserService
                 coins : true,
                 paddles : true,
                 balls : true,
+                tables : true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
                 }
@@ -227,6 +231,7 @@ export class UserService
                 coins : true,
                 paddles : true,
                 balls : true,
+                tables : true,
                 notifications: {
                   orderBy: { createdAt: 'desc' }
                 }
@@ -270,6 +275,7 @@ export class UserService
                 },
                 paddles : true,
                 balls : true,
+                tables : true,
                 coins : true,
               }
           });

@@ -4,13 +4,14 @@ import { Vector3 } from "../types/Vector3";
 class Player {
   id: string | null;
   paddle: Paddle;
-
+  userid: number;
   constructor(
     id: string | null = null,
-    paddle: Paddle = new Paddle(id, { x: 0, y: 0, z: 0 })
+    userid: number
   ) {
     this.id = id;
-    this.paddle = paddle;
+    this.paddle = new Paddle(id, { x: 0, y: 0, z: 0});
+    this.userid = userid;
   }
 
   update(data: any): void {

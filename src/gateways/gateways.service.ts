@@ -79,7 +79,7 @@ export class GatewaysService {
 
   async matchmaking(user: any): Promise<string | null> {
     this.matchQueue.set(user.id, user);
-    console.log(this.matchQueue);
+
     if (this.matchQueue.size >= 2) {
       const users = Array.from(this.matchQueue.values());
       const user1 = users[0];

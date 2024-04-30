@@ -90,7 +90,7 @@ export class AuthController
       sameSite: true,
       secure: false,
     });
-    res.redirect('http://localhost:3000/Dashboard');
+    res.redirect(`${process.env.API_URL}/Dashboard`);
     res.status(HttpStatus.OK);
   }
 
@@ -115,7 +115,7 @@ export class AuthController
       sameSite: true,
       secure: false,
     });
-    res.redirect('http://localhost:3000/Dashboard');
+    res.redirect(`${process.env.API_URL}/Dashboard`);
     res.status(HttpStatus.OK);
   }
 

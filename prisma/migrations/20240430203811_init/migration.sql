@@ -75,11 +75,11 @@ CREATE TABLE "achievement" (
 -- CreateTable
 CREATE TABLE "game_history" (
     "id" SERIAL NOT NULL,
-    "user_a_id" INTEGER DEFAULT 0,
-    "user_b_id" INTEGER DEFAULT 0,
-    "user_a_score" INTEGER DEFAULT 0,
-    "user_b_score" INTEGER DEFAULT 0,
-    "start_time" TIMESTAMP(3),
+    "winner" INTEGER DEFAULT 0,
+    "loser" INTEGER DEFAULT 0,
+    "winner_score" INTEGER DEFAULT 0,
+    "loser_score" INTEGER DEFAULT 0,
+    "start_time" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
     "end_time" TIMESTAMP(3),
 
     CONSTRAINT "game_history_pkey" PRIMARY KEY ("id")
@@ -181,6 +181,18 @@ CREATE TABLE "ball" (
     CONSTRAINT "ball_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "table" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER DEFAULT 0,
+    "image" TEXT,
+    "color" TEXT,
+    "enabled" BOOLEAN DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "table_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "user_googleId_key" ON "user"("googleId");
 
@@ -192,6 +204,15 @@ CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "channel_name_key" ON "channel"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "paddle_color_key" ON "paddle"("color");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ball_color_key" ON "ball"("color");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "table_color_key" ON "table"("color");
 
 -- AddForeignKey
 ALTER TABLE "Friendship" ADD CONSTRAINT "Friendship_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -225,3 +246,6 @@ ALTER TABLE "paddle" ADD CONSTRAINT "paddle_user_id_fkey" FOREIGN KEY ("user_id"
 
 -- AddForeignKey
 ALTER TABLE "ball" ADD CONSTRAINT "ball_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "table" ADD CONSTRAINT "table_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
