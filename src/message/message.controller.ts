@@ -97,8 +97,6 @@ export class MessageController {
     @Query("reciever") users2: string
   ) {
     try {
-      // console.log(file);
-      console.log(users1, users2);
       if (channel) {
         const ch = !isNaN(Number(channel))
           ? await this.channelService.getChannelById(Number(channel))
