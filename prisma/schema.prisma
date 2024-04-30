@@ -104,11 +104,11 @@ model achievement {
 
 model game_history {
   id        Int      @id @default(autoincrement())
-  user_a_id    Int?     @default(0)
-  user_b_id    Int?       @default(0)
-  user_a_score    Int?     @default(0)
-  user_b_score    Int?     @default(0)
-  start_time    DateTime?
+  winner    Int?     @default(0)
+  loser    Int?     @default(0)
+  winner_score    Int?     @default(0)
+  loser_score    Int?     @default(0)
+  start_time    DateTime? @default(now())
   end_time    DateTime?
 }
 

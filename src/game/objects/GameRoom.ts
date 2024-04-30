@@ -18,9 +18,9 @@ class GameRoom {
     this.socket = socket;
   }
 
-  addPlayer(playerId: string, socket: any, client: Socket): void {
+  addPlayer(playerId: string, socket: any, client: Socket, userId : number): void {
     if (this.players.length < this.maxPlayers) {
-      this.players.push(new Player(playerId));
+      this.players.push(new Player(playerId, userId));
       client.join(this.id);
     }
     if (this.players.length === this.maxPlayers) {
@@ -39,7 +39,14 @@ class GameRoom {
   endGameLeave(): void {
     this.game = null;
   }
-
+  update() {
+    if (this.game) {
+      this.game.update();
+      if (this.game.isGameOver()) {
+        this.endGameLeave();
+      }
+    }
+  }
 
   removePlayer(player: Player): void {
     this.players = this.players.filter((p) => p.id !== player.id);
