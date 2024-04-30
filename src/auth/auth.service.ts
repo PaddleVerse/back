@@ -16,6 +16,7 @@ export class AuthService
 
     async signup(username: string, name: string, nickname: string, password: string)
     {
+        console.log(username, name, nickname, password);
         if (!username || !password || !name || !nickname) {
             throw new ConflictException('Missing credentials');
         }
