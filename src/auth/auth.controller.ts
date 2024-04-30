@@ -90,7 +90,6 @@ export class AuthController
       sameSite: true,
       secure: false,
     });
-    console.log(process.env.API_URL);
     res.redirect(`${process.env.API_URL}/Dashboard`);
     res.status(HttpStatus.OK);
   }

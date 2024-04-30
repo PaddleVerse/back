@@ -160,6 +160,11 @@ export default class GameGateway {
 		}
 	}
 
+	@SubscribeMessage("cancelMatchMaking")
+	async CancelMatchMaking(client: any, payload: any) {
+		await this.gatewayService.matchQueue.clear();
+	}
+
 	@SubscribeMessage("leftRoom")
 	async leaveRoomHandler(client: any, payload: any) {
 		const room = this.rooms[payload.room];

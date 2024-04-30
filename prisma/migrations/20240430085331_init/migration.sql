@@ -34,6 +34,7 @@ CREATE TABLE "user" (
     "twoFaSecret" TEXT,
     "first_time" BOOLEAN DEFAULT true,
     "notified" BOOLEAN DEFAULT false,
+    "coins" INTEGER DEFAULT 1000,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -156,6 +157,42 @@ CREATE TABLE "notification" (
     CONSTRAINT "notification_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "paddle" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER DEFAULT 0,
+    "image" TEXT,
+    "color" TEXT,
+    "enabled" BOOLEAN DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "paddle_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ball" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER DEFAULT 0,
+    "image" TEXT,
+    "color" TEXT,
+    "enabled" BOOLEAN DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ball_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "table" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER DEFAULT 0,
+    "image" TEXT,
+    "color" TEXT,
+    "enabled" BOOLEAN DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "table_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "user_googleId_key" ON "user"("googleId");
 
@@ -167,6 +204,15 @@ CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "channel_name_key" ON "channel"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "paddle_color_key" ON "paddle"("color");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ball_color_key" ON "ball"("color");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "table_color_key" ON "table"("color");
 
 -- AddForeignKey
 ALTER TABLE "Friendship" ADD CONSTRAINT "Friendship_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -194,3 +240,12 @@ ALTER TABLE "channel_participant" ADD CONSTRAINT "channel_participant_channel_id
 
 -- AddForeignKey
 ALTER TABLE "notification" ADD CONSTRAINT "notification_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "paddle" ADD CONSTRAINT "paddle_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ball" ADD CONSTRAINT "ball_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "table" ADD CONSTRAINT "table_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
