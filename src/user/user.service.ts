@@ -474,4 +474,24 @@ export class UserService
           return null;
         }
       }
+      async addCoins(id: number, coins: number) {
+        try
+        {
+          const user = await this.prisma.user.update({
+            where: {
+              id,
+            },
+            data: {
+              coins: {
+                increment: coins
+              }
+            }
+          });
+          return user;
+        }
+        catch (error)
+        {
+          return null;
+        }
+      }
 }

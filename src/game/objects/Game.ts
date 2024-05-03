@@ -13,7 +13,7 @@ class Game {
     timeIdle: number;
     ballSide: number;
     socket: any;
-
+    maxScore: number;
     constructor(id: string, players: Player[] | null, socket: any) {
         this.id = id;
         this.players = players;
@@ -25,6 +25,7 @@ class Game {
         this.timeIdle = 0;
         this.ballSide = 1;
         this.socket = socket;
+        this.maxScore = 1   ;
     }
 
     startGame(): void {
@@ -34,17 +35,24 @@ class Game {
     }
 
     endGame(): void {
-        const winnerIndex = this.score[this.players[0].id] > this.score[this.players[1].id] ? 0 : 1;
-        this.winner = this.players[winnerIndex];
+        if (this.isGameOver()) return;
+        if (this.score[this.players[0].id] < this.score[this.players[1].id]) {
+            this.winner = this.players[0];
+        }
+        else {
+            this.winner = this.players[1];
+        }
+
+        console.log(`Game over. Winner: ${this.winner.userid}`);
+        const winnerIndex = this.players.indexOf(this.winner);
         this.socket.to(this.id).emit("endGame", { winner: `player${winnerIndex + 1}` });
-        console.log(`Game ended. Winner: ${this.winner}`);
     }
 
     updateScore(playerIndex: number, points: number): void {
         const playerId = this.players[playerIndex].id;
         this.score[playerId] = (this.score[playerId] || 0) + points;
         this.emitScoreUpdate();
-        if (this.score[playerId] === 5) {
+        if (this.score[playerId] === this.maxScore) {
             this.endGame();
         }
     }
@@ -60,7 +68,7 @@ class Game {
             if (this.ball.hitTable) {
                 this.updateScore(scoringPlayerIdx, 1);
             } else {
-                this.updateScore(scoringPlayerIdx === 0 ? 1 : 0, 1); // Award point to the other player
+                this.updateScore(scoringPlayerIdx === 0 ? 1 : 0, 1);
             }
             this.ballSide = scoringPlayerIdx === 0 ? 1 : -1;
         }
@@ -82,7 +90,7 @@ class Game {
     }
 
     isGameOver(): boolean {
-        return this.winner !== null;
+        return !!this.winner;
     }
 
     movePaddle(playerId: string, payload: any): void {
@@ -94,7 +102,8 @@ class Game {
     }
 
     private resetScores(): void {
-        this.players.forEach(player => this.score[player.id] = 0);
+        this.score[this.players[0].id] = 0;
+        this.score[this.players[1].id] = 0;
     }
 
     private positionPlayers(): void {

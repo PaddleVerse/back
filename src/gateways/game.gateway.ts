@@ -16,6 +16,7 @@ import { NotificationsService } from "src/notifications/notifications.service";
 
 import GameRoom from "src/game/objects/GameRoom";
 import Player from "src/game/objects/Player";
+import Game from "src/game/objects/game";
 
 type userT = {
   id: number;
@@ -126,15 +127,14 @@ export default class GameGateway {
     return "Yep";
   }
   @SubscribeMessage("resetBall")
-  async handleResetBall(client: any, payload: any): Promise<string> {
+  async handleResetBall(client: any, payload: any): Promise<null> {
     if (!this.rooms[payload.room]) return;
     const game = this.rooms[payload.room].game;
     game.ball.position = { x: 0, y: 15, z: 0 };
     game.ball.velocity = { x: 0.4, y: 0, z: 0 };
-    return "Yep";
   }
 
-  async mainLoop() {
+  mainLoop() {
     this.mainLoopId = setInterval(async () => {
       for (const room in this.rooms) {
         if (!this.rooms[room]) continue;
@@ -142,43 +142,52 @@ export default class GameGateway {
           const gameRoom = this.rooms[room];
           const game = this.rooms[room].getGame();
           game.update();
-          if (!game.ball) continue;
           this.server.to(room).emit("moveBall", game.ball);
           if (game.isGameOver()) {
-            await this.prisma.$connect();
-            const winner: Player = game.winner;
-            const loser: Player = game.players.find((p) => p.id !== winner.id);
-            const winnerId = winner.userid;
-            const loserId = loser.userid;
-            const winnerScore = game.score[winner.id];
-            const loserScore = game.score[loser.id];
-            try {
-              const data = {
-                winner: winnerId,
-                loser: loserId,
-                winner_score: winnerScore,
-                loser_score: loserScore,
-                end_time: new Date(),
-              };
-
-              const createResult = await this.prisma.game_history.create({
-                data,
-              });
-              console.log("Game history created:", createResult);
-            } catch (error) {
-              console.error("Failed to create game history:", error);
-            }
-			
-            console.log("Game history created");
-            this.server
-              .to(room)
-              .emit("gameOver", { winner: winner.id, loser: loser.id });
-            this.rooms[room] = null;
+            this.addGameHistory(this.rooms[room]);
+            this.rooms[room].dataSaved = true;
           }
         }
       }
     }, 1000 / 60);
   }
+  addGameHistory = async (room: GameRoom) => {
+    if (room.dataSaved) return;
+    const game = room.game;
+    await this.prisma.$connect();
+    const winner: Player = game.winner;
+    const loser: Player = game.players.find((p) => p.id !== winner.id);
+    const winnerId = winner.userid;
+    const loserId = loser.userid;
+    const winnerScore = game.score[winner.id];
+    const loserScore = game.score[loser.id];
+    // coins to add depending on the diffrence in score
+    const coinsToAdd = Math.abs(winnerScore - loserScore) * 100;
+    try {
+      const data = {
+        winner: winnerId,
+        loser: loserId,
+        winner_score: winnerScore,
+        loser_score: loserScore,
+        start_time: room.startDate,
+        end_time: new Date(),
+      };
+
+      const createResult = await this.prisma.game_history.create({
+        data,
+      });
+      const winnerUser = await this.userService.getUserById(winnerId);
+      const loserUser = await this.userService.getUserById(loserId);
+      await this.userService.addCoins(winnerUser.id, coinsToAdd);
+    } catch (error) {
+      console.error("Failed to create game history:", error);
+    }
+
+    this.server
+      .to(room.id)
+      .emit("gameOver", { winner: winner.id, loser: loser.id });
+    delete this.rooms[room.id];
+  };
 
   @SubscribeMessage("matchMaking")
   async MatchMakingHandler(client: any, payload: any) {
@@ -199,19 +208,19 @@ export default class GameGateway {
         const otherUserIndex = index === 0 ? 1 : 0;
         const otherUserId = await values[otherUserIndex].id;
 
-				await this.server.to(value.socketId).emit('start', {
-					id: otherUserId,
-					room: room,
-				});
-			});
-			this.gatewayService.matchQueue.clear();
-		}
-	}
+        await this.server.to(value.socketId).emit("start", {
+          id: otherUserId,
+          room: room,
+        });
+      });
+      this.gatewayService.matchQueue.clear();
+    }
+  }
 
-	@SubscribeMessage("cancelMatchMaking")
-	async CancelMatchMaking(client: any, payload: any) {
-		await this.gatewayService.matchQueue.clear();
-	}
+  @SubscribeMessage("cancelMatchMaking")
+  async CancelMatchMaking(client: any, payload: any) {
+    await this.gatewayService.matchQueue.clear();
+  }
 
   @SubscribeMessage("leftRoom")
   async leaveRoomHandler(client: any, payload: any) {

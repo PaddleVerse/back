@@ -9,6 +9,8 @@ class GameRoom {
   maxPlayers: number;
   id: string;
   socket: any;
+  startDate: Date;
+  dataSaved: boolean;
 
   constructor(id: string, socket: any) {
     this.players = [];
@@ -16,6 +18,8 @@ class GameRoom {
     this.maxPlayers = 2;
     this.id = id;
     this.socket = socket;
+    this.startDate = new Date();
+    this.dataSaved = false;
   }
 
   addPlayer(playerId: string, socket: any, client: Socket, userId : number): void {
