@@ -65,7 +65,6 @@ model user {
   notified Boolean?   @default(false)
   coins Int?          @default(1000)
   win_streak Int?     @default(0)
-  lose_streak Int?    @default(0)
 
   friends Friendship[]
   achievements achievement[]
@@ -111,6 +110,8 @@ model game_history {
   loser    Int?     @default(0)
   winner_score    Int?     @default(0)
   loser_score    Int?     @default(0)
+  winner_streak    Int?     @default(0)
+
   start_time    DateTime?
   end_time    DateTime?
 }

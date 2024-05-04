@@ -41,6 +41,7 @@ class Game {
         this.winner = winner;
         const winnerId = winner.id === this.players[0].id ? "player1" : "player2";
         this.socket.to(this.id).emit("endGame", { winner: winnerId });
+        //
         console.log(winner);
         console.log(this.players);
         console.log(this.score);
@@ -56,7 +57,7 @@ class Game {
     }
 
     spawnBall(): void {
-        this.ball = new Ball(0.3, { x: 0, y: 15, z: 0 }, { x: 0.4 * this.ballSide, y: 0, z: 0 });
+        this.ball = new Ball(0.3, { x: 0, y: 15, z: 0 }, { x: 0.4 * this.ballSide, y: 0, z: 0.001 });
     }
 
     checkScore(): void {

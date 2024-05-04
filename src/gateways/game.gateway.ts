@@ -177,38 +177,34 @@ export default class GameGateway {
       const createResult = await this.prisma.game_history.create({
         data,
       });
-      // increment the win_streak of the winner and reset it if it wins
-      if (winnerScore > loserScore) {
-        await this.prisma.user.update({
-          where: { id: winnerId },
-          data: {
-            win_streak: {
-              increment: 1,
-            },
+      // increment the win_streak of the winner and put the result in the game history
+      const user = await this.prisma.user.update({
+        where: { id: winnerId },
+        data: {
+          win_streak: {
+            increment: 1,
           },
-        });
-        await this.prisma.user.update({
-          where: { id: loserId },
-          data: {
-            win_streak: 0,
-          },
-        });
-      } else {
-        await this.prisma.user.update({
-          where: { id: winnerId },
-          data: {
-            win_streak: 0,
-          },
-        });
-        await this.prisma.user.update({
-          where: { id: loserId },
-          data: {
-            win_streak: {
-              increment: 1,
-            },
-          },
-        });
-      }
+        },
+      });
+
+      await this.prisma.game_history.update({
+        where: { id: createResult.id },
+        data: {
+          winner: winnerId,
+          loser: loserId,
+          winner_score: winnerScore,
+          loser_score: loserScore,
+          winner_streak: user.win_streak,
+        },
+      });
+      // reset the win streak of the loser
+      await this.prisma.user.update({
+        where: { id: loserId },
+        data: {
+          win_streak: 0,
+        },
+      });
+      
       // add xp to the winner that changes due to the diffrence in score
       await this.prisma.user.update({
         where: { id: winnerId },
@@ -218,6 +214,7 @@ export default class GameGateway {
           },
         },
       });
+      
       const winnerUser = await this.userService.getUserById(winnerId);
       const loserUser = await this.userService.getUserById(loserId);
       await this.userService.addCoins(winnerUser.id, coinsToAdd);
