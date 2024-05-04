@@ -22,7 +22,32 @@ export class FriendshipService
             return error;
         }
     }
-
+    async getTopFriends(userid: number) {
+        try
+        {
+            const friendships = await this.prisma.friendship.findMany({
+                where: {
+                    user_id: userid,
+                    status: FriendshipStatus.ACCEPTED
+                }
+            });
+            const friendslist = friendships.slice(0, 3);
+            const actualFriends = [];
+            for (const friend in friendslist) {
+                const user = await this.prisma.user.findFirst({
+                    where: {
+                        id: friendslist[friend].friendId
+                    }
+                });
+                actualFriends.push(user);
+            }
+            return actualFriends;
+        }
+        catch (error)
+        {
+            return error;
+        }
+    }
     async getFriends(userId: number)
     {
         try

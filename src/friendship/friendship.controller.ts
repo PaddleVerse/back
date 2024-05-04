@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
 
 @Controller('friendship')
@@ -10,6 +10,11 @@ export class FriendshipController
     getFriendships()
     {
         return this.friendshipService.getFriendships();
+    }
+
+    @Get("top")
+    async getTopFriends(@Query('userid') userid: string) {
+        return await this.friendshipService.getTopFriends(Number(userid));
     }
     
     @Get(':id')
