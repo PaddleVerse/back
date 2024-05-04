@@ -57,13 +57,14 @@ model user {
   banner_picture String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713526102/zxwritc0rqvtjvcwbqiv.jpg")
   status    Status  @default(OFFLINE)
   xp        Int?     @default(0)
-  level     Int?     @default(1)
   createdAt DateTime @default(now())
   twoFa    Boolean? @default(false)
   twoFaSecret String?
   first_time Boolean? @default(true)
   notified Boolean?   @default(false)
   coins Int?          @default(1000)
+  win_streak Int?     @default(0)
+  lose_streak Int?    @default(0)
 
   friends Friendship[]
   achievements achievement[]
