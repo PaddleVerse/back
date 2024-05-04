@@ -28,13 +28,16 @@ CREATE TABLE "user" (
     "picture" TEXT DEFAULT 'https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713806275/kx6iknqyvu0uyqhhpfro.jpg',
     "banner_picture" TEXT DEFAULT 'https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713526102/zxwritc0rqvtjvcwbqiv.jpg',
     "status" "Status" NOT NULL DEFAULT 'OFFLINE',
-    "level" INTEGER DEFAULT 600,
+    "xp" INTEGER DEFAULT 0,
+    "level" INTEGER DEFAULT 1,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "twoFa" BOOLEAN DEFAULT false,
     "twoFaSecret" TEXT,
     "first_time" BOOLEAN DEFAULT true,
     "notified" BOOLEAN DEFAULT false,
     "coins" INTEGER DEFAULT 1000,
+    "win_streak" INTEGER DEFAULT 0,
+    "lose_streak" INTEGER DEFAULT 0,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -79,7 +82,7 @@ CREATE TABLE "game_history" (
     "loser" INTEGER DEFAULT 0,
     "winner_score" INTEGER DEFAULT 0,
     "loser_score" INTEGER DEFAULT 0,
-    "start_time" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+    "start_time" TIMESTAMP(3),
     "end_time" TIMESTAMP(3),
 
     CONSTRAINT "game_history_pkey" PRIMARY KEY ("id")
@@ -174,6 +177,7 @@ CREATE TABLE "ball" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER DEFAULT 0,
     "image" TEXT,
+    "texture" TEXT DEFAULT '/Game/textures/balls/default.jpg',
     "color" TEXT,
     "enabled" BOOLEAN DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

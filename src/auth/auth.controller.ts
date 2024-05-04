@@ -22,7 +22,7 @@ export class AuthController
   @Post('login')
   async login(@Request() req, @Res({ passthrough: true }) res: Response) {
     const user : any = await this.authService.login(req.user);
-
+    if (user?.status === 'error') return user;
     // Set the access token as a cookie
     res.cookie('access_token', user.access_token, { httpOnly: true });
 
@@ -57,11 +57,10 @@ export class AuthController
   }
 
   @Post('signup')
-  async signup(@Body() body: CreateUserDto)
+  async signup(@Body() body: any)
   {
-    const { username, name, nickname, password } = body;
-    await this.authService.signup(username, name, nickname, password);
-    return { message: 'signup successful' };
+    const res = await this.authService.signup(body);
+    return res;
   }
 
   @UseGuards(JwtAuthGuard)

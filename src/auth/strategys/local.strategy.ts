@@ -14,15 +14,20 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(username: string, password: string): Promise<any> {
+
+    if (!username || !password || username.length < 3 || password.length < 6)
+      return { status: 'error', message: 'Please provide all the required fields' };
+
     const existingUser = await this.userService.findOne(username);
-    if (!existingUser) throw new UnauthorizedException('Invalid credentials');
+
+    if (!existingUser) return { status: 'error', message: 'User not found, please signup' };
 
     const isPasswordValid = await this.authService.validatePassword(
       password,
       existingUser.password,
     );
 
-    if (!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
+    if (!isPasswordValid) return { status: 'error', message: 'Invalid password' };
 
     return existingUser;
   }
