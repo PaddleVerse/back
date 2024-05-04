@@ -57,6 +57,7 @@ model user {
   banner_picture String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713526102/zxwritc0rqvtjvcwbqiv.jpg")
   status    Status  @default(OFFLINE)
   xp        Int?     @default(0)
+  level     Int?      @default(1)
   createdAt DateTime @default(now())
   twoFa    Boolean? @default(false)
   twoFaSecret String?
