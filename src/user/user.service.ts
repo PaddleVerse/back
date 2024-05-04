@@ -265,6 +265,7 @@ export class UserService
                 status: true,
                 level: true,
                 xp: true,
+                win_streak: true,
                 twoFa : true,
                 twoFaSecret: true,
                 createdAt: true,
