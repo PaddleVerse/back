@@ -112,7 +112,7 @@ model game_history {
   loser_score    Int?     @default(0)
   winner_streak    Int?     @default(0)
 
-  start_time    DateTime?
+  start_time    DateTime? @default(now())
   end_time    DateTime?
 }
 
