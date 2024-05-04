@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
 import { TwoFactorService } from './two-factor.service';
+import { stat } from 'fs';
+import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
 
 @Injectable()
 export class AuthService 
@@ -14,21 +16,21 @@ export class AuthService
         this.prisma = new PrismaClient();
     }
 
-    async signup(username: string, name: string, nickname: string, password: string)
+    async signup(body: any)
     {
-        console.log(username, name, nickname, password);
-        if (!username || !password || !name || !nickname) {
-            throw new ConflictException('Missing credentials');
-        }
+        const { username, password, name, nickname } : CreateUserDto = body;
+        if (!username || !password || !name || !nickname)
+            return { status: 'error', message: 'Please provide all the required fields' };
+        
         const user = await this.prisma.user.findUnique({
             where: {
                 username
             }
         });
-        if (user) {
-            throw new ConflictException('Username already taken');
-        }
-        const newUser = await this.prisma.user.create({
+
+        if (user) return { status: 'error_', message: 'User already exists' };
+
+        await this.prisma.user.create({
             data: {
                 username,
                 name,
@@ -37,7 +39,7 @@ export class AuthService
             }
         });
         
-        return newUser;
+        return { status: 'success', message: 'User created' };
     }
     
     async validatePassword(plainPassword: string, hashedPassword: string): Promise<boolean> 
@@ -51,6 +53,7 @@ export class AuthService
 
     async login(user: any)
     {
+        if (user?.status === 'error') return user;
         const payload = { username: user.username, sub: user.id };
         return {
             access_token: await this.jwtService.signAsync(payload),

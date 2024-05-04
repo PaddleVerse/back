@@ -475,6 +475,7 @@ export class UserService
           return null;
         }
       }
+
       async addCoins(id: number, coins: number) {
         try
         {

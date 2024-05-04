@@ -10,21 +10,23 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isTokenValid = await super.canActivate(context) as boolean;
 
-    if (!isTokenValid) {
+    try {
+      const isTokenValid = await super.canActivate(context) as boolean;
+      if (!isTokenValid)
+        return false;
+      
+      const request = context.switchToHttp().getRequest();
+      const token = this.extractJwtFromRequest(request);
+  
+      // Check if the token is blacklisted
+      if (this.blacklistService.isTokenBlacklisted(token))
+        return false;
+  
+      return true;
+    } catch (error) {
       return false;
     }
-
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractJwtFromRequest(request);
-
-    // Check if the token is blacklisted
-    if (this.blacklistService.isTokenBlacklisted(token)) {
-      throw new UnauthorizedException('Token has been revoked');
-    }
-
-    return true;
   }
 
   private extractJwtFromRequest(request: any): string {
