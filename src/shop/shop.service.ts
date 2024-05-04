@@ -105,6 +105,7 @@ export class ShopService
             await this.prisma.ball.create({
                 data: {
                     image: body?.image,
+                    texture: body?.texture,
                     color: body?.color + body?.user_id,
                     user_id: body?.user_id
                 }

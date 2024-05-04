@@ -29,6 +29,12 @@ import { SearchModule } from './search/search.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ShopModule } from './shop/shop.module';
+import { GameModule } from "./game/game.module";
+import { GameController } from "./game/game.controller";
+import { GameService } from "./game/game.service";
+import { MatchController } from "./match_history/match.controller";
+import { MatchService } from "./match_history/match.service";
+import { MatchModule } from "./match_history/match.module";
 
 @Module({
   imports: [
@@ -44,6 +50,8 @@ import { ShopModule } from './shop/shop.module';
     ConversationsModule,
     NotificationsModule,
     ShopModule,
+    GameModule,
+    MatchModule
   ],
   controllers: [
     AppController,
@@ -53,7 +61,9 @@ import { ShopModule } from './shop/shop.module';
     ParticipantsController,
     BanController,
     ChannelsController,
-    ChatController
+    ChatController,
+    GameController,
+    MatchController
   ],
   providers: [
     AppService,
@@ -64,6 +74,8 @@ import { ShopModule } from './shop/shop.module';
     BanService,
     ParticipantsService,
     ConversationsService,
+    GameService,
+    MatchService
   ],
 })
 export class AppModule {}

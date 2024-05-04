@@ -56,7 +56,8 @@ model user {
   picture   String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713806275/kx6iknqyvu0uyqhhpfro.jpg")
   banner_picture String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713526102/zxwritc0rqvtjvcwbqiv.jpg")
   status    Status  @default(OFFLINE)
-  level     Int?     @default(600)
+  xp        Int?     @default(0)
+  level     Int?     @default(1)
   createdAt DateTime @default(now())
   twoFa    Boolean? @default(false)
   twoFaSecret String?
@@ -191,6 +192,7 @@ model ball {
   id        Int      @id @default(autoincrement())
   user_id    Int?     @default(0)
   image     String?
+  texture  String? @default("/Game/textures/balls/default.jpg")
   color     String? @unique
   enabled   Boolean? @default(false)
   createdAt DateTime @default(now())

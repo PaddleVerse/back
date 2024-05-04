@@ -7,7 +7,7 @@ class Game {
     id: string;
     players: Player[];
     winner: Player | null;
-    score: Record<string, number>;
+    score: { [key: string]: number };
     ball: Ball | null;
     table: Table;
     timeIdle: number;
@@ -36,16 +36,14 @@ class Game {
 
     endGame(): void {
         if (this.isGameOver()) return;
-        if (this.score[this.players[0].id] < this.score[this.players[1].id]) {
-            this.winner = this.players[0];
-        }
-        else {
-            this.winner = this.players[1];
-        }
-
-        console.log(`Game over. Winner: ${this.winner.userid}`);
-        const winnerIndex = this.players.indexOf(this.winner);
-        this.socket.to(this.id).emit("endGame", { winner: `player${winnerIndex + 1}` });
+    
+        const winner = this.score[this.players[0].id] > this.score[this.players[1].id] ? this.players[0] : this.players[1];
+        this.winner = winner;
+        const winnerId = winner.id === this.players[0].id ? "player1" : "player2";
+        this.socket.to(this.id).emit("endGame", { winner: winnerId });
+        console.log(winner);
+        console.log(this.players);
+        console.log(this.score);
     }
 
     updateScore(playerIndex: number, points: number): void {
@@ -64,7 +62,7 @@ class Game {
     checkScore(): void {
         if (!this.ball || !this.ball.hitGround) return;
         if (this.ball.lastHit) {
-            const scoringPlayerIdx = this.ball.lastHit.id === this.players[0].id ? 1 : 0;
+            const scoringPlayerIdx = this.ball.lastHit.id === this.players[0].id ? 0 : 1;
             if (this.ball.hitTable) {
                 this.updateScore(scoringPlayerIdx, 1);
             } else {
@@ -139,6 +137,13 @@ class Game {
             }
         }
     }
+    private determineWinner(): Player {
+        const player1Score = this.score[this.players[0].id] || 0;
+        const player2Score = this.score[this.players[1].id] || 0;
+    
+        return player1Score > player2Score ? this.players[0] : this.players[1];
+    }
+    
 }
 
 export default Game;

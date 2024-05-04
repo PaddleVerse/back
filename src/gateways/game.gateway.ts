@@ -156,6 +156,7 @@ export default class GameGateway {
     const game = room.game;
     await this.prisma.$connect();
     const winner: Player = game.winner;
+    console.log(winner.userid)
     const loser: Player = game.players.find((p) => p.id !== winner.id);
     const winnerId = winner.userid;
     const loserId = loser.userid;
