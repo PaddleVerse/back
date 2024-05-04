@@ -264,6 +264,7 @@ export class UserService
                 banner_picture: true,
                 status: true,
                 level: true,
+                xp: true,
                 twoFa : true,
                 twoFaSecret: true,
                 createdAt: true,
