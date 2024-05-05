@@ -35,6 +35,7 @@ import { GameService } from "./game/game.service";
 import { MatchController } from "./match_history/match.controller";
 import { MatchService } from "./match_history/match.service";
 import { MatchModule } from "./match_history/match.module";
+import { AchievementModule } from './achievement/achievement.module';
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { MatchModule } from "./match_history/match.module";
     NotificationsModule,
     ShopModule,
     GameModule,
-    MatchModule
+    MatchModule,
+    AchievementModule
   ],
   controllers: [
     AppController,
