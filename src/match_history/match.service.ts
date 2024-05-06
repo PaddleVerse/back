@@ -7,16 +7,19 @@ export class MatchService {
   constructor() {
     this.prisma = new PrismaClient();
   }
-
+  
   async getMatchHistoryByUserId(userId: number) {
-    
     return await this.prisma.game_history.findMany({
       where: {
         OR: [
           { winner: userId },
           { loser: userId }
         ]
+      },
+      orderBy: {
+        start_time: 'desc' // Order by createdAt field in descending order
       }
     });
   }
+  
 }

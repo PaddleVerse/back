@@ -9,14 +9,13 @@ import {
 import { Socket, Server } from "socket.io";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { UserService } from "../user/user.service";
-import { N_Type, PrismaClient, Req, Status, user } from "@prisma/client";
+import { PrismaClient, user } from "@prisma/client";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
-
+import { AchievementService } from "src/achievement/achievement.service";
 import GameRoom from "src/game/objects/GameRoom";
 import Player from "src/game/objects/Player";
-import Game from "src/game/objects/game";
 
 type userT = {
   id: number;
@@ -41,7 +40,8 @@ export default class GameGateway {
     private readonly userService: UserService,
     private readonly convService: ConversationsService,
     private readonly gatewayService: GatewaysService,
-    private readonly notificationService: NotificationsService
+    private readonly notificationService: NotificationsService,
+    private readonly achievementService: AchievementService
   ) {
     this.prisma = new PrismaClient();
     this.mainLoop();
@@ -221,6 +221,9 @@ export default class GameGateway {
     } catch (error) {
       console.error("Failed to create game history:", error);
     }
+    this.achievementService.checkFirstGame(winnerId);
+    this.achievementService.checkFirstGame(loserId);
+    this.achievementService.checkAchievements(winnerId);
 
     this.server
       .to(room.id)

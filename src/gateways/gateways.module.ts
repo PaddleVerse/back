@@ -8,8 +8,10 @@ import { ConversationsService } from 'src/conversations/conversations.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import GameGateway  from './game.gateway';
+import { AchievementModule } from 'src/achievement/achievement.module';
+import { AchievementService } from 'src/achievement/achievement.service';
 @Module({
-  providers: [GatewaysService, GatewaysGateway, ConversationsService, NotificationsService, GameGateway],
-  imports: [UserModule, FriendshipModule, ConversationsModule, NotificationsModule],
+  providers: [GatewaysService, GatewaysGateway, ConversationsService, NotificationsService, GameGateway, AchievementService],
+  imports: [UserModule, FriendshipModule, ConversationsModule, NotificationsModule, AchievementModule],
 })
 export class GatewaysModule {}
