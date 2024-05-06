@@ -118,7 +118,7 @@ model game_history {
 
 model channel{
   id           Int      @id @default(autoincrement())
-  picture String? @default("http://localhost:8080/1709546788254-test7.png")
+  picture String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713806275/kx6iknqyvu0uyqhhpfro.jpg")
   topic       String? @default("here to have fun and make friends, no toxicity allowed")
   key          String?
   state        Appearance? @default(public)
