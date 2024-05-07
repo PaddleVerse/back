@@ -53,7 +53,7 @@ class Game {
     }
 
     spawnBall(): void {
-        this.ball = new Ball(0.3, { x: 0, y: 15, z: 0 }, { x: 0.4 * this.ballSide, y: 0, z: 0.001 });
+        this.ball = new Ball(0.3, { x: 0, y: 15, z: 0 }, { x: 0.4 * this.ballSide, y: 0, z: 0.001 * Math.random() });
     }
 
     checkScore(): void {
@@ -65,6 +65,7 @@ class Game {
             } else {
                 this.updateScore(scoringPlayerIdx === 0 ? 1 : 0, 1);
             }
+            // give the ball to the player got scored on
             this.ballSide = scoringPlayerIdx === 0 ? 1 : -1;
         }
 
@@ -125,7 +126,10 @@ class Game {
 
     private checkStandStill(): void {
         if (!this.ball) return;
-        if (this.ball.velocity.x === 0 && this.ball.velocity.z === 0) {
+        
+        const epsilon = 0.0001;
+    
+        if (Math.abs(this.ball.velocity.x) < epsilon && Math.abs(this.ball.velocity.z) < epsilon) {
             this.timeIdle++;
             if (this.timeIdle > 500) {
                 console.log('Ball is idle for too long. Resetting ball.');
@@ -134,6 +138,7 @@ class Game {
             }
         }
     }
+    
     
 }
 
