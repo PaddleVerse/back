@@ -20,4 +20,12 @@ export class MatchController {
     {
         return await this.matchService.getCountWinsByUserId(userId);
     }
+
+    @Get("/history/losses/:userId")
+    async getAllLosses(
+        @Param("userId") userId: number
+    )
+    {
+        return await this.matchService.getCountLossesByUserId(userId);
+    }
 }

@@ -32,4 +32,15 @@ export class MatchService {
       });
     } catch (error) {}
   }
+
+  async getCountLossesByUserId(userId: number) 
+  {
+    try {
+      return await this.prisma.game_history.count({
+        where: {
+          loser: userId
+        }
+      });
+    } catch (error) {}
+  }
 }
