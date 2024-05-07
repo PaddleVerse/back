@@ -25,7 +25,7 @@ class Game {
         this.timeIdle = 0;
         this.ballSide = 1;
         this.socket = socket;
-        this.maxScore = 1   ;
+        this.maxScore = 5;
     }
 
     startGame(): void {
@@ -41,10 +41,6 @@ class Game {
         this.winner = winner;
         const winnerId = winner.id === this.players[0].id ? "player1" : "player2";
         this.socket.to(this.id).emit("endGame", { winner: winnerId });
-        //
-        console.log(winner);
-        console.log(this.players);
-        console.log(this.score);
     }
 
     updateScore(playerIndex: number, points: number): void {
@@ -137,12 +133,6 @@ class Game {
                 this.resetBall();
             }
         }
-    }
-    private determineWinner(): Player {
-        const player1Score = this.score[this.players[0].id] || 0;
-        const player2Score = this.score[this.players[1].id] || 0;
-    
-        return player1Score > player2Score ? this.players[0] : this.players[1];
     }
     
 }
