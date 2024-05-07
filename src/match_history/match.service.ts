@@ -22,4 +22,14 @@ export class MatchService {
     });
   }
   
+  async getCountWinsByUserId(userId: number) 
+  {
+    try {
+      return await this.prisma.game_history.count({
+        where: {
+          winner: userId
+        }
+      });
+    } catch (error) {}
+  }
 }

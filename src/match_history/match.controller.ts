@@ -12,4 +12,12 @@ export class MatchController {
         userId = Number(userId);
         return await this.matchService.getMatchHistoryByUserId(userId);
     }
+
+    @Get("/history/wins/:userId")
+    async getAllWins(
+        @Param("userId") userId: number
+    )
+    {
+        return await this.matchService.getCountWinsByUserId(userId);
+    }
 }

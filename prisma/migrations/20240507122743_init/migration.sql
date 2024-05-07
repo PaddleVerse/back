@@ -37,7 +37,6 @@ CREATE TABLE "user" (
     "notified" BOOLEAN DEFAULT false,
     "coins" INTEGER DEFAULT 1000,
     "win_streak" INTEGER DEFAULT 0,
-    "lose_streak" INTEGER DEFAULT 0,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -82,7 +81,8 @@ CREATE TABLE "game_history" (
     "loser" INTEGER DEFAULT 0,
     "winner_score" INTEGER DEFAULT 0,
     "loser_score" INTEGER DEFAULT 0,
-    "start_time" TIMESTAMP(3),
+    "winner_streak" INTEGER DEFAULT 0,
+    "start_time" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
     "end_time" TIMESTAMP(3),
 
     CONSTRAINT "game_history_pkey" PRIMARY KEY ("id")
@@ -91,7 +91,7 @@ CREATE TABLE "game_history" (
 -- CreateTable
 CREATE TABLE "channel" (
     "id" SERIAL NOT NULL,
-    "picture" TEXT DEFAULT 'http://localhost:8080/1709546788254-test7.png',
+    "picture" TEXT DEFAULT 'https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713806275/kx6iknqyvu0uyqhhpfro.jpg',
     "topic" TEXT DEFAULT 'here to have fun and make friends, no toxicity allowed',
     "key" TEXT,
     "state" "Appearance" DEFAULT 'public',
