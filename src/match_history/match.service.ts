@@ -22,23 +22,23 @@ export class MatchService {
     });
   }
   
-  async getCountWinsByUserId(userId: number) 
+  async getCountWinsByUserId(userId: any) 
   {
     try {
       return await this.prisma.game_history.count({
         where: {
-          winner: userId
+          winner: +userId
         }
       });
     } catch (error) {}
   }
 
-  async getCountLossesByUserId(userId: number) 
+  async getCountLossesByUserId(userId: any) 
   {
     try {
       return await this.prisma.game_history.count({
         where: {
-          loser: userId
+          loser: +userId
         }
       });
     } catch (error) {}

@@ -16,30 +16,34 @@ export class AuthService
         this.prisma = new PrismaClient();
     }
 
-    async signup(body: any)
+    async signup(body: CreateUserDto)
     {
-        const { username, password, name, nickname } : CreateUserDto = body;
-        if (!username || !password || !name || !nickname)
-            return { status: 'error', message: 'Please provide all the required fields' };
-        
-        const user = await this.prisma.user.findUnique({
-            where: {
-                username
-            }
-        });
-
-        if (user) return { status: 'error_', message: 'User already exists' };
-
-        await this.prisma.user.create({
-            data: {
-                username,
-                name,
-                nickname,
-                password: await this.hashPassword(password)
-            }
-        });
-        
-        return { status: 'success', message: 'User created' };
+        try {
+            const { username, password, name, nickname } : CreateUserDto = body;
+            if (!username || !password || !name || !nickname)
+                return { status: 'error', message: 'Please provide all the required fields' };
+            
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    username
+                }
+            });
+    
+            if (user) return { status: 'error_', message: 'User already exists' };
+    
+            await this.prisma.user.create({
+                data: {
+                    username,
+                    name,
+                    nickname,
+                    password: await this.hashPassword(password)
+                }
+            });
+            
+            return { status: 'success', message: 'User created' };
+        } catch (error) {
+            return { status: 'error', message: 'An error occurred' };
+        }
     }
     
     async validatePassword(plainPassword: string, hashedPassword: string): Promise<boolean> 
