@@ -197,12 +197,28 @@ export class UserService
       try
       {
         const users = await this.getUsers();
-        for (let i = 0; i < users.length; i++)
-        {
-          // check if the user in a range of each 10 users by level
-            if (users[i].id == id)
-              return (i < 10) ? users.slice(0, 10) : users.slice(i - 10, i + 10);
-        }
+        users.sort((a: any, b: any) => b.xp - a.xp);
+  const currentUserIndex = users.findIndex(
+    (user) => user.id === id
+  );
+
+  // Check for insufficient users above
+  const totalUsers = users.length;
+  if (currentUserIndex + 1 < 5) {
+    const totalDeficit = 10 - (currentUserIndex + 1);
+    const usersBelowLimit = Math.min(totalDeficit, totalUsers - (currentUserIndex + 1));
+
+    const nearbyUsers = [
+      ...users.slice(0, currentUserIndex + 1),
+      ...users.slice(currentUserIndex + 1, currentUserIndex + 1 + usersBelowLimit),
+    ];
+    return nearbyUsers;
+  } else {
+    const start = Math.max(0, currentUserIndex - 5);
+    const end = Math.min(totalUsers - 1, currentUserIndex + 5);
+    const nearbyUsers = users.slice(start, end + 1);
+    return nearbyUsers;
+  }
       }
       catch (error)
       {
