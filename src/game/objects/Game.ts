@@ -25,7 +25,7 @@ class Game {
         this.timeIdle = 0;
         this.ballSide = 1;
         this.socket = socket;
-        this.maxScore = 1   ;
+        this.maxScore = 5;
     }
 
     startGame(): void {
