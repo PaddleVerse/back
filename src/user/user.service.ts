@@ -178,28 +178,7 @@ export class UserService {
     try {
       const users = await this.getUsers();
       users.sort((a: any, b: any) => b.xp - a.xp);
-      const currentUserIndex = users.findIndex((user) => user.id === id);
-      
-      const totalUsers = users.length;
-      
-      if (currentUserIndex === totalUsers - 1) {
-        return users.slice(currentUserIndex - 9, currentUserIndex + 1);
-      } else {
-        const totalDeficit = 10 - (currentUserIndex + 1);
-        const usersBelowLimit = Math.min(
-          totalDeficit,
-          totalUsers - (currentUserIndex + 1)
-        );
-      
-        const nearbyUsers = [
-          ...users.slice(0, currentUserIndex + 1),
-          ...users.slice(
-            currentUserIndex + 1,
-            currentUserIndex + 1 + usersBelowLimit
-          ),
-        ];
-        return nearbyUsers;
-      }
+      return users.slice(0, 20);
     } catch (error) {
       return null;
     }
