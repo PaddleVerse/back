@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
 import { PrismaClient } from "@prisma/client";
 import achievementsData from "./achievement.data";
+
 @Injectable()
 export class AchievementService {
   private readonly prisma: PrismaClient;
