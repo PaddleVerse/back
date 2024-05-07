@@ -182,11 +182,9 @@ export class UserService {
       
       const totalUsers = users.length;
       
-      // Check for current user being last
       if (currentUserIndex === totalUsers - 1) {
-        return users; // Return all users if current user is last
+        return users.slice(currentUserIndex - 9, currentUserIndex + 1);
       } else {
-        // Existing logic for handling users not last:
         const totalDeficit = 10 - (currentUserIndex + 1);
         const usersBelowLimit = Math.min(
           totalDeficit,
