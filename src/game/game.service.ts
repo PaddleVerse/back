@@ -20,4 +20,14 @@ export class GameService
         });
 
     }
+    
+    async getUserPadddleSkin(id: number): Promise<any>
+    {
+        return await this.prisma.paddle.findFirst({
+            where: {
+                user_id: id,
+                enabled: true
+            }
+        });
+    }
 }
