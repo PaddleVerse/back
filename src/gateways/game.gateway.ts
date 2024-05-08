@@ -53,37 +53,37 @@ export default class GameGateway {
   }
 
   async handleDisconnect(client: any) {
-    const socketId = client.id;
-    // Find the user ID based on the disconnecting socket ID
-    const userId = Object.keys(this.userService.clients).find(
-      (key) => this.userService.clients[key].socketId === socketId
-    );
+    // const socketId = client.id;
+    // // Find the user ID based on the disconnecting socket ID
+    // const userId = Object.keys(this.userService.clients).find(
+    //   (key) => this.userService.clients[key].socketId === socketId
+    // );
 
-    if (userId) {
-      // console.log(`Client with user ID ${userId} and socket ID ${socketId} disconnected.`);
-      const user = await this.userService.getUserById(+userId);
-      if (user) {
-        // find the player and which room they are in
-        let room = null;
-        for (const roomKey in this.rooms) {
-          let players =
-            this.rooms && this.rooms[roomKey]
-              ? this.rooms[roomKey].players
-              : null;
-          if (!players) continue;
-          for (const player of players) {
-            // delete the player from the room
-            if (player.id === socketId) {
-              room = roomKey;
-              this.rooms[room] = null;
-              break;
-            }
-          }
-        }
-      }
-    } else {
-      console.error(`Failed to find a matching user for socket ID ${socketId}`);
-    }
+    // if (userId) {
+    //   // console.log(`Client with user ID ${userId} and socket ID ${socketId} disconnected.`);
+    //   const user = await this.userService.getUserById(+userId);
+    //   if (user) {
+    //     // find the player and which room they are in
+    //     let room = null;
+    //     for (const roomKey in this.rooms) {
+    //       let players =
+    //         this.rooms && this.rooms[roomKey]
+    //           ? this.rooms[roomKey].players
+    //           : null;
+    //       if (!players) continue;
+    //       for (const player of players) {
+    //         // delete the player from the room
+    //         if (player.id === socketId) {
+    //           room = roomKey;
+    //           this.rooms[room] = null;
+    //           break;
+    //         }
+    //       }
+    //     }
+    //   }
+    // } else {
+    //   console.error(`Failed to find a matching user for socket ID ${socketId}`);
+    // }
   }
   // Helper method to notify the remaining player
   private notifyRemainingPlayer(room: string, remainingRole: string) {
