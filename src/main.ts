@@ -9,7 +9,7 @@ declare const module: any;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  app.use(express.json()); // Add this line if not already present
+  app.use(express.json());
   app.use(cookieParser());
   if (module.hot) {
     module.hot.accept();

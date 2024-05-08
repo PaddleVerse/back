@@ -1,7 +1,6 @@
 import { Body } from "@nestjs/common";
 import {
   ConnectedSocket,
-  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -13,7 +12,6 @@ import { N_Type, PrismaClient, Req, Status, user } from "@prisma/client";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
-import { zip } from "rxjs";
 
 
 @WebSocketGateway({
