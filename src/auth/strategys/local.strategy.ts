@@ -13,8 +13,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super();
   }
 
-  async validate(nickname: string, password: string): Promise<any> {
+  async validate(username: string, password: string): Promise<any> {
 
+    const nickname = username;
     if (!nickname || !password || nickname.length < 3 || password.length < 6)
       return { status: 'error', message: 'Please provide all the required fields' };
 

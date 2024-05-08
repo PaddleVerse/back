@@ -120,7 +120,7 @@ export class AuthController
 
 
   @UseGuards(JwtAuthGuard)
-  @Post('logout')
+  @Get('logout')
   async logout(@Req() req) {
     const accessToken = req.headers.authorization.split(' ')[1]; // Extracting token from Authorization header
     this.blacklistService.addToBlacklist(accessToken);
