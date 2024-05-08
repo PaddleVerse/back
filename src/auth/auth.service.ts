@@ -18,23 +18,23 @@ export class AuthService
     async signup(body: CreateUserDto)
     {
         try {
-            const { username, password, name, nickname } : CreateUserDto = body;
-            if (!username || !password || !name || !nickname)
+            const { nickname, password, name, middlename } : CreateUserDto = body;
+            if (!nickname || !password || !name || !middlename)
                 return { status: 'error', message: 'Please provide all the required fields' };
             
             const user = await this.prisma.user.findUnique({
-                where: {
-                    username
+                where : {
+                    nickname
                 }
             });
     
             if (user) return { status: 'error_', message: 'User already exists' };
     
             await this.prisma.user.create({
-                data: {
-                    username,
-                    name,
+                data : {
                     nickname,
+                    name,
+                    middlename,
                     password: await this.hashPassword(password)
                 }
             });
@@ -57,7 +57,7 @@ export class AuthService
     async login(user: any)
     {
         if (user?.status === 'error') return user;
-        const payload = { username: user.username, sub: user.id };
+        const payload = { nickname: user.nickname, sub: user.id };
         return {
             access_token: await this.jwtService.signAsync(payload),
         };
@@ -69,7 +69,7 @@ export class AuthService
 
         if (!user) throw new UnauthorizedException('User not found');
 
-        const url = await this.twoFactorService.generateSecret(user.username);
+        const url = await this.twoFactorService.generateSecret(user.nickname);
 
         await this.userService.updateUser(userId, { twoFaSecret: url.secret });
 

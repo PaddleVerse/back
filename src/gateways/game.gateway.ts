@@ -19,7 +19,7 @@ import Player from "src/game/objects/Player";
 
 type userT = {
   id: number;
-  userName: string;
+  nickname: string;
   socketId: string;
 };
 
@@ -237,7 +237,7 @@ export default class GameGateway {
 
     const usr: userT = {
       id: user.id,
-      userName: user.username,
+      nickname: user.nickname,
       socketId: this.getSocketId(user.id),
     };
     const room = await this.gatewayService.matchmaking(usr);
@@ -279,7 +279,7 @@ export default class GameGateway {
     if (!user) return;
     const usr: userT = {
       id: user.id,
-      userName: user.username,
+      nickname: user.nickname,
       socketId: this.getSocketId(user.id),
     };
     await this.gatewayService.leaveRoom(usr);

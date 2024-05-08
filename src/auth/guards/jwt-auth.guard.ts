@@ -14,18 +14,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     try {
       const isTokenValid = await super.canActivate(context) as boolean;
       if (!isTokenValid)
-        return false;
+        throw new UnauthorizedException();
       
       const request = context.switchToHttp().getRequest();
       const token = this.extractJwtFromRequest(request);
-  
+      
       // Check if the token is blacklisted
       if (this.blacklistService.isTokenBlacklisted(token))
-        return false;
+        throw new UnauthorizedException();
   
       return true;
     } catch (error) {
-      return false;
+      throw new UnauthorizedException();
     }
   }
 

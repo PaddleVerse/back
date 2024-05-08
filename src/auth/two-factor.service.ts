@@ -5,11 +5,11 @@ import * as qrcode from 'qrcode';
 @Injectable()
 export class TwoFactorService {
 
-  async generateSecret(username: string) : Promise<any>
+  async generateSecret(nickname: string) : Promise<any>
   {
     const secret = authenticator.generateSecret(64);
 
-    const url = authenticator.keyuri(username, 'tchipa', secret);
+    const url = authenticator.keyuri(nickname, 'tchipa', secret);
 
     return {
       secret: secret,
