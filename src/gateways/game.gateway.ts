@@ -9,7 +9,7 @@ import {
 import { Socket, Server } from "socket.io";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { UserService } from "../user/user.service";
-import { PrismaClient, user } from "@prisma/client";
+import { PrismaClient, user, Status } from "@prisma/client";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
@@ -49,7 +49,12 @@ export default class GameGateway {
   @WebSocketServer() server: Server;
 
   async handleConnection(client: any) {
-    // console.log(`Client connected: ${client.id}`);
+    const userId = await client.handshake.query?.userId;
+    this.userService.clients[userId] = { socketId: client.id, socket: client };
+    const user = await this.userService.getUserById(+userId);
+    if (user) {
+      await this.userService.updateUser(user.id, { status: Status.ON_GAME });
+    }
   }
 
   async handleDisconnect(client: any) {
@@ -58,7 +63,6 @@ export default class GameGateway {
     // const userId = Object.keys(this.userService.clients).find(
     //   (key) => this.userService.clients[key].socketId === socketId
     // );
-
     // if (userId) {
     //   // console.log(`Client with user ID ${userId} and socket ID ${socketId} disconnected.`);
     //   const user = await this.userService.getUserById(+userId);
@@ -156,7 +160,7 @@ export default class GameGateway {
     const game = room.game;
     await this.prisma.$connect();
     const winner: Player = game.winner;
-    console.log(winner.userid)
+    console.log(winner.userid);
     const loser: Player = game.players.find((p) => p.id !== winner.id);
     const winnerId = winner.userid;
     const loserId = loser.userid;
@@ -204,7 +208,7 @@ export default class GameGateway {
           win_streak: 0,
         },
       });
-      
+
       // add xp to the winner that changes due to the diffrence in score
       await this.prisma.user.update({
         where: { id: winnerId },
@@ -214,7 +218,7 @@ export default class GameGateway {
           },
         },
       });
-      
+
       const winnerUser = await this.userService.getUserById(winnerId);
       const loserUser = await this.userService.getUserById(loserId);
       await this.userService.addCoins(winnerUser.id, coinsToAdd);

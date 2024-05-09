@@ -330,7 +330,7 @@ export class GatewaysGateway {
       //some logic here to handle the message between the two users, mainly check the sockets and if they exist in the data base or not
       const id: any = this.getSocketId(reciever);
       this.server.to(id).emit("update", { dm: true }); // final result
-      this.server.to(socket.id).emit("update", { dm: true }); // final result
+      this.server.to(socket.id).emit("update", { dm: true, type: "dmMessage" }); // final result
     } catch (error) {}
   }
 
@@ -401,7 +401,7 @@ export class GatewaysGateway {
       if (u === null) {
         throw new Error("User not found.");
       }
-      this.server.to(roomName).emit("update", { channel: true });
+      this.server.to(roomName).emit("update", { channel: true, type: "channelMessage" });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
