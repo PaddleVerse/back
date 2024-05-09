@@ -35,7 +35,7 @@ export class ShopService
             await this.prisma.paddle.create({
                 data: {
                     image: body?.image,
-                    color: body?.color,
+                    color: body?.color + body?.user_id,
                     user_id: body?.user_id
                 }
             });
@@ -50,8 +50,7 @@ export class ShopService
             return {status : 'success', message : 'Paddle owned'};
         }
         catch (error) {
-            return {status : 'error', message : 'Paddle not owned'};
-
+            console.error(error);
         }
     }
 
@@ -72,7 +71,7 @@ export class ShopService
             }
             await this.prisma.paddle.update({
                 data: { enabled: true },
-                where: { color: body?.color, user_id: body?.user_id}
+                where: { color: body?.color + body?.user_id}
             })
             return {status : 'success', message : 'Paddle equipped'};
         }
@@ -87,7 +86,7 @@ export class ShopService
             if (!body) return {status : 'error', message : 'Invalid request'};
             await this.prisma.paddle.update({
                 data: { enabled: false },
-                where: { color: body?.color, user_id: body?.user_id}
+                where: { color: body?.color + body?.user_id}
             })
             return {status : 'success', message : 'Paddle unequipped'};
         }
@@ -107,7 +106,7 @@ export class ShopService
                 data: {
                     image: body?.image,
                     texture: body?.texture,
-                    color: body?.color,
+                    color: body?.color + body?.user_id,
                     user_id: body?.user_id
                 }
             });
@@ -142,7 +141,7 @@ export class ShopService
             }
             await this.prisma.ball.update({
                 data: { enabled: true },
-                where: { color: body?.color, user_id: body?.user_id}
+                where: { color: body?.color + body?.user_id}
             })
             return {status : 'success', message : 'Ball equipped'};
         }
@@ -157,7 +156,7 @@ export class ShopService
             if (!body) return {status : 'error', message : 'Invalid request'};
             await this.prisma.ball.update({
                 data: { enabled: false },
-                where: { color: body?.color, user_id: body?.user_id}
+                where: { color: body?.color + body?.user_id}
             })
             return {status : 'success', message : 'Ball unequipped'};
         }
@@ -176,7 +175,7 @@ export class ShopService
             await this.prisma.table.create({
                 data: {
                     image: body?.image,
-                    color: body?.color,
+                    color: body?.color + body?.user_id,
                     user_id: body?.user_id
                 }
             });
@@ -211,7 +210,7 @@ export class ShopService
             }
             await this.prisma.table.update({
                 data: { enabled: true },
-                where: { color: body?.color, user_id: body?.user_id}
+                where: { color: body?.color + body?.user_id}
             })
             return {status : 'success', message : 'Table equipped'};
         }
@@ -226,7 +225,7 @@ export class ShopService
             if (!body) return {status : 'error', message : 'Invalid request'};
             await this.prisma.table.update({
                 data: { enabled: false },
-                where: { color: body?.color, user_id: body?.user_id}
+                where: { color: body?.color + body?.user_id}
             })
             return {status : 'success', message : 'Table unequipped'};
         }
