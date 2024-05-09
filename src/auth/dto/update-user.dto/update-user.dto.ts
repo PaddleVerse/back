@@ -8,19 +8,11 @@ export class UpdateUserDto extends PartialType(CreateUserDto)
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(20)
-    nickname: string;
+    middlename: string;
     
     @IsString()
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(20)
     name: string;
-
-    @IsString()
-    picture: string;
-
-    @IsString()
-    status: string;
-    @IsInt()
-    level: number;
 }

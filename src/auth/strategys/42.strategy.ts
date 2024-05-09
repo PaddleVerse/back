@@ -13,7 +13,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
         profileFields:
         {
             id: 'id',
-            username: 'login',
+            nickname: 'login',
             email: 'email',
             avatar: 'image_url',
         },

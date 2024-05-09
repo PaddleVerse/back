@@ -21,9 +21,9 @@ CREATE TABLE "user" (
     "id" SERIAL NOT NULL,
     "googleId" TEXT,
     "fortytwoId" INTEGER,
-    "username" TEXT NOT NULL,
+    "nickname" TEXT NOT NULL,
     "name" TEXT,
-    "nickname" TEXT DEFAULT 'zuse',
+    "middlename" TEXT DEFAULT 'zuse',
     "password" TEXT NOT NULL,
     "picture" TEXT DEFAULT 'https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713806275/kx6iknqyvu0uyqhhpfro.jpg',
     "banner_picture" TEXT DEFAULT 'https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713526102/zxwritc0rqvtjvcwbqiv.jpg',
@@ -204,7 +204,7 @@ CREATE UNIQUE INDEX "user_googleId_key" ON "user"("googleId");
 CREATE UNIQUE INDEX "user_fortytwoId_key" ON "user"("fortytwoId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
+CREATE UNIQUE INDEX "user_nickname_key" ON "user"("nickname");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "channel_name_key" ON "channel"("name");

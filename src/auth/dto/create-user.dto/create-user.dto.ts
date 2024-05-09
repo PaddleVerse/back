@@ -6,7 +6,7 @@ export class CreateUserDto
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(20)
-    username: string;
+    nickname: string;
     
     @IsString()
     @IsNotEmpty()
@@ -25,6 +25,6 @@ export class CreateUserDto
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(20)
-    nickname: string;
+    middlename: string;
 
 }

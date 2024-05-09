@@ -49,9 +49,9 @@ model user {
   id        Int      @id @default(autoincrement())
   googleId  String?  @unique
   fortytwoId  Int?  @unique
-  username     String   @unique
+  nickname     String   @unique
   name      String?
-  nickname  String? @default("zuse")
+  middlename String? @default("zuse")
   password  String
   picture   String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713806275/kx6iknqyvu0uyqhhpfro.jpg")
   banner_picture String? @default("https://res.cloudinary.com/dxxlqdwxb/image/upload/v1713526102/zxwritc0rqvtjvcwbqiv.jpg")

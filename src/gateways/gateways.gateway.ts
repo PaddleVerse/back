@@ -351,7 +351,7 @@ export class GatewaysGateway {
       if (room === -1) {
         await this.gatewayService.addRoom(roomName, {
           id: Number(client.id),
-          userName: client.username,
+          nickname: client.nickname,
           socketId: u,
         });
         socket.join(roomName);
@@ -367,7 +367,7 @@ export class GatewaysGateway {
       if (type === "self") {
         await this.gatewayService.addUserToRoom(roomName, {
           id: Number(client.id),
-          userName: client.username,
+          nickname: client.nickname,
           socketId: u,
         });
         socket.join(roomName);
@@ -375,7 +375,7 @@ export class GatewaysGateway {
         const soc = this.getSocket(client.id);
         await this.gatewayService.addUserToRoom(roomName, {
           id: Number(client.id),
-          userName: client.username,
+          nickname: client.nickname,
           socketId: soc.id,
         });
         soc.join(roomName);

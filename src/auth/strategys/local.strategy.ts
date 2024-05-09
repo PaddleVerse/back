@@ -15,10 +15,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
   async validate(username: string, password: string): Promise<any> {
 
-    if (!username || !password || username.length < 3 || password.length < 6)
+    const nickname = username;
+    if (!nickname || !password || nickname.length < 3 || password.length < 6)
       return { status: 'error', message: 'Please provide all the required fields' };
 
-    const existingUser = await this.userService.findOne(username);
+    const existingUser = await this.userService.findOne(nickname);
 
     if (!existingUser) return { status: 'error', message: 'User not found, please signup' };
 

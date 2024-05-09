@@ -29,9 +29,9 @@ export class UserService {
         select: {
           id: true,
           first_time: true,
-          username: true,
-          name: true,
           nickname: true,
+          name: true,
+          middlename: true,
           picture: true,
           banner_picture: true,
           status: true,
@@ -65,9 +65,9 @@ export class UserService {
         select: {
           id: true,
           first_time: true,
-          username: true,
-          name: true,
           nickname: true,
+          name: true,
+          middlename: true,
           picture: true,
           banner_picture: true,
           status: true,
@@ -104,9 +104,9 @@ export class UserService {
         select: {
           id: true,
           first_time: true,
-          username: true,
-          name: true,
           nickname: true,
+          name: true,
+          middlename: true,
           picture: true,
           banner_picture: true,
           status: true,
@@ -142,9 +142,9 @@ export class UserService {
         select: {
           id: true,
           first_time: true,
-          username: true,
-          name: true,
           nickname: true,
+          name: true,
+          middlename: true,
           picture: true,
           banner_picture: true,
           status: true,
@@ -192,9 +192,9 @@ export class UserService {
         },
         select: {
           id: true,
-          username: true,
-          name: true,
           nickname: true,
+          name: true,
+          middlename: true,
           picture: true,
           banner_picture: true,
           status: true,
@@ -220,18 +220,18 @@ export class UserService {
     }
   }
 
-  async findOne(username: string) {
+  async findOne(nickname: string) {
     try {
       const user = await this.prisma.user.findUnique({
         where: {
-          username,
+          nickname,
         },
         select: {
           id: true,
           first_time: true,
-          username: true,
-          name: true,
           nickname: true,
+          name: true,
+          middlename: true,
           password: true,
           picture: true,
           banner_picture: true,
@@ -273,7 +273,7 @@ export class UserService {
 
       let check = await this.prisma.user.findUnique({
         where: {
-          username: emails[0]?.value,
+          nickname: emails[0]?.value,
         },
       });
       if (check) {
@@ -288,7 +288,7 @@ export class UserService {
           data: {
             googleId: id,
             name: displayName,
-            username: emails[0]?.value || id,
+            nickname: emails[0]?.value || id,
             password: pw,
             picture: photo,
           },
@@ -302,7 +302,7 @@ export class UserService {
 
   async findOrCreateFortyTwoUser(profile: any) {
     try {
-      let { id, username } = profile;
+      let { id, nickname } = profile;
       const name = profile._json.first_name + " " + profile._json.last_name;
       const pic = profile._json.image.link;
       let user = await this.prisma.user.findUnique({
@@ -312,11 +312,11 @@ export class UserService {
       });
       let check = await this.prisma.user.findUnique({
         where: {
-          username: username,
+          nickname: nickname,
         },
       });
       if (check) {
-        username = username + id;
+        nickname = nickname + id;
       }
       if (!user) {
         const random = Math.floor(Math.random() * 1000000);
@@ -326,7 +326,7 @@ export class UserService {
           data: {
             fortytwoId: id,
             name: name,
-            username: username,
+            nickname: nickname,
             password: pw,
             picture: pic,
           },
@@ -376,8 +376,8 @@ export class UserService {
   }
 
   async editUser(id: number, data: UpdateUserDto) {
-    const { name, nickname } = data;
-    if (!name || !nickname || name.length < 3 || nickname.length < 3)
+    const { name, middlename } = data;
+    if (!name || !middlename || name.length < 3 || middlename.length < 3)
       return null;
     const updatedUser = await this.prisma.user.update({
       where: {
@@ -385,7 +385,7 @@ export class UserService {
       },
       data: {
         name: name,
-        nickname: nickname,
+        middlename: middlename,
       },
     });
     return updatedUser;
