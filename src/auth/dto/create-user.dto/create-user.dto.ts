@@ -2,29 +2,28 @@ import { IsString, IsNotEmpty, MinLength, MaxLength, IsAlphanumeric } from "clas
 
 export class CreateUserDto 
 {
-    @IsString()
-    @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(20)
+    @IsString({ message: "Nickname must be a string" })
+    @IsNotEmpty({ message: "Nickname cannot be empty" })
+    @MinLength(3, { message: "Nickname must be at least 3 characters long" })
+    @MaxLength(20, { message: "Nickname cannot be longer than 20 characters" })
     nickname: string;
     
-    @IsString()
-    @IsNotEmpty()
-    @MinLength(6)
-    @MaxLength(20)
+    @IsString({ message: "Password must be a string" })
+    @IsNotEmpty({ message: "Password cannot be empty" })
+    @MinLength(6, { message: "Password must be at least 6 characters long" })
+    @MaxLength(20, { message: "Password cannot be longer than 20 characters" })
     @IsAlphanumeric()
     password: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(20)
+    @IsString({ message: "Name must be a string" })
+    @IsNotEmpty({ message: "Name cannot be empty" })
+    @MinLength(3, { message: "Name must be at least 3 characters long" })
+    @MaxLength(20, { message: "Name cannot be longer than 20 characters" })
     name: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(20)
+    @IsString({ message: "Middle name must be a string" })
+    @IsNotEmpty({ message: "Middle name cannot be empty" })
+    @MinLength(3, { message: "Middle name must be at least 3 characters long" })
+    @MaxLength(20, { message: "Middle name cannot be longer than 20 characters" })
     middlename: string;
-
 }

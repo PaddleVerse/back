@@ -9,13 +9,3 @@ services:
       POSTGRES_DB: mydb
     ports:
       - 5432:5432
-#     volumes:
-#       - postg:/var/lib/postgresql/data
-
-# volumes:
-#   postg:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: /goinfre/mjarboua/back/data/

@@ -7,8 +7,7 @@ import { GoogleGuard } from './guards/google.guard';
 import { FortyTwoGuard } from './guards/42.guard';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
 import { BlacklistService } from './blacklist.service';
-
-
+import { ValidationPipe } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController 
@@ -57,7 +56,7 @@ export class AuthController
   }
 
   @Post('signup')
-  async signup(@Body() body: CreateUserDto)
+  async signup(@Body(new ValidationPipe()) body: CreateUserDto)
   {
     const res = await this.authService.signup(body);
     return res;
