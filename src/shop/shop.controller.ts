@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ShopService } from './shop.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('shop')
+@UseGuards(JwtAuthGuard)
 export class ShopController {
   constructor(private readonly shopService: ShopService){}
 
@@ -46,23 +48,5 @@ export class ShopController {
     async disableBall(@Body() body : any)
     {
         return await this.shopService.disableBall(body);
-    }
-
-    @Post('table')
-    async createTable(@Body() body : any)
-    {
-        return await this.shopService.createTable(body);
-    }
-
-    @Post('table/enable')
-    async enableTable(@Body() body : any)
-    {
-        return await this.shopService.enableTable(body);
-    }
-
-    @Post('table/disable')
-    async disableTable(@Body() body : any)
-    {
-        return await this.shopService.disableTable(body);
     }
 }

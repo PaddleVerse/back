@@ -14,7 +14,7 @@ export class AuthService
     {
         this.prisma = new PrismaClient();
     }
-
+   
     async signup(body: CreateUserDto)
     {
         try {
@@ -100,6 +100,19 @@ export class AuthService
         this.userService.updateUser(userId, { twoFa: res });
 
         return {ok: res};
+    }
+
+    async logout (token : string)
+    {
+       try {
+         await this.prisma.blacklistedTokens.create({
+             data : {
+                 token
+             }
+         });
+       } catch (error) {
+            console.error(error);
+       }
     }
 };
 

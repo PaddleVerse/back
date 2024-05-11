@@ -5,23 +5,18 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  UseGuards
 } from "@nestjs/common";
 import { ChatService } from "./chat.service";
-import {
-  Prisma,
-  Role,
-  channel,
-  channel_participant,
-  message,
-  user,
-} from "@prisma/client";
+
 import { UserService } from "src/user/user.service";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { ChannelsService } from "../channels/channels.service";
-import { MessageService } from "src/message/message.service";
 import { ConversationsService } from "src/conversations/conversations.service";
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller("chat")
+@UseGuards(JwtAuthGuard)
 export class ChatController {
   /**
    *

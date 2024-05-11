@@ -8,12 +8,14 @@ import {
   Param,
   Post,
   Query,
+  UseGuards
 } from "@nestjs/common";
-import { PrismaClient } from "@prisma/client";
 import { ConversationsService } from "./conversations.service";
 import { MessageService } from "src/message/message.service";
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller("conversations")
+@UseGuards(JwtAuthGuard)
 export class ConversationsController {
   constructor(
     readonly conversationsService: ConversationsService,

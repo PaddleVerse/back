@@ -74,7 +74,6 @@ model user {
 
   paddles paddle[]
   balls ball[]
-  tables table[]
 }
 
 model SearchHistory {
@@ -202,12 +201,8 @@ model ball {
   user    user?     @relation(fields: [user_id], references: [id])
 }
 
-model table {
+model blacklistedTokens {
   id        Int      @id @default(autoincrement())
-  user_id    Int?     @default(0)
-  image     String?
-  color     String? @unique
-  enabled   Boolean? @default(false)
+  token     String? @unique
   createdAt DateTime @default(now())
-  user    user?     @relation(fields: [user_id], references: [id])
 }

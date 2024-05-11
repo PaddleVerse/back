@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Query,
+  UseGuards
 } from "@nestjs/common";
 import { BanService } from "./ban.service";
 import { ChannelsService } from "src/channels/channels.service";
@@ -13,8 +14,10 @@ import { Prisma } from "@prisma/client";
 import { channel } from "diagnostics_channel";
 import { UserService } from "src/user/user.service";
 import { ParticipantsService } from "src/participants/participants.service";
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller("ban")
+@UseGuards(JwtAuthGuard)
 export class BanController {
   constructor(
     private readonly banService: BanService,

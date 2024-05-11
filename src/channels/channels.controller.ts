@@ -10,6 +10,7 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
+  UseGuards
 } from "@nestjs/common";
 import { ChannelsService } from "./channels.service";
 import { Appearance, channel, Prisma, Role, user } from "@prisma/client";
@@ -20,8 +21,10 @@ import { ConversationsService } from "src/conversations/conversations.service";
 import { MessageService } from "src/message/message.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { MulterFile } from "multer";
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller("channels")
+@UseGuards(JwtAuthGuard)
 export class ChannelsController {
   constructor(
     private readonly channelService: ChannelsService,

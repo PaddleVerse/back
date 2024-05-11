@@ -8,7 +8,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategys/jwt.strategy';
 import { GoogleStrategy } from './strategys/google.strategy';
 import { FortyTwoStrategy } from './strategys/42.strategy';
-import { BlacklistService } from './blacklist.service';
 import { TwoFactorService } from './two-factor.service';
 
 
@@ -19,7 +18,7 @@ import { TwoFactorService } from './two-factor.service';
     UserModule, 
     JwtModule.register({ secret: process.env.SECRET, signOptions: { expiresIn: '1w' }})
   ],
-  providers: [LocalStrategy, AuthService, JwtStrategy, GoogleStrategy, FortyTwoStrategy, BlacklistService, TwoFactorService],
+  providers: [LocalStrategy, AuthService, JwtStrategy, GoogleStrategy, FortyTwoStrategy, TwoFactorService],
   controllers: [AuthController],
 })
 export class AuthModule {}

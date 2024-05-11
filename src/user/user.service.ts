@@ -47,7 +47,6 @@ export class UserService {
           coins: true,
           paddles: true,
           balls: true,
-          tables: true,
           notifications: {
             orderBy: { createdAt: "desc" },
           },
@@ -83,7 +82,7 @@ export class UserService {
           coins: true,
           paddles: true,
           balls: true,
-          tables: true,
+          
           notifications: {
             orderBy: { createdAt: "desc" },
           },
@@ -120,7 +119,7 @@ export class UserService {
           coins: true,
           paddles: true,
           balls: true,
-          tables: true,
+          
           notifications: {
             orderBy: { createdAt: "desc" },
           },
@@ -158,7 +157,7 @@ export class UserService {
           paddles: true,
           xp: true,
           balls: true,
-          tables: true,
+          
           notifications: {
             orderBy: { createdAt: "desc" },
           },
@@ -208,7 +207,7 @@ export class UserService {
           coins: true,
           paddles: true,
           balls: true,
-          tables: true,
+          
           notifications: {
             orderBy: { createdAt: "desc" },
           },
@@ -245,13 +244,14 @@ export class UserService {
           notified: true,
           friends: true,
           achievements: true,
+          channel_participants: true,
+          coins: true,
+          paddles: true,
+          balls: true,
+
           notifications: {
             orderBy: { createdAt: "desc" },
           },
-          paddles: true,
-          balls: true,
-          tables: true,
-          coins: true,
         },
       });
       return user;

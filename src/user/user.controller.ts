@@ -6,13 +6,13 @@ import { UpdateUserDto } from 'src/auth/dto/update-user.dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class UserController 
 {
     constructor (private readonly userService : UserService) {}
-
+    
     @Get()
-    getUsers() 
+    async getUsers() 
     {
         return this.userService.getUsers();
     }

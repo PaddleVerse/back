@@ -1,25 +1,25 @@
 import {
   Body,
-  ConsoleLogger,
   Controller,
-  Get,
   HttpException,
   Post,
   Query,
   UploadedFile,
   UseInterceptors,
+  UseGuards
 } from "@nestjs/common";
 import { MessageService } from "./message.service";
-import { Prisma, channel, message, user } from "@prisma/client";
-import { privateDecrypt } from "crypto";
+import { Prisma, channel, } from "@prisma/client";
 import { ChannelsService } from "src/channels/channels.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { UserService } from "src/user/user.service";
 import { ParticipantsService } from "src/participants/participants.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { MulterFile } from "multer";
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller("message")
+@UseGuards(JwtAuthGuard)
 export class MessageController {
   constructor(
     private readonly messageService: MessageService,

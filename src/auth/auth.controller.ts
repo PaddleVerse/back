@@ -6,7 +6,6 @@ import { LocalGuard } from './guards/local.guard';
 import { GoogleGuard } from './guards/google.guard';
 import { FortyTwoGuard } from './guards/42.guard';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
-import { BlacklistService } from './blacklist.service';
 import { ValidationPipe } from '@nestjs/common';
 
 @Controller('auth')
@@ -14,7 +13,6 @@ export class AuthController
 {
   constructor (
       private authService: AuthService,
-      private readonly blacklistService :BlacklistService
       ) {}
 
   @UseGuards(LocalGuard)
@@ -122,7 +120,8 @@ export class AuthController
   @Get('logout')
   async logout(@Req() req) {
     const accessToken = req.headers.authorization.split(' ')[1]; // Extracting token from Authorization header
-    this.blacklistService.addToBlacklist(accessToken);
+    // this.blacklistService.addToBlacklist(accessToken);
+    await this.authService.logout(accessToken);
     return { message: 'Logout successful' };
   }
 }

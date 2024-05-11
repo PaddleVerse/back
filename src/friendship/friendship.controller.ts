@@ -1,7 +1,9 @@
-import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
+import { Controller, Delete,UseGuards, Get, Param, Query } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('friendship')
+@UseGuards(JwtAuthGuard)
 export class FriendshipController
 {
     constructor(private readonly friendshipService: FriendshipService) {}

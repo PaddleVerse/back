@@ -9,15 +9,15 @@ import {
   Post,
   Put,
   Query,
+  UseGuards
 } from "@nestjs/common";
 import { ParticipantsService } from "./participants.service";
 import { Prisma, Role, channel, user } from "@prisma/client";
-import { ChannelsService } from "src/channels/channels.service";
-import { UserService } from "src/user/user.service";
-import { connect } from "http2";
 import { BanService } from "src/ban/ban.service";
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller("participants")
+@UseGuards(JwtAuthGuard)
 export class ParticipantsController {
   constructor(
     private readonly participantsService: ParticipantsService,
