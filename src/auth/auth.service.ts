@@ -96,7 +96,7 @@ export class AuthService
         if (!user) throw new UnauthorizedException('User not found');
 
         const res = await this.twoFactorService.verifyToken(user.twoFaSecret, token);
-
+        if (!res) return {ok: false};
         this.userService.updateUser(userId, { twoFa: res });
 
         return {ok: res};
