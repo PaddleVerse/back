@@ -80,7 +80,18 @@ export class AuthController
   async googleLoginCallback(@Request() req, @Res({ passthrough: true }) res: Response) {
 
     const user: any = await this.authService.login(req.user);
-
+    if (!user) return { status: 'error', message: 'User not found' };
+    if (user?.twoFa)
+    {
+      res.cookie('access_token', user.access_token, {
+        maxAge: 2592000000,
+        sameSite: true,
+        secure: false,
+      });
+      res.redirect(`${process.env.API_URL}/signin`);
+      res.status(HttpStatus.OK);
+      return;
+    }
     res.cookie('access_token', user.access_token, {
       maxAge: 2592000000,
       sameSite: true,
@@ -104,8 +115,19 @@ export class AuthController
   async fortyTwoLoginCallback(@Request() req, @Res({ passthrough: true }) res: Response) {
 
     const user: any = await this.authService.login(req.user);
-    // res.cookie('access_token', user.access_token, { httpOnly: true, secure: true, sameSite: 'strict' });
+    if (!user) return { status: 'error', message: 'User not found' };
 
+    if (user?.twoFa)
+    {
+      res.cookie('access_token', user.access_token, {
+        maxAge: 2592000000,
+        sameSite: true,
+        secure: false,
+      });
+      res.redirect(`${process.env.API_URL}/Signin`);
+      res.status(HttpStatus.OK);
+      return;
+    }
     res.cookie('access_token', user.access_token, {
       maxAge: 2592000000,
       sameSite: true,

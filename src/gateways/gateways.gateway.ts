@@ -86,6 +86,7 @@ export class GatewaysGateway {
           });
           client.leave(key + "");
           this.server.to(key).emit("disconnected", { userId: key, socketId });
+          this.server.emit("ok", { ok: 1 });
           delete this.userService.clients[key];
         }
       }
@@ -524,6 +525,14 @@ export class GatewaysGateway {
   async handleGameInvite(@Body('sender') sender: user, @Body('reciever') reciever: user) {
     try {
       const id: any = this.getSocketId(reciever.id);
+      const senderId: any = this.getSocketId(sender.id);
+      const usr = await this.userService.getUserById(reciever.id);
+      if (!usr) return;
+      if (usr.status === Status.ON_GAME) {
+        this.server.to(senderId).emit("userInGame", {});
+        this.server.to(id).emit("userInGame", {});
+        return;
+      }
       this.server.to(id).emit("invited", { sender: sender });
     } catch (error) {
 

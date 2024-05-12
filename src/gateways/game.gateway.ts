@@ -49,12 +49,13 @@ export default class GameGateway {
   @WebSocketServer() server: Server;
 
   async handleConnection(client: any) {
+
     const userId = await client.handshake.query?.userId;
     this.userService.clients[userId] = { socketId: client.id, socket: client };
-    const user = await this.userService.getUserById(+userId);
-    if (user) {
-      await this.userService.updateUser(user.id, { status: Status.ON_GAME });
-    }
+    // const user = await this.userService.getUserById(+userId);
+    // if (user) {
+    //   await this.userService.updateUser(user.id, { status: Status.ON_GAME });
+    // }
   }
 
   async handleDisconnect(client: any) {
@@ -155,6 +156,7 @@ export default class GameGateway {
       }
     }, 1000 / 60);
   }
+
   addGameHistory = async (room: GameRoom) => {
     if (room.dataSaved) return;
     const game = room.game;
@@ -238,7 +240,12 @@ export default class GameGateway {
   @SubscribeMessage("matchMaking")
   async MatchMakingHandler(client: any, payload: any) {
     const user = await this.userService.getUserById(payload.id);
+    if (!user) return;
 
+    if (user?.status === Status.ON_GAME) {
+      this.server.to(this.getSocketId(user.id)).emit("alreadyInGame");
+      return;
+    }
     const usr: userT = {
       id: user.id,
       nickname: user.nickname,
@@ -246,15 +253,18 @@ export default class GameGateway {
     };
     const room = await this.gatewayService.matchmaking(usr);
     if (room) {
-      const matchQueue = await this.gatewayService.matchQueue;
+      const matchQueue = this.gatewayService.matchQueue;
 
       const values = Array.from(matchQueue.values());
 
       values.forEach(async (value, index) => {
         const otherUserIndex = index === 0 ? 1 : 0;
-        const otherUserId = await values[otherUserIndex].id;
+        const otherUserId = values[otherUserIndex].id;
 
-        await this.server.to(value.socketId).emit("start", {
+        this.userService.updateUser(user.id, { status: Status.ON_GAME });
+        this.userService.updateUser(otherUserId, { status: Status.ON_GAME });
+        this.server.emit("ok", { ok: 1 });
+        this.server.to(value.socketId).emit("start", {
           id: otherUserId,
           room: room,
         });
@@ -264,8 +274,8 @@ export default class GameGateway {
   }
 
   @SubscribeMessage("cancelMatchMaking")
-  async CancelMatchMaking(client: any, payload: any) {
-    await this.gatewayService.matchQueue.clear();
+  CancelMatchMaking(client: any, payload: any) {
+    this.gatewayService.matchQueue.clear();
   }
 
   @SubscribeMessage("leftRoom")
@@ -277,7 +287,7 @@ export default class GameGateway {
       // check who wins
       this.server.to(player.id).emit("leftRoom");
     }
-
+    
     delete this.rooms[payload.room];
     const user = await this.userService.getUserById(payload.id);
     if (!user) return;
@@ -303,6 +313,12 @@ export default class GameGateway {
   ) {
     const senderSocketId = this.userService.clients[sender.id].socketId;
     const receiverSocketId = this.userService.clients[receiver.id].socketId;
+    const receiverUser = await this.userService.getUserById(receiver.id);
+    if (!receiverUser) return;
+    if (receiverUser.status === Status.ON_GAME) {
+      this.server.to(senderSocketId).emit("userInGame");
+      return;
+    }
     const roomId = sender.name + receiver.name + Date.now();
     this.server.to(receiverSocketId).emit("acceptedGameInvite", {
       sender: sender,

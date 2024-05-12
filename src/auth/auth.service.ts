@@ -58,7 +58,9 @@ export class AuthService
     {
         if (user?.status === 'error') return user;
         const payload = { nickname: user.nickname, sub: user.id };
+        const user_ = await this.userService.getUser(user.id);
         return {
+            twoFa : user_.twoFa,
             access_token: await this.jwtService.signAsync(payload),
         };
     }
@@ -96,7 +98,9 @@ export class AuthService
         if (!user) throw new UnauthorizedException('User not found');
 
         const res = await this.twoFactorService.verifyToken(user.twoFaSecret, token);
+
         if (!res) return {ok: false};
+
         this.userService.updateUser(userId, { twoFa: res });
 
         return {ok: res};
