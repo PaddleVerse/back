@@ -48,15 +48,7 @@ export default class GameGateway {
   }
   @WebSocketServer() server: Server;
 
-  async handleConnection(client: any) {
-
-    const userId = await client.handshake.query?.userId;
-    this.userService.clients[userId] = { socketId: client.id, socket: client };
-    // const user = await this.userService.getUserById(+userId);
-    // if (user) {
-    //   await this.userService.updateUser(user.id, { status: Status.ON_GAME });
-    // }
-  }
+  async handleConnection(client: any) {}
 
   async handleDisconnect(client: any) {
     // const socketId = client.id;
@@ -102,11 +94,12 @@ export default class GameGateway {
   // game logic
   @SubscribeMessage("joinGame")
   async handleJoinGame(
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() client: any,
     @MessageBody() data: { senderId: number; room: string }
   ): Promise<void> {
     // Join the client to the specified room
     client.join(data.room);
+
     // locate the room if it exists
     if (this.rooms[data.room]) {
       this.rooms[data.room].addPlayer(
@@ -119,6 +112,12 @@ export default class GameGateway {
       let room = new GameRoom(data.room, this.server);
       this.rooms[data.room] = room;
       room.addPlayer(client.id, this.server, client, data.senderId);
+    }
+    const userId = await client.handshake.query?.userId;
+    this.userService.clients[userId] = { socketId: client.id, socket: client };
+    const user = await this.userService.getUserById(+userId);
+    if (user) {
+      await this.userService.updateUser(user.id, { status: Status.ON_GAME });
     }
   }
 
@@ -287,7 +286,7 @@ export default class GameGateway {
       // check who wins
       this.server.to(player.id).emit("leftRoom");
     }
-    
+
     delete this.rooms[payload.room];
     const user = await this.userService.getUserById(payload.id);
     if (!user) return;
@@ -297,6 +296,7 @@ export default class GameGateway {
       socketId: this.getSocketId(user.id),
     };
     await this.gatewayService.leaveRoom(usr);
+    await this.userService.updateUser(user.id, { status: Status.ONLINE });
   }
 
   getSocketId(userId: number): string {
