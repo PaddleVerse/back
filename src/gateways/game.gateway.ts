@@ -118,6 +118,8 @@ export default class GameGateway {
     const user = await this.userService.getUserById(+userId);
     if (user) {
       await this.userService.updateUser(user.id, { status: Status.ON_GAME });
+      this.server.to(this.getSocketId(user.id)).emit("refresh");
+
     }
   }
 
@@ -297,6 +299,7 @@ export default class GameGateway {
     };
     await this.gatewayService.leaveRoom(usr);
     await this.userService.updateUser(user.id, { status: Status.ONLINE });
+    this.server.to(this.getSocketId(user.id)).emit("refresh");
   }
 
   getSocketId(userId: number): string {
