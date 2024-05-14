@@ -528,7 +528,7 @@ export class GatewaysGateway {
       const senderId: any = this.getSocketId(sender.id);
       const usr = await this.userService.getUserById(reciever.id);
       if (!usr) return;
-      if (usr.status === Status.ON_GAME) {
+      if (usr.status === Status.IN_GAME) {
         this.server.to(senderId).emit("userInGame", {});
         this.server.to(id).emit("userInGame", {});
         return;

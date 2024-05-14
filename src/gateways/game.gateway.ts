@@ -105,7 +105,7 @@ export default class GameGateway {
     this.userService.clients[userId] = { socketId: client.id, socket: client };
     const user = await this.userService.getUserById(+userId);
     if (user) {
-      await this.userService.updateUser(user.id, { status: Status.ON_GAME });
+      await this.userService.updateUser(user.id, { status: Status.IN_GAME });
       this.server.to(this.getSocketId(user.id)).emit("refresh");
 
     }
@@ -234,7 +234,7 @@ export default class GameGateway {
     const user = await this.userService.getUserById(payload.id);
     if (!user) return;
 
-    if (user?.status === Status.ON_GAME) {
+    if (user?.status === Status.IN_GAME) {
       this.server.to(this.getSocketId(user.id)).emit("alreadyInGame");
       return;
     }
@@ -253,8 +253,8 @@ export default class GameGateway {
         const otherUserIndex = index === 0 ? 1 : 0;
         const otherUserId = values[otherUserIndex].id;
 
-        this.userService.updateUser(user.id, { status: Status.ON_GAME });
-        this.userService.updateUser(otherUserId, { status: Status.ON_GAME });
+        this.userService.updateUser(user.id, { status: Status.IN_GAME });
+        this.userService.updateUser(otherUserId, { status: Status.IN_GAME });
         this.server.emit("ok", { ok: 1 });
         this.server.to(value.socketId).emit("start", {
           id: otherUserId,
@@ -312,7 +312,7 @@ export default class GameGateway {
     const receiverSocketId = this.userService.clients[receiver.id].socketId;
     const receiverUser = await this.userService.getUserById(receiver.id);
     if (!receiverUser) return;
-    if (receiverUser.status === Status.ON_GAME) {
+    if (receiverUser.status === Status.IN_GAME) {
       this.server.to(senderSocketId).emit("userInGame");
       return;
     }

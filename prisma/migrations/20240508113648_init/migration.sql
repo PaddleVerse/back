@@ -5,7 +5,7 @@ CREATE TYPE "Appearance" AS ENUM ('protected', 'private', 'public');
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'MOD', 'MEMBER');
 
 -- CreateEnum
-CREATE TYPE "Status" AS ENUM ('ONLINE', 'OFFLINE', 'ON_GAME');
+CREATE TYPE "Status" AS ENUM ('ONLINE', 'OFFLINE', 'IN_GAME');
 
 -- CreateEnum
 CREATE TYPE "Req" AS ENUM ('RECIVED', 'SEND');
