@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MinLength, MaxLength, IsAlphanumeric } from "class-validator";
+import { IsString, IsNotEmpty, MinLength, MaxLength, IsAlphanumeric, Matches } from "class-validator";
 
 export class CreateUserDto 
 {
@@ -6,6 +6,7 @@ export class CreateUserDto
     @IsNotEmpty({ message: "Nickname cannot be empty" })
     @MinLength(3, { message: "Nickname must be at least 3 characters long" })
     @MaxLength(20, { message: "Nickname cannot be longer than 20 characters" })
+    @Matches(/^[a-zA-Z_]+$/, { message: "Nickname can only contain alphabet characters and underscores" })
     nickname: string;
     
     @IsString({ message: "Password must be a string" })
@@ -19,11 +20,13 @@ export class CreateUserDto
     @IsNotEmpty({ message: "Name cannot be empty" })
     @MinLength(3, { message: "Name must be at least 3 characters long" })
     @MaxLength(20, { message: "Name cannot be longer than 20 characters" })
+    @Matches(/^[a-zA-Z_]+$/, { message: "Name can only contain alphabet characters and underscores" })
     name: string;
 
     @IsString({ message: "Middle name must be a string" })
     @IsNotEmpty({ message: "Middle name cannot be empty" })
     @MinLength(3, { message: "Middle name must be at least 3 characters long" })
     @MaxLength(20, { message: "Middle name cannot be longer than 20 characters" })
+    @Matches(/^[a-zA-Z_]+$/, { message: "Middlename can only contain alphabet characters and underscores" })
     middlename: string;
 }
