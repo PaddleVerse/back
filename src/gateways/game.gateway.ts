@@ -120,14 +120,7 @@ export default class GameGateway {
     client.broadcast.to(payload.room).emit("paddlePositionUpdate", payload);
     return "Yep";
   }
-  @SubscribeMessage("resetBall")
-  async handleResetBall(client: any, payload: any): Promise<null> {
-    if (!this.rooms[payload.room]) return;
-    // const game = this.rooms[payload.room].game;
-    // game.ball.position = { x: 0, y: 15, z: 0 };
-    // game.ball.velocity = { x: 0.4, y: 0, z: 0 };
-  }
-
+  
   mainLoop() {
     this.mainLoopId = setInterval(async () => {
       for (const room in this.rooms) {
