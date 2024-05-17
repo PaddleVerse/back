@@ -15,6 +15,8 @@ import { ParticipantsService } from "./participants.service";
 import { Prisma, Role, channel, user } from "@prisma/client";
 import { BanService } from "src/ban/ban.service";
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import * as bcrypt from 'bcrypt';
+
 
 @Controller("participants")
 @UseGuards(JwtAuthGuard)
@@ -55,7 +57,7 @@ export class ParticipantsController {
           HttpStatus.FORBIDDEN
         );
       }
-      if (ch.key && ch.key !== channel.key) {
+      if (ch.key && await (bcrypt.compare(ch.key, channel.key))) {
         throw new HttpException("wrong key", HttpStatus.BAD_REQUEST);
       }
       const participant = await this.participantsService.createParticipant({

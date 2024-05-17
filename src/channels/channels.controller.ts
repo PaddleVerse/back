@@ -22,6 +22,8 @@ import { MessageService } from "src/message/message.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { MulterFile } from "multer";
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import * as bcrypt from 'bcrypt';
+
 
 @Controller("channels")
 @UseGuards(JwtAuthGuard)
@@ -59,6 +61,9 @@ export class ChannelsController {
         throw error;
       }
       try {
+        if (info.key) {
+          info.key = await bcrypt.hash(info.key, 10);
+        }
         const newChannel = await this.channelService.createChannel(info);
         const admin = await this.participantService.createParticipant({
           role: Role.ADMIN,

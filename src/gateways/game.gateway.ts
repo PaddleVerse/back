@@ -226,7 +226,6 @@ export default class GameGateway {
   async MatchMakingHandler(client: any, payload: any) {
     const user = await this.userService.getUserById(payload.id);
     if (!user) return;
-
     if (user?.status === Status.IN_GAME) {
       this.server.to(this.getSocketId(user.id)).emit("alreadyInGame");
       return;
@@ -270,11 +269,11 @@ export default class GameGateway {
 
     for (const player of room.players) {
       // check who wins
-      this.server.to(player.id).emit("leftRoom");
       let user = await this.userService.getUserById(player.userid);
       if (!user) return;
+      this.server.to(user.id + "").emit("leftRoom");
       await this.userService.updateUser(user.id, { status: Status.ONLINE });
-      this.server.to(this.getSocketId(user.id)).emit("refresh");
+      this.server.to(user.id + "").emit("refresh");
     }
 
     delete this.rooms[payload.room];

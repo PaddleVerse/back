@@ -35,11 +35,13 @@ export class GatewaysGateway {
     const userId = await client.handshake.query?.userId;
     const socketId = client.id;
 
+    const ss = this.userService.clients.hasOwnProperty(+userId);
     this.userService.clients[userId] = { socketId: client.id, socket: client };
     const user = await this.userService.getUserById(+userId);
     if (user)
-    {
-      await this.userService.updateUser(user.id, { status: Status.ONLINE });
+    { 
+      if (!ss)
+        await this.userService.updateUser(user.id, { status: Status.ONLINE });
       client.join(userId + "");
       this.server.to(userId).emit("connected", { userId, socketId });
     }

@@ -83,17 +83,6 @@ class Ball {
 		// this.velocity.y *= 1 - AIR_R÷ESISTANCE;
 		this.velocity.z *= 1 - AIR_RESISTANCE;
 	}
-	// applySpeedLimit(): void {
-	// 	const velocityMagnitude = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2 + this.velocity.z ** 2);
-	// 	if (velocityMagnitude > this.maxSpeed) {
-	// 		// Normalize the velocity vector and then multiply by maxSpeed
-	// 		this.velocity.x = (this.velocity.x / velocityMagnitude) * this.maxSpeed;
-	// 		this.velocity.y = (this.velocity.y / velocityMagnitude) * this.maxSpeed;
-	// 		this.velocity.z = (this.velocity.z / velocityMagnitude) * this.maxSpeed;
-	// 		console.log("Speed limit reached!");
-	// 		console.log(this.velocity);
-	// 	}
-	// }
 }
 
 export default Ball;

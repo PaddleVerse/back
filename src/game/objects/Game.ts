@@ -132,7 +132,6 @@ class Game {
         if (Math.abs(this.ball.velocity.x) < epsilon && Math.abs(this.ball.velocity.z) < epsilon) {
             this.timeIdle++;
             if (this.timeIdle > 500) {
-                console.log('Ball is idle for too long. Resetting ball.');
                 this.timeIdle = 0;
                 this.resetBall();
             }
