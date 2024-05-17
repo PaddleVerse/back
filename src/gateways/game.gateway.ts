@@ -301,6 +301,7 @@ export default class GameGateway {
     @Body("sender") sender: user,
     @Body("receiver") receiver: user
   ) {
+    if (!sender || !receiver) return;
     const senderSocketId = this.userService.clients[sender.id].socketId;
     const receiverSocketId = this.userService.clients[receiver.id].socketId;
     const receiverUser = await this.userService.getUserById(receiver.id);

@@ -523,6 +523,7 @@ export class GatewaysGateway {
 
   @SubscribeMessage("GameInvite")
   async handleGameInvite(@Body('sender') sender: user, @Body('reciever') reciever: user) {
+    if (!reciever || !sender) return;
     try {
       const id: any = this.getSocketId(reciever.id);
       const senderId: any = this.getSocketId(sender.id);
