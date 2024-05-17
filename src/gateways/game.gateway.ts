@@ -226,50 +226,34 @@ export default class GameGateway {
   async MatchMakingHandler(client: any, payload: any) {
     const user = await this.userService.getUserById(payload.id);
     if (!user) return;
-  
-    if (user.status === Status.IN_GAME) {
+
+    if (user?.status === Status.IN_GAME) {
       this.server.to(this.getSocketId(user.id)).emit("alreadyInGame");
       return;
     }
-  
     const usr: userT = {
       id: user.id,
       nickname: user.nickname,
       socketId: this.getSocketId(user.id),
     };
-  
     const room = await this.gatewayService.matchmaking(usr);
     if (room) {
-      const matchQueue = Array.from(this.gatewayService.matchQueue.values());
-  
-      // Matchmaking process
-      for (let i = 0; i < matchQueue.length - 1; i += 2) {
-        const user1 = matchQueue[i];
-        const user2 = matchQueue[i + 1];
-  
-        try {
-          await Promise.all([
-            this.userService.updateUser(user1.id, { status: Status.IN_GAME }),
-            this.userService.updateUser(user2.id, { status: Status.IN_GAME })
-          ]);
-  
-          this.server.emit("matchFound", { ok: 1 });
-  
-          this.server.to(user1.socketId).emit("gameStart", {
-            id: user2.id,
-            room: room,
-          });
-  
-          this.server.to(user2.socketId).emit("gameStart", {
-            id: user1.id,
-            room: room,
-          });
-        } catch (error) {
-          console.error("Error during matchmaking:", error);
-          // Handle error appropriately
-        }
-      }
-  
+      const matchQueue = this.gatewayService.matchQueue;
+
+      const values = Array.from(matchQueue.values());
+
+      values.forEach(async (value, index) => {
+        const otherUserIndex = index === 0 ? 1 : 0;
+        const otherUserId = values[otherUserIndex].id;
+
+        this.userService.updateUser(user.id, { status: Status.IN_GAME });
+        this.userService.updateUser(otherUserId, { status: Status.IN_GAME });
+        this.server.emit("ok", { ok: 1 });
+        this.server.to(value.socketId).emit("start", {
+          id: otherUserId,
+          room: room,
+        });
+      });
       this.gatewayService.matchQueue.clear();
     }
   }
