@@ -75,7 +75,7 @@ export default class GameGateway {
     const remainingPlayerId = this.rooms[room][remainingRole];
     if (remainingPlayerId) {
       this.server.to(remainingPlayerId).emit("update", {
-        message: `Your opponent has disconnected. You are now the only player in the room.`,
+        message: `Your opponent has disconnected. You are now the only player in the room?.`,
       });
     }
   }
@@ -99,7 +99,7 @@ export default class GameGateway {
     } else {
       let room = new GameRoom(data.room, this.server);
       this.rooms[data.room] = room;
-      room.addPlayer(client.id, this.server, client, data.senderId);
+      room?.addPlayer(client.id, this.server, client, data.senderId);
     }
     const userId = await client.handshake.query?.userId;
     this.userService.clients[userId] = { socketId: client.id, socket: client };
@@ -113,11 +113,11 @@ export default class GameGateway {
 
   @SubscribeMessage("movePaddleGame")
   async handleMovePaddleGame(client: any, payload: any): Promise<string> {
-    if (!this.rooms[payload.room]) return;
-    const game = this.rooms[payload.room].game;
+    if (!this.rooms[payload?.room]) return;
+    const game = this.rooms[payload?.room].game;
     if (!game) return;
     game.movePaddle(client.id, payload);
-    client.broadcast.to(payload.room).emit("paddlePositionUpdate", payload);
+    client.broadcast.to(payload?.room).emit("paddlePositionUpdate", payload);
     return "Yep";
   }
   
@@ -140,8 +140,8 @@ export default class GameGateway {
   }
 
   addGameHistory = async (room: GameRoom) => {
-    if (room.dataSaved) return;
-    const game = room.game;
+    if (room?.dataSaved) return;
+    const game = room?.game;
     await this.prisma.$connect();
     const winner: Player = game.winner;
     console.log(winner.userid);
@@ -158,7 +158,7 @@ export default class GameGateway {
         loser: loserId,
         winner_score: winnerScore,
         loser_score: loserScore,
-        start_time: room.startDate,
+        start_time: room?.startDate,
         end_time: new Date(),
       };
 
@@ -217,14 +217,14 @@ export default class GameGateway {
     await this.userService.updateUser(loserId, { status: Status.ONLINE });
     this.server.to(this.getSocketId(loserId)).emit("refresh");
     this.server
-      .to(room.id)
+      .to(room?.id)
       .emit("gameOver", { winner: winner.id, loser: loser.id });
-    delete this.rooms[room.id];
+    delete this.rooms[room?.id];
   };
 
   @SubscribeMessage("matchMaking")
   async MatchMakingHandler(client: any, payload: any) {
-    const user = await this.userService.getUserById(payload.id);
+    const user = await this.userService.getUserById(payload?.id);
     if (!user) return;
     if (user?.status === Status.IN_GAME) {
       this.server.to(this.getSocketId(user.id)).emit("alreadyInGame");
@@ -236,6 +236,7 @@ export default class GameGateway {
       socketId: this.getSocketId(user.id),
     };
     const room = await this.gatewayService.matchmaking(usr);
+    console.log("---->", room);
     if (room) {
       const matchQueue = this.gatewayService.matchQueue;
 
@@ -245,8 +246,8 @@ export default class GameGateway {
         const otherUserIndex = index === 0 ? 1 : 0;
         const otherUserId = values[otherUserIndex].id;
 
-        this.userService.updateUser(user.id, { status: Status.IN_GAME });
-        this.userService.updateUser(otherUserId, { status: Status.IN_GAME });
+        await this.userService.updateUser(user.id, { status: Status.IN_GAME });
+        await this.userService.updateUser(otherUserId, { status: Status.IN_GAME });
         this.server.emit("ok", { ok: 1 });
         this.server.to(value.socketId).emit("start", {
           id: otherUserId,
@@ -264,10 +265,12 @@ export default class GameGateway {
 
   @SubscribeMessage("leftRoom")
   async leaveRoomHandler(client: any, payload: any) {
-    const room = this.rooms[payload.room];
+    const room : any = this.rooms[payload?.room];
     if (!room) return;
 
-    for (const player of room.players) {
+    this.server.to(room?.players[0]?.id).emit("otherUserLeft");
+    this.server.to(room?.players[1]?.id).emit("otherUserLeft");
+    for (const player of room?.players) {
       // check who wins
       let user = await this.userService.getUserById(player.userid);
       if (!user) return;
@@ -276,8 +279,8 @@ export default class GameGateway {
       this.server.to(user.id + "").emit("refresh");
     }
 
-    delete this.rooms[payload.room];
-    const user = await this.userService.getUserById(payload.id);
+    delete this.rooms[payload?.room];
+    const user = await this.userService.getUserById(payload?.id);
     if (!user) return;
     const usr: userT = {
       id: user.id,
@@ -285,7 +288,17 @@ export default class GameGateway {
       socketId: this.getSocketId(user.id),
     };
     await this.gatewayService.leaveRoom(usr);
+  }
 
+  @SubscribeMessage("gameOver")
+  async gameOverHandler(client: any, payload: any) {
+
+    // console.log("--->", this.rooms);
+    const room = Object.values(this.rooms).find(room => {
+      const players = Object.values(room.players);
+      return players.some(player => player.userid === payload.userId);
+    });
+    // console.log(room);
   }
 
   getSocketId(userId: number): string {
