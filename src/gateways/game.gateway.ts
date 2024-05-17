@@ -236,7 +236,6 @@ export default class GameGateway {
       socketId: this.getSocketId(user.id),
     };
     const room = await this.gatewayService.matchmaking(usr);
-    console.log("---->", room);
     if (room) {
       const matchQueue = this.gatewayService.matchQueue;
 
@@ -267,10 +266,9 @@ export default class GameGateway {
   async leaveRoomHandler(client: any, payload: any) {
     const room : any = this.rooms[payload?.room];
     if (!room) return;
-
-    this.server.to(room?.players[0]?.id).emit("otherUserLeft");
-    this.server.to(room?.players[1]?.id).emit("otherUserLeft");
-    for (const player of room?.players) {
+    this.server.to(room?.users[0]?.id).emit("otherUserLeft");
+    this.server.to(room?.users[1]?.id).emit("otherUserLeft");
+    for (const player of room?.users) {
       // check who wins
       let user = await this.userService.getUserById(player.userid);
       if (!user) return;
@@ -292,12 +290,14 @@ export default class GameGateway {
 
   @SubscribeMessage("gameOver")
   async gameOverHandler(client: any, payload: any) {
-
+    console.log("----...",this.gatewayService.rooms);
+    const room : any = this.gatewayService.rooms.find(room => room.name === payload?.room);
+    console.log("----wwww",room);
     // console.log("--->", this.rooms);
-    const room = Object.values(this.rooms).find(room => {
-      const players = Object.values(room.players);
-      return players.some(player => player.userid === payload.userId);
-    });
+    // const room = Object.values(this.rooms).find(room => {
+    //   const players = Object.values(room.players);
+    //   return players.some(player => player.userid === payload.userId);
+    // });
     // console.log(room);
   }
 

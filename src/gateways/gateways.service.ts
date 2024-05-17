@@ -85,8 +85,6 @@ export class GatewaysService {
       const user1 = users[0];
       const user2 = users[1];
       const room = user1.nickname + user2.nickname + Date.now();
-      // this.matchQueue.delete(user1.id);
-      // this.matchQueue.delete(user2.id);
       await this.addRoom(room, user1);
       await this.addUserToRoom(user1.nickname + user2.nickname, user1);
       await this.addUserToRoom(user1.nickname + user2.nickname, user2);
