@@ -47,11 +47,11 @@ export class AuthService
     
     async validatePassword(plainPassword: string, hashedPassword: string): Promise<boolean> 
     {
-      return bcrypt.compare(plainPassword, hashedPassword);
+      return await bcrypt.compare(plainPassword, hashedPassword);
     }
     
     async hashPassword(password: string): Promise<string> {
-      return bcrypt.hash(password, 10);
+      return await bcrypt.hash(password, 10);
     }
 
     async login(user: any)
