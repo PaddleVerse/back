@@ -243,8 +243,10 @@ export default class GameGateway {
       values.forEach((value, index) => {
         const otherUserId = values[index === 0 ? 1 : 0].id;
         this.userService.updateUser(value.id, { status: Status.IN_GAME });
-        this.server.emit("ok", { ok: 1 });
-        // console.log(value);
+        this.server.to(value.socketId).emit("okk", {
+          id: otherUserId,
+          room: room,
+        });
         this.server.to(value.socketId).emit("start", {
           id: otherUserId,
           room: room,
