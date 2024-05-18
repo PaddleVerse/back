@@ -86,8 +86,8 @@ export class GatewaysService {
       const user2 = users[1];
       const room = user1.nickname + user2.nickname + Date.now();
       await this.addRoom(room, user1);
-      await this.addUserToRoom(user1.nickname + user2.nickname, user1);
-      await this.addUserToRoom(user1.nickname + user2.nickname, user2);
+      await this.addUserToRoom(room, user1);
+      await this.addUserToRoom(room, user2);
       return room;
     }
     return null;

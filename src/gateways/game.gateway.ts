@@ -259,6 +259,23 @@ export default class GameGateway {
   @SubscribeMessage("cancelMatchMaking")
   CancelMatchMaking(client: any, payload: any) {
     this.gatewayService.matchQueue.clear();
+    const rooms : any = this.gatewayService.rooms;
+    let resRoom = null;
+    if (rooms) {
+      for (const room of rooms) {
+        if (room?.users.has(payload?.id)) {
+          resRoom = room;
+          break;
+        }
+      }
+      if (resRoom) {
+        for (const user of resRoom.users) {
+          this.server.to(user[1].socketId).emit("leftRoom");
+          this.userService.updateUser(user[1].id, { status: Status.ONLINE });
+        }
+        this.gatewayService.deleteRoom(resRoom.name);
+      }
+    }
   }
 
   @SubscribeMessage("leftRoom")
@@ -287,8 +304,7 @@ export default class GameGateway {
 
   @SubscribeMessage("gameOver")
   async gameOverHandler(client: any, payload: any) {
-    // const room : any = this.gatewayService.rooms.find(room => room.name === payload?.room);
-    // console.log("--->", this.rooms);
+    
     // const room = Object.values(this.rooms).find(room => {
     //   const players = Object.values(room.players);
     //   return players.some(player => player.userid === payload.userId);
