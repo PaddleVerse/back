@@ -240,14 +240,11 @@ export default class GameGateway {
       const matchQueue = this.gatewayService.matchQueue;
 
       const values = Array.from(matchQueue.values());
-
-      values.forEach(async (value, index) => {
-        const otherUserIndex = index === 0 ? 1 : 0;
-        const otherUserId = values[otherUserIndex].id;
-
-        await this.userService.updateUser(user.id, { status: Status.IN_GAME });
-        await this.userService.updateUser(otherUserId, { status: Status.IN_GAME });
+      values.forEach((value, index) => {
+        const otherUserId = values[index === 0 ? 1 : 0].id;
+        this.userService.updateUser(value.id, { status: Status.IN_GAME });
         this.server.emit("ok", { ok: 1 });
+        // console.log(value);
         this.server.to(value.socketId).emit("start", {
           id: otherUserId,
           room: room,
@@ -264,21 +261,19 @@ export default class GameGateway {
 
   @SubscribeMessage("leftRoom")
   async leaveRoomHandler(client: any, payload: any) {
-    const room : any = this.rooms[payload?.room];
+    const room = this.rooms[payload.room];
     if (!room) return;
-    this.server.to(room?.users[0]?.id).emit("otherUserLeft");
-    this.server.to(room?.users[1]?.id).emit("otherUserLeft");
-    for (const player of room?.users) {
+
+    for (const player of room.players) {
+
       // check who wins
-      let user = await this.userService.getUserById(player.userid);
-      if (!user) return;
-      this.server.to(user.id + "").emit("leftRoom");
-      await this.userService.updateUser(user.id, { status: Status.ONLINE });
-      this.server.to(user.id + "").emit("refresh");
+      this.server.to(player.userid + "").emit("leftRoom");
+      this.server.to(player.userid + "").emit("refresh");
+      await this.userService.updateUser(player.userid, { status: Status.ONLINE });
     }
 
-    delete this.rooms[payload?.room];
-    const user = await this.userService.getUserById(payload?.id);
+    delete this.rooms[payload.room];
+    const user = await this.userService.getUserById(payload.id);
     if (!user) return;
     const usr: userT = {
       id: user.id,
@@ -290,9 +285,7 @@ export default class GameGateway {
 
   @SubscribeMessage("gameOver")
   async gameOverHandler(client: any, payload: any) {
-    console.log("----...",this.gatewayService.rooms);
-    const room : any = this.gatewayService.rooms.find(room => room.name === payload?.room);
-    console.log("----wwww",room);
+    // const room : any = this.gatewayService.rooms.find(room => room.name === payload?.room);
     // console.log("--->", this.rooms);
     // const room = Object.values(this.rooms).find(room => {
     //   const players = Object.values(room.players);
