@@ -8,11 +8,17 @@ import {
 import { Socket, Server } from "socket.io";
 import { FriendshipService } from "src/friendship/friendship.service";
 import { UserService } from "../user/user.service";
-import { N_Type, PrismaClient, Req, Status, user } from "@prisma/client";
+import {
+  N_Type,
+  Prisma,
+  PrismaClient,
+  Req,
+  Status,
+  user,
+} from "@prisma/client";
 import { GatewaysService } from "./gateways.service";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { NotificationsService } from "src/notifications/notifications.service";
-
 
 @WebSocketGateway({
   cors: {
@@ -28,7 +34,9 @@ export class GatewaysGateway {
     private readonly convService: ConversationsService,
     private readonly gatewayService: GatewaysService,
     private readonly notificationService: NotificationsService
-  ) { this.prisma = new PrismaClient(); }
+  ) {
+    this.prisma = new PrismaClient();
+  }
   @WebSocketServer() server: Server;
 
   async handleConnection(client: any) {
@@ -38,8 +46,7 @@ export class GatewaysGateway {
     const ss = this.userService.clients.hasOwnProperty(+userId);
     this.userService.clients[userId] = { socketId: client.id, socket: client };
     const user = await this.userService.getUserById(+userId);
-    if (user)
-    { 
+    if (user) {
       if (!ss)
         await this.userService.updateUser(user.id, { status: Status.ONLINE });
       client.join(userId + "");
@@ -70,7 +77,7 @@ export class GatewaysGateway {
       if (this.userService.clients[key].socketId === socketId) {
         console.log(`Client with id ${key} disconnected.`);
         const user = await this.userService.getUserById(+key);
-        if(user) {
+        if (user) {
           await this.userService.updateUser(user.id, {
             status: Status.OFFLINE,
           });
@@ -393,7 +400,8 @@ export class GatewaysGateway {
   async handleChannelMessage(
     @ConnectedSocket() socket: Socket,
     @Body("roomName") roomName: string,
-    @Body("user") user: user
+    @Body("user") user: user,
+    @Body("message") message: any
   ) {
     try {
       const r = await this.gatewayService.getRoom(roomName);
@@ -404,7 +412,9 @@ export class GatewaysGateway {
       if (u === null) {
         throw new Error("User not found.");
       }
-      this.server.to(roomName).emit("update", { channel: true, type: "channelMessage" });
+      this.server
+        .to(roomName)
+        .emit("update", { channel: true, type: "channelMessage" });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
     }
@@ -486,7 +496,7 @@ export class GatewaysGateway {
   ) {
     try {
       this.server.to(roomName).emit("update", { channel: "channel" });
-    } catch (error) { }
+    } catch (error) {}
   }
 
   @SubscribeMessage("typing")
@@ -524,7 +534,10 @@ export class GatewaysGateway {
   }
 
   @SubscribeMessage("GameInvite")
-  async handleGameInvite(@Body('sender') sender: user, @Body('reciever') reciever: user) {
+  async handleGameInvite(
+    @Body("sender") sender: user,
+    @Body("reciever") reciever: user
+  ) {
     if (!reciever || !sender) return;
     try {
       const id: any = this.getSocketId(reciever.id);
@@ -537,8 +550,6 @@ export class GatewaysGateway {
         return;
       }
       this.server.to(id).emit("invited", { sender: sender });
-    } catch (error) {
-
-    }
+    } catch (error) {}
   }
 }
