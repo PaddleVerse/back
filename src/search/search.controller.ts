@@ -14,10 +14,10 @@ export class SearchController
         return this.searchService.getAll();
     }
 
-    @Get('searchedUsers')
-    getSearchedUsers()
+    @Get('searchedUsers/:userId')
+    getSearchedUsers(@Param() body)
     {
-        return this.searchService.getSearchedUsers();
+        return this.searchService.getSearchedUsers(+body?.userId);
     }
 
     @Get(':name/:userId')
@@ -29,7 +29,7 @@ export class SearchController
     @Post()
     addSearch(@Body() body)
     {
-        return this.searchService.addSearch(+body?.userId);
+        return this.searchService.addSearch(+body?.userId, +body?.searchingUserId);
     }
 
     @Delete(':id')

@@ -88,7 +88,7 @@ export class AuthController
         sameSite: true,
         secure: false,
       });
-      res.redirect(`http://${process.env.API_URL}:3000/signin`);
+      res.redirect(`http://${process.env.API_URL}:3000/Signin`);
       res.status(HttpStatus.OK);
       return;
     }
