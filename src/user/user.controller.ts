@@ -37,7 +37,7 @@ export class UserController
 
     @Put('img/:id')
     @UseInterceptors(FileInterceptor('image'))
-    async updateUserPic(@Param('id') id: any, @UploadedFile() file: MulterFile)
+    async updateUserPic(@Param('id') id: any, @UploadedFile() file: `MulterFile`)
     {
         const url = await this.userService.uploadImage(file);
         return await this.userService.updateUser(+id, { picture: url });

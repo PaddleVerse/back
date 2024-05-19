@@ -485,8 +485,8 @@ export class GatewaysGateway {
     @Body("user") user: user
   ) {
     try {
-      this.server.to(roomName).emit("update", { channel: true });
-    } catch (error) {}
+      this.server.to(roomName).emit("update", { channel: "channel" });
+    } catch (error) { }
   }
 
   @SubscribeMessage("typing")

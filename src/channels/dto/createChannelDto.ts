@@ -38,8 +38,5 @@ export class CreateChannelDto {
   @IsOptional()
   @IsString({ message: "topic  must be a string" })
   @MinLength(3, { message: "topic must be at least 3 characters long" })
-  @Matches(/^[a-zA-Z_]+$/, {
-    message: "topic can only contain alphabet characters and underscores",
-  })
   topic: string;
 }

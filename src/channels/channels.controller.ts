@@ -48,7 +48,7 @@ export class ChannelsController {
         if (ch)
           throw new HttpException(
             "channel already exist",
-            HttpStatus.BAD_GATEWAY
+            HttpStatus.CONFLICT
           );
       } catch (error) {
         throw error;
