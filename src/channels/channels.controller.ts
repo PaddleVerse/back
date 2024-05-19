@@ -89,7 +89,7 @@ export class ChannelsController {
         throw error;
       }
     } catch (error) {
-      return { success: false, error: error };
+      throw error;
     }
   }
 
@@ -156,9 +156,7 @@ export class ChannelsController {
   ) {
     try {
       try {
-        const channels = !isNaN(Number(id))
-          ? await this.channelService.getChannelById(Number(id))
-          : await this.channelService.getChannelByName(id);
+        const channels = await this.channelService.getChannelById(Number(id))
         const us = await this.userService.getUserById(Number(user.id));
         if (!us) {
           throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
@@ -185,10 +183,17 @@ export class ChannelsController {
             }
           }
         }
-        const updatedChannel = await this.channelService.updateChannel(
-          channels.id,
-          updates as Prisma.channelUpdateInput
-        );
+        const exists = await this.channelService.getChannelByName(updates.name!);
+        if (exists) {
+          throw new HttpException(
+            "channel already exist",
+            HttpStatus.CONFLICT
+          );
+        }
+          const updatedChannel = await this.channelService.updateChannel(
+            channels.id,
+            updates as Prisma.channelUpdateInput
+          );
         return updatedChannel;
       } catch (error) {
         throw error;

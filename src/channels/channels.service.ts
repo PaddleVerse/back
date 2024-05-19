@@ -8,9 +8,9 @@ import {
   animals,
 } from "unique-names-generator";
 
-import { MulterFile } from 'multer';
+import { MulterFile } from "multer";
 
-import * as fs from 'fs';
+import * as fs from "fs";
 
 @Injectable()
 export class ChannelsService {

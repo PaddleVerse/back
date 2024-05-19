@@ -32,15 +32,13 @@ export class MessageController {
   @Post()
   async createMessage(
     @Body("message") m: Prisma.messageCreateInput,
-    @Body("channel") channel: channel,
+    @Body("channel") channel: string,
     @Body("user1") users1: string,
     @Body("user2") users2: string
   ) {
     try {
       if (channel) {
-        const ch = !isNaN(channel.id)
-          ? await this.channelService.getChannelById(channel.id)
-          : await this.channelService.getChannelByName(channel.name);
+        const ch = await this.channelService.getChannelById(Number(channel))
         if (!ch) {
           throw new HttpException("Channel does not exist", 404);
         }
