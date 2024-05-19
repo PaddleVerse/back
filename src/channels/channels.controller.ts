@@ -10,7 +10,7 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
-  UseGuards
+  UseGuards,
 } from "@nestjs/common";
 import { ChannelsService } from "./channels.service";
 import { Appearance, channel, Prisma, Role, user } from "@prisma/client";
@@ -21,9 +21,10 @@ import { ConversationsService } from "src/conversations/conversations.service";
 import { MessageService } from "src/message/message.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { MulterFile } from "multer";
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import * as bcrypt from 'bcrypt';
-
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import * as bcrypt from "bcrypt";
+import { CreateChannelDto } from "./dto/createChannelDto";
+import { UpdateChannelDto } from "./dto/updateChannelDto";
 
 @Controller("channels")
 @UseGuards(JwtAuthGuard)
@@ -38,7 +39,7 @@ export class ChannelsController {
 
   @Post()
   async createChannel(
-    @Body("channel") info: Prisma.channelCreateInput,
+    @Body("channel") info: CreateChannelDto,
     @Body("user") user: user
   ) {
     try {
@@ -61,10 +62,21 @@ export class ChannelsController {
         throw error;
       }
       try {
+        if (info.state === Appearance.protected) {
+          if (!info.key) {
+            throw new HttpException(
+              "no key for protection mode",
+              HttpStatus.BAD_GATEWAY
+            );
+          }
+        }
+
         if (info.key) {
           info.key = await bcrypt.hash(info.key, 10);
         }
-        const newChannel = await this.channelService.createChannel(info);
+        const newChannel = await this.channelService.createChannel(
+          info as Prisma.channelCreateInput
+        );
         const admin = await this.participantService.createParticipant({
           role: Role.ADMIN,
           mute: false,
@@ -140,7 +152,7 @@ export class ChannelsController {
   async updateChannel(
     @Param("id") id: string,
     @Body("user") user: user,
-    @Body("channel") updates: Prisma.channelUpdateInput
+    @Body("channel") updates: UpdateChannelDto
   ) {
     try {
       try {
@@ -175,7 +187,7 @@ export class ChannelsController {
         }
         const updatedChannel = await this.channelService.updateChannel(
           channels.id,
-          updates
+          updates as Prisma.channelUpdateInput
         );
         return updatedChannel;
       } catch (error) {
@@ -309,26 +321,23 @@ export class ChannelsController {
     }
   }
 
-  @Get('inviteList/:id')
-  async  getUsers(@Param('id') id: string) 
-  {
+  @Get("inviteList/:id")
+  async getUsers(@Param("id") id: string) {
     try {
-      const users = await this.userService.getUsers()
-     let list = [];
-     for (const user of users) {
-       const pa = await this.participantService.getParticipantByIds(
-         Number(id),
-         user.id
-       );
-       if (!(pa?.id > 0)) {
-         list.push(user);
-       }
-     }
+      const users = await this.userService.getUsers();
+      let list = [];
+      for (const user of users) {
+        const pa = await this.participantService.getParticipantByIds(
+          Number(id),
+          user.id
+        );
+        if (!(pa?.id > 0)) {
+          list.push(user);
+        }
+      }
       return list;
-    }
-    catch (error) {
+    } catch (error) {
       throw error;
     }
-    }
-
+  }
 }
