@@ -31,36 +31,40 @@ export class SearchService
                 },
             },
             });
-        
             return filteredUsers;
         }
         catch (error) { return []; }
     }
 
-    async getSearchedUsers()
-    {
+    async getSearchedUsers(userId: number) {
         try {
             const srchs = await this.getAll();
             const users = await this.userService.getUsers();
-            const usersID = srchs?.map((user : any) => user?.userId);
-            const res = usersID.map((id : any) => users.find((u : any) => (u?.id === id)));
-            return res;
+            const usersID = srchs?.filter((user: any) => user?.searchingUserId === userId).map((user: any) => user?.userId);
+            if (!usersID) return [];
+            const res = usersID.map((id: any) => users.filter((user: any) => user?.id === id));
+            return res.flat();
         } catch (error) {
             return error;
         }
     }
-    async addSearch(user_id : number)
+    
+
+    async addSearch(user_id : number, searshingUserId : number)
     {
+        console.log(user_id, searshingUserId);
         try {
             const prev = await this.prisma.searchHistory.findFirst({
                 where: {
-                    userId : user_id
+                    userId : user_id,
+                    searchingUserId : searshingUserId
                 }
             });
             if (prev) return prev;
             return await this.prisma.searchHistory.create({
                 data: {
-                    userId : user_id
+                    userId : user_id,
+                    searchingUserId : searshingUserId
                 }
             });
         } catch (error) {
