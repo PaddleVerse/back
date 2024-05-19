@@ -428,7 +428,7 @@ export class GatewaysGateway {
       await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
       this.server.to(roomName).emit("update", { type: "leave" });
       socket.leave(roomName);
-      // this.server.to(socket.id).emit("update");
+      this.server.to(socket.id).emit("update");
     } catch (error) {}
   }
   @SubscribeMessage("kick")
@@ -450,7 +450,7 @@ export class GatewaysGateway {
       await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
       this.server.to(u).emit("update", { type: "kicked" });
       s.leave(roomName);
-      this.server.to(roomName).emit("updateChannleList", { type: "channel" });
+      this.server.to(roomName).emit("update", { type: "channel" });
     } catch (error) {}
   }
 
@@ -472,7 +472,7 @@ export class GatewaysGateway {
         throw new Error("User not found.");
       }
       await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
-      this.server.to(socket.id).emit("update", { type: "banned" });
+      this.server.to(u).emit("update", { type: "banned" });
       s.leave(roomName);
       this.server.to(roomName).emit("update", { type: "channel" });
     } catch (error) {}
