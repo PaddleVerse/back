@@ -442,15 +442,15 @@ export class GatewaysGateway {
       if (r === -1) {
         throw new Error("Room not found.");
       }
-      const u = await this.getSocketId(Number(user.id));
-      const s = await this.getSocket(Number(user.id));
+      const u = this.getSocketId(Number(user.id));
+      const s = this.getSocket(Number(user.id));
       if (u === null) {
         throw new Error("User not found.");
       }
       await this.gatewayService.RemoveUserFromRoom(roomName, user.id);
       this.server.to(u).emit("update", { type: "kicked" });
       s.leave(roomName);
-      this.server.to(roomName).emit("update", { type: "channel" });
+      this.server.to(roomName).emit("updateChannleList", { type: "channel" });
     } catch (error) {}
   }
 
@@ -465,8 +465,8 @@ export class GatewaysGateway {
       if (r === -1) {
         throw new Error("Room not found.");
       }
-      const u = await this.getSocketId(Number(user.id));
-      const s = await this.getSocket(Number(user.id));
+      const u = this.getSocketId(Number(user.id));
+      const s = this.getSocket(Number(user.id));
 
       if (u === null) {
         throw new Error("User not found.");
