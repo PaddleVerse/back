@@ -30,11 +30,11 @@ export class ParticipantsController {
   async createParticipants(
     @Body("participants") part: Prisma.channel_participantCreateInput,
     @Body("user") user: user,
-    @Body("channel") channel: channel
+    @Body("channel") channel: number
   ) {
     try {
       const ch = await this.participantsService.channelService.getChannelById(
-        Number(channel.id)
+        Number(channel)
       );
       if (!ch)
         throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
@@ -57,7 +57,7 @@ export class ParticipantsController {
           HttpStatus.FORBIDDEN
         );
       }
-      if (ch.key && await (bcrypt.compare(ch.key, channel.key))) {
+      if (ch.key && await (bcrypt.compare(ch.key, ch.key))) {
         throw new HttpException("wrong key", HttpStatus.BAD_REQUEST);
       }
       const participant = await this.participantsService.createParticipant({

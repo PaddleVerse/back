@@ -6,7 +6,8 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
-  UseGuards
+  UseGuards,
+  HttpStatus
 } from "@nestjs/common";
 import { MessageService } from "./message.service";
 import { Prisma, channel, } from "@prisma/client";
@@ -52,6 +53,9 @@ export class MessageController {
         );
         if (!participants) {
           throw new HttpException("User is not a participant", 404);
+        }
+        if (participants.mute === true) {
+          throw new HttpException("User is muted", HttpStatus.FORBIDDEN);
         }
         const message = await this.messageService.createMessage({
           ...m,

@@ -80,17 +80,18 @@ export class GatewaysGateway {
             status: Status.OFFLINE,
           });
           // Leave the room with the userId
-          this.gatewayService.rooms.forEach((room) => {
-            if (room.host.id === Number(key)) {
-              client.leave(room.name);
-            } else {
-              room.users.forEach((user, id) => {
-                if (Number(key) === user.id) {
-                  client.leave(room.name);
-                }
-              });
-            }
-          });
+          // this.gatewayService.rooms.forEach((room) => {
+          //   if (room.host.id === Number(key)) {
+          //     client.leave(room.name);
+          //   } else {
+          //     room.users.forEach((user, id) => {
+          //       if (Number(key) === user.id) {
+          //         client.leave(room.name);
+          //       }
+          //     });
+          //   }
+          // });
+          //hello
           client.leave(key + "");
           this.server.to(key).emit("disconnected", { userId: key, socketId });
           this.server.emit("ok", { ok: 1 });

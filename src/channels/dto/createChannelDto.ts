@@ -30,7 +30,7 @@ export class CreateChannelDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
   @MinLength(3, { message: "Name must be at least 3 characters long" })
   @MaxLength(20, { message: "Name cannot be longer than 20 characters" })
-  @Matches(/^[a-zA-Z_\ ]+$/, {
+  @Matches(/^[a-zA-Z0-9_ ]+$/, {
     message: "Name can only contain alphabet characters and underscores",
   })
   name: string;
