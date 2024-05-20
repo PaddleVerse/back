@@ -119,7 +119,8 @@ class Game {
     private emitScoreUpdate(): void {
         const score = this.players?.map((player, idx) => ({
             player: `player${idx + 1}`,
-            score: this.score[player?.id]
+            score: this.score[player?.id],
+            uid : player?.userid
         }));
         this.socket.to(this.id).emit("updateScore", { score });
     }
