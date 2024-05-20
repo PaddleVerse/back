@@ -46,10 +46,7 @@ export class ChannelsController {
       try {
         const ch = await this.channelService.getChannelByName(info.name!);
         if (ch)
-          throw new HttpException(
-            "channel already exist",
-            HttpStatus.CONFLICT
-          );
+          throw new HttpException("channel already exist", HttpStatus.CONFLICT);
       } catch (error) {
         throw error;
       }
@@ -103,11 +100,19 @@ export class ChannelsController {
   }
 
   @Get("/:id")
-  async getChannel(@Param("id") id: string) {
+  async getChannel(@Param("id") id: string, @Query("uid") user: string) {
     try {
-      const channels = !isNaN(Number(id))
-        ? await this.channelService.getChannelById(Number(id))
-        : await this.channelService.getChannelByName(id);
+      const channels = await this.channelService.getChannelById(Number(id));
+      if (!channels) {
+        throw new HttpException("no such channel", HttpStatus.BAD_REQUEST);
+      }
+      const us = await this.participantService.getParticipantByIds(
+        channels.id,
+        Number(user)
+      );
+      if (!us) {
+        throw new HttpException("no such participant", HttpStatus.BAD_REQUEST);
+      }
       return channels;
     } catch (error) {
       throw error;
@@ -156,7 +161,7 @@ export class ChannelsController {
   ) {
     try {
       try {
-        const channels = await this.channelService.getChannelById(Number(id))
+        const channels = await this.channelService.getChannelById(Number(id));
         const us = await this.userService.getUserById(Number(user.id));
         if (!us) {
           throw new HttpException("no such user", HttpStatus.BAD_REQUEST);
@@ -183,17 +188,16 @@ export class ChannelsController {
             }
           }
         }
-        const exists = await this.channelService.getChannelByName(updates.name!);
+        const exists = await this.channelService.getChannelByName(
+          updates.name!
+        );
         if (exists && exists.id !== channels.id) {
-          throw new HttpException(
-            "channel already exist",
-            HttpStatus.CONFLICT
-          );
+          throw new HttpException("channel already exist", HttpStatus.CONFLICT);
         }
-          const updatedChannel = await this.channelService.updateChannel(
-            channels.id,
-            updates as Prisma.channelUpdateInput
-          );
+        const updatedChannel = await this.channelService.updateChannel(
+          channels.id,
+          updates as Prisma.channelUpdateInput
+        );
         return updatedChannel;
       } catch (error) {
         throw error;

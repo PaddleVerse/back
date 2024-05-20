@@ -53,6 +53,8 @@ export class GatewaysGateway {
       this.server.to(userId).emit("connected", { userId, socketId });
     }
     // the chat part, where the user should join the rooms he is in if he gets reconnected
+    // 
+    //
     this.gatewayService.rooms.forEach((room) => {
       if (room.host.id === Number(userId)) {
         room.host.socketId = client.id;
