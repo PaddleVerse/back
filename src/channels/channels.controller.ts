@@ -93,16 +93,16 @@ export class ChannelsController {
     }
   }
 
-  @Get()
-  async getAllChannels() {
-    let channels = await this.channelService.getChannels();
+  @Get("/all/:id")
+  async getAllChannels(@Param("id") id: string) {
+    let channels = await this.channelService.getChannelsWithUserId(Number(id));
     channels = channels.filter(
       (channel) => channel.state !== Appearance.private
     );
     return channels;
   }
 
-  @Get(":id")
+  @Get("/:id")
   async getChannel(@Param("id") id: string) {
     try {
       const channels = !isNaN(Number(id))
@@ -148,7 +148,7 @@ export class ChannelsController {
     }
   }
 
-  @Put(":id")
+  @Put("/:id")
   async updateChannel(
     @Param("id") id: string,
     @Body("user") user: user,

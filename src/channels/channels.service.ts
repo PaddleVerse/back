@@ -70,6 +70,15 @@ export class ChannelsService {
     return channels;
   }
 
+  async getChannelsWithUserId(id: number) {
+    const channels = await this.prisma.channel.findMany({
+      where: { participants: { none: { user_id: id } } },
+      include: { participants: true, ban: true, messages: true },
+    });
+    return channels;
+  }
+
+
   async filterChannelsByName(name: string) {
     const channels = await this.prisma.channel.findMany({
       where: { name: name },
