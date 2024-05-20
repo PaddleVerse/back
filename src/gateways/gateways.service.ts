@@ -19,7 +19,7 @@ export class GatewaysService {
   matchQueue = new Map<number, userT>();
 
   async getRoom(name: string) {
-    const room = await this.rooms.findIndex((room) => room.name === name);
+    const room = this.rooms.findIndex((room) => room?.name === name);
     return room;
   }
 
@@ -33,20 +33,20 @@ export class GatewaysService {
   async deleteRoom(name: string) {
     const room = await this.getRoom(name);
     if (room !== -1) {
-      this.rooms = this.rooms.filter((room) => room.name !== name);
+      this.rooms = this.rooms.filter((room) => room?.name !== name);
     }
   }
 
   async getRoomHost(name: string) {
     const room = await this.getRoom(name);
-    return this.rooms[room].host;
+    return this.rooms[room]?.host;
   }
 
   async addUserToRoom(name: string, user: userT) {
     const room = await this.getRoom(name);
 
     if (room !== -1) {
-      this.rooms[room].users.set(user.id, user);
+      this.rooms[room]?.users?.set(user.id, user);
     }
   }
   async RemoveUserFromRoom(name: string, user: number) {
@@ -55,14 +55,14 @@ export class GatewaysService {
       if (this.rooms[room]?.host?.id === user) {
         this.deleteRoom(name);
       } else {
-        this.rooms[room].users.delete(user);
+        this.rooms[room]?.users?.delete(user);
       }
     }
   }
 
   async findRoomsByUserId(id: number): Promise<room[]> {
     const filteredRooms = this.rooms.filter((room) => {
-      const found = room.users.get(id);
+      const found = room?.users?.get(id);
       if (found) {
         return found;
       }
@@ -73,7 +73,7 @@ export class GatewaysService {
   async removeUserFromAllRooms(id: number): Promise<void> {
     const rooms = await this.findRoomsByUserId(id);
     for (const room of rooms) {
-      await this.RemoveUserFromRoom(room.name, id);
+      await this.RemoveUserFromRoom(room?.name, id);
     }
   }
 
@@ -101,7 +101,7 @@ export class GatewaysService {
     this.leaveMatchmaking(user);
     const rooms = await this.findRoomsByUserId(user.id);
     for (const room of rooms) {
-      await this.RemoveUserFromRoom(room.name, user.id);
+      await this.RemoveUserFromRoom(room?.name, user.id);
     }
   }
 }
