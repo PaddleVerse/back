@@ -70,7 +70,7 @@ export class ChannelsController {
             );
           }
         }
-
+        console.log(info);
         if (info.key) {
           info.key = await bcrypt.hash(info.key, 10);
         }
@@ -184,7 +184,7 @@ export class ChannelsController {
           }
         }
         const exists = await this.channelService.getChannelByName(updates.name!);
-        if (exists) {
+        if (exists && exists.id !== channels.id) {
           throw new HttpException(
             "channel already exist",
             HttpStatus.CONFLICT
