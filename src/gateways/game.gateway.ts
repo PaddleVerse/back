@@ -72,12 +72,7 @@ export default class GameGateway {
   }
   // Helper method to notify the remaining player
   private notifyRemainingPlayer(room: string, remainingRole: string) {
-    const remainingPlayerId = this.rooms[room][remainingRole];
-    if (remainingPlayerId) {
-      this.server.to(remainingPlayerId).emit("update", {
-        message: `Your opponent has disconnected. You are now the only player in the room?.`,
-      });
-    }
+
   }
   // game logic
   @SubscribeMessage("joinGame")

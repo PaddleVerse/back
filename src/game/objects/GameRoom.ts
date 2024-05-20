@@ -28,6 +28,10 @@ class GameRoom {
       client.join(this.id);
     }
     if (this.players.length === this.maxPlayers) {
+      // send both players their opponent
+      this.players.forEach((player, index) => {
+        socket.to(player.id).emit("gameOpponent", this.players[1 - index].userid);
+      });
       this.startGame();
     }
     // give every player either role player1 or player2
