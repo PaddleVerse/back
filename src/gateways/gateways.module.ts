@@ -10,8 +10,23 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
 import GameGateway  from './game.gateway';
 import { AchievementModule } from 'src/achievement/achievement.module';
 import { AchievementService } from 'src/achievement/achievement.service';
+import { ChannelsService } from 'src/channels/channels.service';
 @Module({
-  providers: [GatewaysService, GatewaysGateway, ConversationsService, NotificationsService, GameGateway, AchievementService],
-  imports: [UserModule, FriendshipModule, ConversationsModule, NotificationsModule, AchievementModule],
+  providers: [
+    GatewaysService,
+    GatewaysGateway,
+    ConversationsService,
+    NotificationsService,
+    GameGateway,
+    AchievementService,
+    ChannelsService,
+  ],
+  imports: [
+    UserModule,
+    FriendshipModule,
+    ConversationsModule,
+    NotificationsModule,
+    AchievementModule,
+  ],
 })
 export class GatewaysModule {}

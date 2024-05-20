@@ -80,7 +80,6 @@ export class ChannelsController {
           channel: { connect: { id: newChannel.id } },
           user: { connect: { id: user.id } },
         });
-        newChannel.participants.push(admin);
         return { ...newChannel, success: true };
       } catch (error) {
         throw error;
