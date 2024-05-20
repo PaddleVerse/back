@@ -37,14 +37,14 @@ class Game {
     endGame(): void {
         if (this.isGameOver()) return;
     
-        const winner = this.score[this.players[0].id] > this.score[this.players[1].id] ? this.players[0] : this.players[1];
+        const winner = this.score[this.players[0]?.id] > this.score[this.players[1]?.id] ? this.players[0] : this.players[1];
         this.winner = winner;
-        const winnerId = winner.id === this.players[0].id ? "player1" : "player2";
+        const winnerId = winner?.id === this.players[0]?.id ? "player1" : "player2";
         this.socket.to(this.id).emit("endGame", { winner: winnerId });
     }
 
     updateScore(playerIndex: number, points: number): void {
-        const playerId = this.players[playerIndex].id;
+        const playerId = this.players[playerIndex]?.id;
         this.score[playerId] = (this.score[playerId] || 0) + points;
         this.emitScoreUpdate();
         if (this.score[playerId] === this.maxScore) {
@@ -57,10 +57,10 @@ class Game {
     }
 
     checkScore(): void {
-        if (!this.ball || !this.ball.hitGround) return;
-        if (this.ball.lastHit) {
-            const scoringPlayerIdx = this.ball.lastHit.id === this.players[0].id ? 0 : 1;
-            if (this.ball.hitTable) {
+        if (!this.ball || !this.ball?.hitGround) return;
+        if (this.ball?.lastHit) {
+            const scoringPlayerIdx = this.ball?.lastHit?.id === this.players[0]?.id ? 0 : 1;
+            if (this.ball?.hitTable) {
                 this.updateScore(scoringPlayerIdx, 1);
             } else {
                 this.updateScore(scoringPlayerIdx === 0 ? 1 : 0, 1);
@@ -79,7 +79,7 @@ class Game {
         checkCollisionPaddle(this.players[1], this.ball);
         checkCollisionTable(this.ball, this.table);
         checkCollisionGround(this.ball);
-        this.ball.update();
+        this.ball?.update();
 
         this.checkScore();
         this.checkStandStill();
@@ -90,21 +90,21 @@ class Game {
     }
 
     movePaddle(playerId: string, payload: any): void {
-        const player = this.players.find(p => p.id === playerId);
+        const player = this.players?.find(p => p.id === playerId);
         if (player) {
-            player.paddle.velocity = payload.velocity;
-            player.paddle.update({ paddle: payload.paddle });
+            player.paddle.velocity = payload?.velocity;
+            player.paddle.update({ paddle: payload?.paddle });
         }
     }
 
     private resetScores(): void {
-        this.score[this.players[0].id] = 0;
-        this.score[this.players[1].id] = 0;
+        this.score[this.players[0]?.id] = 0;
+        this.score[this.players[1]?.id] = 0;
     }
 
     private positionPlayers(): void {
-        this.players[0].paddle.update({ paddle: { x: 16, y: 10, z: 0 } });
-        this.players[1].paddle.update({ paddle: { x: -16, y: 10, z: 0 } });
+        this.players[0]?.paddle.update({ paddle: { x: 16, y: 10, z: 0 } });
+        this.players[1]?.paddle.update({ paddle: { x: -16, y: 10, z: 0 } });
     }
 
     private spawnBallDelayed(): void {
@@ -117,9 +117,9 @@ class Game {
     }
 
     private emitScoreUpdate(): void {
-        const score = this.players.map((player, idx) => ({
+        const score = this.players?.map((player, idx) => ({
             player: `player${idx + 1}`,
-            score: this.score[player.id]
+            score: this.score[player?.id]
         }));
         this.socket.to(this.id).emit("updateScore", { score });
     }
@@ -129,7 +129,7 @@ class Game {
         
         const epsilon = 0.0001;
     
-        if (Math.abs(this.ball.velocity.x) < epsilon && Math.abs(this.ball.velocity.z) < epsilon) {
+        if (Math.abs(this.ball?.velocity?.x) < epsilon && Math.abs(this.ball?.velocity?.z) < epsilon) {
             this.timeIdle++;
             if (this.timeIdle > 500) {
                 this.timeIdle = 0;
