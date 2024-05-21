@@ -389,6 +389,7 @@ export class GatewaysGateway {
       //   soc.join(roomName);
       // }
       // socket.join(roomName);
+      console.log(client)
       const soc = this.getSocket(Number(client.id));
       soc.join(roomName);
       this.server.to(roomName).emit("update", { type: "join" });
@@ -431,9 +432,10 @@ export class GatewaysGateway {
     @Body("user") user: user
   ) {
     try {
+      const soc = this.getSocket(Number(user.id));
       this.server.to(roomName).emit("update", { type: "leave" });
-      socket.leave(roomName);
-      this.server.to(socket.id).emit("update", { type: "leave" });
+      soc.leave(roomName); 
+      this.server.to(soc.id).emit("update", { type: "leave" });
     } catch (error) {}
   }
   @SubscribeMessage("kick")
