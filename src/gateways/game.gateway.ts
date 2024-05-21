@@ -80,20 +80,20 @@ export default class GameGateway {
     @MessageBody() data: { senderId: number; room: string }
   ): Promise<void> {
     // Join the client to the specified room
-    client.join(data.room);
+    client.join(data?.room);
 
     // locate the room if it exists
-    if (this.rooms[data.room]) {
-      this.rooms[data.room].addPlayer(
+    if (this.rooms[data?.room]) {
+      this.rooms[data?.room].addPlayer(
         client.id,
         this.server,
         client,
-        data.senderId
+        data?.senderId
       );
     } else {
-      let room = new GameRoom(data.room, this.server);
-      this.rooms[data.room] = room;
-      room?.addPlayer(client.id, this.server, client, data.senderId);
+      let room = new GameRoom(data?.room, this.server);
+      this.rooms[data?.room] = room;
+      room?.addPlayer(client.id, this.server, client, data?.senderId);
     }
     const userId = await client.handshake.query?.userId;
     this.userService.clients[userId] = { socketId: client.id, socket: client };
