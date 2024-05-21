@@ -481,7 +481,7 @@ export class GatewaysGateway {
       chs.forEach((channel) => {
         soc.join(channel.name);
       })
-      this.server.to(roomName).emit("update", { channel: "channel" });
+      this.server.to(roomName).emit("update", { type: "channelupdate" });
     } catch (error) {}
   }
 
