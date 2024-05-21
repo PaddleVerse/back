@@ -67,7 +67,7 @@ export class ChannelsController {
             );
           }
         }
-        console.log(info);
+
         if (info.key) {
           info.key = await bcrypt.hash(info.key, 10);
         }

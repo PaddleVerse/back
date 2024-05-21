@@ -57,7 +57,6 @@ export default class GameGateway {
       (key) => this.userService.clients[key].socketId === socketId
     );
     if (userId) {
-      // console.log(`Client with user ID ${userId} and socket ID ${socketId} disconnected.`);
       const user = await this.userService.getUserById(+userId);
       if (user) {
         // Update the user's status to offline
@@ -139,7 +138,6 @@ export default class GameGateway {
     const game = room?.game;
     await this.prisma.$connect();
     const winner: Player = game.winner;
-    console.log(winner.userid);
     const loser: Player = game.players.find((p) => p.id !== winner.id);
     const winnerId = winner.userid;
     const loserId = loser.userid;
@@ -295,16 +293,6 @@ export default class GameGateway {
       socketId: this.getSocketId(user.id),
     };
     await this.gatewayService.leaveRoom(usr);
-  }
-
-  @SubscribeMessage("gameOver")
-  async gameOverHandler(client: any, payload: any) {
-    
-    // const room = Object.values(this.rooms).find(room => {
-    //   const players = Object.values(room.players);
-    //   return players.some(player => player.userid === payload.userId);
-    // });
-    // console.log(room);
   }
 
   getSocketId(userId: number): string {

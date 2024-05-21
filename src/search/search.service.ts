@@ -52,7 +52,6 @@ export class SearchService
 
     async addSearch(user_id : number, searshingUserId : number)
     {
-        console.log(user_id, searshingUserId);
         try {
             const prev = await this.prisma.searchHistory.findFirst({
                 where: {

@@ -60,7 +60,6 @@ export class GatewaysGateway {
     const channels = await this.chanService.getChannelsWithUserIdS(
       Number(userId)
     );
-    console.log("the channels are: ", channels);
     channels.forEach(async (channel) => {
       client.join(channel.name);
     });
@@ -415,7 +414,6 @@ export class GatewaysGateway {
 
       // }
       // console.log("the socket id is: ", u);
-      console.log("the room name is: ", roomName.name);
       this.server
         .to(roomName.name)
         .emit("update", { channel: true, type: "channelMessage" });

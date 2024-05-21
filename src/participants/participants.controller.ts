@@ -30,7 +30,7 @@ export class ParticipantsController {
   async createParticipants(
     @Body("participants") part: Prisma.channel_participantCreateInput,
     @Body("user") user: user,
-    @Body("channel") channel: number
+    @Body("channel") channel: string
   ) {
     try {
       const ch = await this.participantsService.channelService.getChannelById(
