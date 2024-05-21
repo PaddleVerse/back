@@ -1,5 +1,4 @@
-import Paddle from "./paddle";
-import { Vector3 } from "../types/Vector3";
+import Paddle from "./Paddle";
 
 class Player {
   id: string | null;

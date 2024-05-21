@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
-import Game from "./game";
-import Player from "./player";
+import Game from "./Game";
+import Player from "./Player";
 import { Server } from "http";
 
 class GameRoom {

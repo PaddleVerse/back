@@ -1,5 +1,5 @@
-import Ball from "./ball";
-import Table from "./table";
+import Ball from "./Ball";
+import Table from "./Table";
 import Player from "./Player";
 import { checkCollisionGround, checkCollisionNet, checkCollisionPaddle, checkCollisionTable } from "../logic/Collisions";
 
