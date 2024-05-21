@@ -388,7 +388,9 @@ export class GatewaysGateway {
       //   });
       //   soc.join(roomName);
       // }
-      socket.join(roomName);
+      // socket.join(roomName);
+      const soc = this.getSocket(Number(client.id));
+      soc.join(roomName);
       this.server.to(roomName).emit("update", { type: "join" });
     } catch (error) {
       this.server.to(socket.id).emit("error", error.toString());
@@ -474,6 +476,11 @@ export class GatewaysGateway {
     @Body("user") user: user
   ) {
     try {
+      const chs = await this.chanService.getChannelsWithUserIdS(user.id);
+      const soc = this.getSocket(user.id);
+      chs.forEach((channel) => {
+        soc.join(channel.name);
+      })
       this.server.to(roomName).emit("update", { channel: "channel" });
     } catch (error) {}
   }
